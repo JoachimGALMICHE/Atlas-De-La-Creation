@@ -3,360 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>L'Atlas de la Création — Chronologie</title>
+<title>L'Atlas de la Creation — Chronologie</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --cream: #f9f6f0; --warm-white: #fdfbf7; --ink: #1a1714; --ink-light: #3d3830;
-  --ink-faint: #8a8278; --gold: #b8975a; --gold-light: #d4b07a;
-  --gold-pale: rgba(184,151,90,0.09); --border: #e4ddd3; --border-strong: #c8bfb3;
-  --ev-guerre: #9e5a5a; --ev-decouverte: #5a7e9e; --ev-mort: #3d3830;
-  --ev-politique: #b8975a; --ev-magie: #7a5a9e; --ev-naissance: #5a8e6a;
-}
-html, body { height: 100%; background: var(--cream); color: var(--ink); font-family: 'Jost', sans-serif; font-weight: 300; overflow: hidden; }
-.app { display: flex; flex-direction: column; height: 100vh; }
 
-/* HEADER */
-header { height: 60px; flex-shrink: 0; background: rgba(249,246,240,0.96); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 400; }
-.header-left { display: flex; align-items: center; gap: 18px; }
-.back-btn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; text-decoration: none; transition: color .2s; }
-.back-btn:hover { color: var(--gold); }
-.hdiv { width: 1px; height: 18px; background: var(--border); }
-.header-logo { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; letter-spacing: .06em; }
-.header-logo span { font-style: italic; color: var(--gold); margin-right: 8px; font-size: 22px; }
-.btn-new { padding: 7px 16px; background: var(--ink); color: var(--cream); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; transition: background .2s; position: relative; overflow: hidden; }
-.btn-new:hover { background: var(--ink-light); }
-.btn-new::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform .3s; }
-.btn-new:hover::after { transform: scaleX(1); }
-
-/* TOOLBAR */
-.toolbar { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
-.tb-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
-.filter-btn { padding: 4px 12px; border: 1px solid var(--border); background: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 10.5px; letter-spacing: .08em; color: var(--ink-faint); transition: all .2s; display: flex; align-items: center; gap: 6px; }
-.filter-btn .fdot { width: 7px; height: 7px; border-radius: 50%; }
-.filter-btn.active { background: var(--gold-pale); border-color: var(--gold-light); color: var(--gold); }
-.filter-btn:hover { border-color: var(--border-strong); }
-.tb-sep { width: 1px; height: 20px; background: var(--border); }
-.tb-select { background: var(--cream); border: 1px solid var(--border); padding: 5px 12px; font-family: 'Jost', sans-serif; font-size: 11px; color: var(--ink-faint); outline: none; cursor: pointer; -webkit-appearance: none; letter-spacing: .06em; }
-
-/* ERE SELECTOR */
-.ere-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--warm-white); padding: 0 28px; flex-shrink: 0; overflow-x: auto; }
-.ere-tab { padding: 11px 20px; background: none; border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); position: relative; white-space: nowrap; transition: color .2s; }
-.ere-tab.active { color: var(--ink); }
-.ere-tab::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1.5px; background: var(--gold); transform: scaleX(0); transition: transform .3s; }
-.ere-tab.active::after { transform: scaleX(1); }
-
-/* FRISE CONTAINER */
-.frise-outer { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
-
-/* FRISE SCROLL */
-.frise-scroll { flex: 1; overflow-x: auto; overflow-y: hidden; padding: 0 28px; display: flex; align-items: flex-start; cursor: grab; user-select: none; }
-.frise-scroll:active { cursor: grabbing; }
-.frise-scroll::-webkit-scrollbar { height: 4px; }
-.frise-scroll::-webkit-scrollbar-thumb { background: var(--border); }
-
-.frise-inner { display: flex; align-items: flex-start; min-width: max-content; padding: 40px 0 20px; position: relative; gap: 0; }
-
-/* THE LINE */
-.frise-line { position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); transform: translateY(60px); z-index: 0; pointer-events: none; }
-
-/* ERA LABEL */
-.era-block { display: flex; flex-direction: column; align-items: flex-start; margin-right: 0; position: relative; }
-.era-label-wrap { padding: 0 32px 0 0; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.era-label { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
-.era-start-line { width: 1px; height: 80px; background: var(--border); margin-top: 8px; }
-
-/* EVENT CARD */
-.ev-col { display: flex; flex-direction: column; align-items: center; position: relative; margin: 0 8px; }
-.ev-col.below { flex-direction: column-reverse; }
-
-.ev-card {
-  width: 200px; background: var(--warm-white); border: 1px solid var(--border);
-  padding: 14px 16px; cursor: pointer; position: relative;
-  transition: border-color .25s, transform .2s, box-shadow .25s;
-  animation: evIn .4s ease backwards;
-  margin-bottom: 12px;
-}
-.ev-col.below .ev-card { margin-bottom: 0; margin-top: 12px; }
-.ev-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,23,20,.06); }
-.ev-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--ev-color, var(--gold)); }
-
-@keyframes evIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-.ev-type-badge { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ev-color, var(--gold)); margin-bottom: 6px; }
-.ev-title { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 4px; line-height: 1.3; }
-.ev-date { font-size: 10px; letter-spacing: .06em; color: var(--ink-faint); margin-bottom: 6px; }
-.ev-desc { font-size: 11.5px; font-weight: 300; color: var(--ink-faint); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.ev-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-.ev-tag { font-size: 9.5px; padding: 2px 6px; border: 1px solid var(--border); color: var(--border-strong); }
-
-/* Connector line card→dot */
-.ev-connector { width: 1px; background: var(--border); flex-shrink: 0; }
-.ev-col:not(.below) .ev-connector { height: 20px; }
-.ev-col.below .ev-connector { height: 20px; }
-
-/* DOT on line */
-.ev-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--ev-color, var(--gold)); border: 2px solid var(--cream); flex-shrink: 0; z-index: 2; transition: transform .2s; }
-.ev-col:hover .ev-dot { transform: scale(1.4); }
-
-/* Year label */
-.ev-year { font-family: 'Cormorant Garamond', serif; font-size: 12px; color: var(--ink-faint); margin-top: 6px; letter-spacing: .04em; }
-.ev-col.below .ev-year { margin-top: 0; margin-bottom: 6px; }
-
-/* ADD BUTTON on frise */
-.add-ev-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 24px; cursor: pointer; opacity: .5; transition: opacity .2s; }
-.add-ev-btn:hover { opacity: 1; }
-.add-ev-circle { width: 32px; height: 32px; border-radius: 50%; border: 1.5px dashed var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gold); margin-top: 48px; }
-.add-ev-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
-
-/* DETAIL PANEL */
-.detail-panel {
-  position: fixed; right: 0; top: 60px; bottom: 0; width: 340px;
-  background: var(--warm-white); border-left: 1px solid var(--border);
-  z-index: 250; transform: translateX(100%); transition: transform .35s ease;
-  display: flex; flex-direction: column; overflow: hidden;
-}
-.detail-panel.open { transform: translateX(0); }
-.dp-header { padding: 20px 22px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.dp-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--ink-faint); flex-shrink: 0; transition: color .2s; }
-.dp-close:hover { color: var(--ink); }
-.dp-type { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--dp-color, var(--gold)); margin-bottom: 6px; }
-.dp-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--ink); line-height: 1.2; }
-.dp-date { font-size: 11.5px; color: var(--ink-faint); margin-top: 5px; letter-spacing: .04em; }
-.dp-body { flex: 1; overflow-y: auto; padding: 20px 22px; }
-.dp-section { margin-bottom: 20px; }
-.dp-label { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-.dp-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-.dp-text { font-size: 13.5px; font-weight: 300; color: var(--ink-light); line-height: 1.8; letter-spacing: .02em; outline: none; width: 100%; min-height: 60px; border-bottom: 1px solid transparent; transition: border-color .2s; cursor: text; }
-.dp-text:hover { border-color: var(--gold-light); }
-.dp-text:focus { border-color: var(--gold); }
-.dp-text[data-ph]:empty::before { content: attr(data-ph); color: var(--border-strong); font-style: italic; font-family: 'Cormorant Garamond', serif; pointer-events: none; }
-.dp-tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
-.dp-tag { font-size: 10px; padding: 3px 9px; border: 1px solid var(--border); color: var(--ink-faint); }
-
-/* MODAL */
-.modal-overlay { position: fixed; inset: 0; background: rgba(26,23,20,.5); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--warm-white); border: 1px solid var(--border); width: 500px; max-height: 90vh; overflow-y: auto; transform: translateY(14px); transition: transform .3s; }
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; }
-.modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--ink-faint); }
-.modal-body { padding: 22px 24px; display: grid; gap: 16px; }
-.mf label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 6px; }
-.mf input, .mf select, .mf textarea { width: 100%; padding: 9px 13px; background: var(--cream); border: 1px solid var(--border); font-family: 'Jost', sans-serif; font-size: 13.5px; font-weight: 300; color: var(--ink); outline: none; transition: border-color .2s; -webkit-appearance: none; resize: vertical; }
-.mf input:focus, .mf select:focus, .mf textarea:focus { border-color: var(--gold); }
-.type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
-.type-opt { padding: 10px 8px; border: 1px solid var(--border); cursor: pointer; text-align: center; background: none; transition: all .2s; }
-.type-opt.sel { border-color: var(--to-c); background: color-mix(in srgb, var(--to-c) 9%, transparent); }
-.type-opt-icon { font-size: 20px; display: block; margin-bottom: 4px; }
-.type-opt-label { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
-.type-opt.sel .type-opt-label { color: var(--to-c); }
-.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
-.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--border); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
-.btn-save { padding: 8px 18px; background: var(--ink); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); transition: background .2s; }
-.btn-save:hover { background: var(--gold); }
-
-/* TOAST */
-.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--ink); color: var(--cream); padding: 10px 20px; font-size: 12px; letter-spacing: .06em; display: flex; align-items: center; gap: 8px; opacity: 0; transition: transform .3s, opacity .3s; z-index: 999; }
-.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-.toast-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; }
-
-/* ── DELETE BUTTONS */
-.ev-del-btn {
-  position: absolute; top: 8px; right: 8px;
-  background: none; border: none; cursor: pointer;
-  font-size: 12px; color: var(--border-strong);
-  opacity: 0; transition: opacity .15s, color .15s;
-  padding: 2px 5px; line-height: 1; z-index: 5;
-}
-.ev-card:hover .ev-del-btn { opacity: 1; }
-.ev-del-btn:hover { color: #9e5a5a; }
-
-
-/* ════════════════════════════════
-   RESPONSIVE MOBILE — max 768px
-════════════════════════════════ */
-@media (max-width: 768px) {
-
-  /* ── GLOBAL ── */
-  html, body { font-size: 15px; }
-  .app { height: auto; min-height: 100vh; overflow: auto; }
-
-  /* ── HEADER ── */
-  header {
-    height: auto; min-height: 52px;
-    padding: 10px 16px;
-    flex-wrap: wrap; gap: 8px;
-  }
-  .header-left { gap: 10px; }
-  .header-logo { font-size: 15px; }
-  .header-logo span { font-size: 18px; margin-right: 5px; }
-  .back-btn { font-size: 10px; }
-  .header-right { gap: 6px; flex-wrap: wrap; }
-  .btn-new { padding: 6px 12px; font-size: 10px; letter-spacing: .08em; }
-  .hbtn { padding: 5px 10px; font-size: 10px; }
-
-  /* ── SIDEBAR → BOTTOM DRAWER ── */
-  .sidebar, .notes-list-panel {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 200px;
-    border-right: none !important;
-    border-bottom: 1px solid var(--border);
-    overflow-y: auto;
-  }
-
-  /* ── BODY LAYOUT ── */
-  .body, .editor-layout { flex-direction: column !important; }
-  .main-content, .editor-pane, .editor-area { overflow-y: auto; }
-
-  /* ── PANELS PADDING ── */
-  .panels, .editor-pane { padding: 16px !important; }
-  .tab-nav { padding: 0 12px !important; overflow-x: auto; }
-  .tab-btn { margin-right: 16px; font-size: 10px; padding: 10px 0; white-space: nowrap; }
-
-  /* ── WORLD HEADER / CHAR HEADER ── */
-  .world-header, .char-header { padding: 20px 16px 0 !important; }
-  .world-title-display, .char-name-display { font-size: 26px !important; }
-  .world-subtitle-display, .char-epithet { font-size: 13px !important; }
-  .world-tags, .identity-pills { gap: 6px; }
-  .tag, .id-pill { font-size: 11px; padding: 3px 8px; }
-
-  /* ── SECTION CARDS ── */
-  .sc, .section-card { margin-bottom: 14px; }
-  .sc-body, .section-card-body { padding: 16px !important; }
-  .sc-title, .section-card-title { font-size: 16px; }
-
-  /* ── FIELDS GRIDS → SINGLE COLUMN ── */
-  .fields-grid, .fields-grid.tri, .magie-layout,
-  .factions-grid, .pouvoir-cards, .relations-layout,
-  .ressources-grid { grid-template-columns: 1fr !important; }
-  .magie-block.full { grid-column: span 1 !important; }
-
-  /* ── FACTION CARDS ── */
-  .faction-card { padding: 16px; }
-  .faction-name { font-size: 16px; }
-
-  /* ── LIEUX TABLE ── */
-  .lieux-table { display: block; overflow-x: auto; font-size: 12px; }
-  .lieux-table th, .lieux-table td { padding: 8px; white-space: nowrap; }
-
-  /* ── SKILLS ── */
-  .skill-name { width: 120px; font-size: 12px; }
-
-  /* ── CHARACTER HEADER ── */
-  .char-header-inner { flex-direction: column !important; gap: 16px; }
-  .portrait-box { width: 90px; height: 112px; }
-
-  /* ── NOTES ── */
-  .notes-grid { grid-template-columns: 1fr !important; }
-  .note-card { padding: 16px; }
-  .note-actions { opacity: 1 !important; }
-  .note-action-btn { opacity: 1 !important; }
-
-  /* ── TOOLBAR ── */
-  .toolbar { padding: 10px 12px; gap: 6px; overflow-x: auto; flex-wrap: nowrap; }
-  .cf-btn, .tag-pill, .filter-btn { font-size: 10px; padding: 4px 9px; white-space: nowrap; }
-  .tb-select { font-size: 11px; padding: 4px 8px; }
-
-  /* ── WRITING CANVAS ── */
-  .writing-canvas { padding: 24px 16px 60px !important; }
-  .prose-editor { font-size: 15px !important; line-height: 1.8 !important; }
-  .chapter-title-input { font-size: 22px !important; }
-  .fmt-bar { padding: 0 8px; gap: 1px; overflow-x: auto; }
-  .fmt-btn { padding: 5px 7px; font-size: 11px; white-space: nowrap; }
-  .status-bar { padding: 0 12px; gap: 10px; font-size: 10px; }
-
-  /* ── CHRONOLOGIE FRISE ── */
-  .frise-outer { overflow: hidden; }
-  .frise-scroll { padding: 0 12px; }
-  .ev-card { width: 160px; padding: 10px 12px; }
-  .ev-title { font-size: 13px; }
-  .ev-desc { font-size: 11px; -webkit-line-clamp: 2; }
-  .ere-tabs { padding: 0 12px !important; }
-  .ere-tab { padding: 10px 12px; font-size: 10px; }
-
-  /* ── DETAIL PANELS ── */
-  .detail-panel {
-    width: 100% !important;
-    top: auto !important;
-    bottom: 0 !important;
-    right: 0 !important;
-    height: 65vh;
-    border-left: none !important;
-    border-top: 1px solid var(--border);
-    border-radius: 16px 16px 0 0;
-  }
-  .detail-panel.open { transform: translateY(0) !important; }
-  .detail-panel:not(.open) { transform: translateY(100%) !important; }
-
-  /* ── MODAL ── */
-  .modal-overlay { align-items: flex-end !important; }
-  .modal, .modal .modal { width: 100% !important; border-radius: 16px 16px 0 0; max-height: 85vh; overflow-y: auto; }
-  .modal-body { padding: 16px 20px; }
-  .modal-footer { padding: 12px 20px; }
-
-  /* ── DELETE OVERLAY ── */
-  #deleteOverlay > div { width: 92% !important; padding: 24px 20px !important; }
-
-  /* ── SIDEBAR PROJECTS (ECRITURE) ── */
-  .sidebar { min-height: 160px; }
-  .proj-name { font-size: 13px; }
-  .chap-name { font-size: 12px; }
-
-  /* ── CARTE ── */
-  .map-toolbar { top: 8px; left: 8px; gap: 4px; }
-  .tool-btn { width: 34px; height: 34px; font-size: 14px; }
-  .filter-panel { bottom: 8px; left: 8px; padding: 10px 12px; }
-  .fp-btn { font-size: 11px; }
-  .legend { bottom: 8px; right: 8px; padding: 10px 12px; min-width: 130px; }
-  .zoom-ctrl { right: 8px; top: 8px; }
-
-  /* ── ACTIVITY STRIP / TILES (HUB) ── */
-  .activity-strip { grid-template-columns: 1fr 1fr !important; }
-  .tiles-grid { grid-template-columns: 1fr !important; }
-  .tile.large { grid-column: span 1 !important; }
-  .tile { padding: 22px 18px; }
-  .tile-title { font-size: 18px; }
-
-  /* SHOW delete buttons always on mobile (no hover) */
-  .del-btn { opacity: 1 !important; }
-  .faction-del { opacity: 1 !important; }
-  .ev-del-btn { opacity: 1 !important; }
-  .marker-del { opacity: 1 !important; }
-  .chap-del { opacity: 1 !important; }
-  .note-actions { opacity: 1 !important; }
-}
-
-@media (max-width: 480px) {
-  .activity-strip { grid-template-columns: 1fr !important; }
-  .hero-title { font-size: 34px !important; }
-  .hero { flex-direction: column !important; padding: 32px 20px 24px !important; }
-  .hero-right { flex-direction: row !important; gap: 20px; align-items: center; }
-  .stat-divider { width: 20px; height: 1px; }
-}
-
-
-.ere-add-btn {
-  background: none; border: 1px dashed var(--border-strong);
-  padding: 8px 16px; cursor: pointer; font-family: 'Jost', sans-serif;
-  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--ink-faint); transition: all .2s; align-self: center; margin: 0 8px;
-}
-.ere-add-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-.ere-tab-wrap { display: flex; align-items: center; gap: 0; }
-.ere-del { background: none; border: none; cursor: pointer; font-size: 11px;
-  color: var(--border-strong); padding: 2px 5px; opacity: 0; transition: opacity .2s;
-  margin-left: -4px; }
-.ere-tab-wrap:hover .ere-del { opacity: 1; }
-.ere-del:hover { color: #9e5a5a; }
-
-</style>
-
-<!-- Firebase compat (global scope) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -369,568 +18,581 @@ firebase.initializeApp({
   messagingSenderId:"641852939635",
   appId:"1:641852939635:web:48273ca3eaea29fdebf906"
 });
-var _fbAuth = firebase.auth();
-var _fbDb   = firebase.firestore();
-var _fbUid  = null;
-var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
-var _saveTimer = null;
+var _db = firebase.firestore();
+var _auth = firebase.auth();
+var _uid = null;
+var _loaded = false;
 
-
-window.fbSaveNow = function fbSaveNow(cb) {
-  if (!_fbUid || typeof fbGetData !== 'function') { if(cb) cb(); return; }
-  // Show saving indicator
-  var toast = document.getElementById('toast');
-  var toastMsg = document.getElementById('toastMsg');
-  if (toastMsg) toastMsg.textContent = 'Sauvegarde...';
-  if (toast) toast.classList.add('show');
-  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
-    .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
-    .then(function() {
-      if (toastMsg) toastMsg.textContent = 'Sauvegardé ✓';
-      setTimeout(function(){ if(toast) toast.classList.remove('show'); }, 1500);
-      if(cb) cb();
-    })
-    .catch(function(e){ 
-      console.log('Save err:', e); 
-      if(toastMsg) toastMsg.textContent = 'Erreur sauvegarde';
-      if(cb) cb();
-    });
+function saveNow() {
+  if (!_uid) return;
+  _db.collection("users").doc(_uid).collection("pages").doc("chronologie").set({
+    events: JSON.stringify(EVENTS),
+    eres: JSON.stringify(ERES),
+    updatedAt: new Date().toISOString()
+  }).then(function(){ showToast("Sauvegarde OK"); })
+  .catch(function(e){ console.log("Save error:", e); });
 }
 
-window.fbSave = function fbSave(data) {
-  if (!_fbUid) return;
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(function() {
-    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
-      .set(Object.assign(data(), { updatedAt: new Date().toISOString() }))
-      .catch(function(e){ console.log('Save err:', e); });
-  }, 2000);
-}
-
-function fbLoad(cb) {
-  if (!_fbUid) return;
-  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
-    .get().then(function(snap) { if (snap.exists) cb(snap.data()); })
-    .catch(function(e){ console.log('Load err:', e); });
-}
-
-var _fbLoaded = false;
-_fbAuth.onAuthStateChanged(function(user) {
-  if (!user) { window.location.href = 'index.html'; return; }
-  _fbUid = user.uid;
-  if (!_fbLoaded && typeof fbOnAuth === 'function') {
-    _fbLoaded = true;
-    fbOnAuth(user);
-  }
+_auth.onAuthStateChanged(function(user) {
+  if (!user) { window.location.href = "index.html"; return; }
+  _uid = user.uid;
+  if (_loaded) return;
+  _loaded = true;
+  _db.collection("users").doc(_uid).collection("pages").doc("chronologie").get()
+    .then(function(snap) {
+      if (snap.exists) {
+        var d = snap.data();
+        if (d.eres)   try { ERES = JSON.parse(d.eres); } catch(e){}
+        if (d.events) try {
+          var evs = JSON.parse(d.events);
+          EVENTS.splice(0, EVENTS.length);
+          evs.forEach(function(ev){ EVENTS.push(ev); });
+        } catch(e){}
+      }
+      renderEreTabs();
+      renderFrise();
+    }).catch(function() { renderEreTabs(); renderFrise(); });
 });
-
-// Auto-save every 60 seconds as backup
-setInterval(function() {
-  if (typeof fbGetData === 'function' && _fbUid) {
-    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
-      .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
-      .catch(function(e){ console.log('Auto-save err:', e); });
-  }
-}, 60000);
 </script>
-<script>
-var EVENTS = [];
 
-function fbGetData() {
-  return {
-    events: JSON.stringify(EVENTS || []),
-    eres: JSON.stringify(ERES || [])
-  };
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#f9f6f0;--warm-white:#fdfbf7;--ink:#1a1714;--ink-light:#3d3830;
+  --ink-faint:#8a8278;--gold:#b8975a;--gold-light:#d4b07a;
+  --gold-pale:rgba(184,151,90,0.09);--border:#e4ddd3;--border-strong:#c8bfb3;
+  --c-guerre:#9e5a5a;--c-decouverte:#5a7e9e;--c-mort:#3d3830;
+  --c-politique:#b8975a;--c-magie:#7a5a9e;--c-naissance:#5a8e6a;
 }
+html,body{height:100%;background:var(--cream);color:var(--ink);font-family:"Jost",sans-serif;font-weight:300;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh}
 
-function fbOnAuth(user) {
-  fbLoad(function(data) {
-    if (data.eres) {
-      try { ERES = JSON.parse(data.eres); } catch(e){}
-    }
-    if (data.events) {
-      try {
-        var evs = JSON.parse(data.events);
-        EVENTS.splice(0, EVENTS.length);
-        evs.forEach(function(ev){ EVENTS.push(ev); });
-      } catch(e){ console.log('Load err:', e); }
-    }
-    renderEreTabs();
-    renderFrise();
-  });
+header{height:60px;flex-shrink:0;background:rgba(249,246,240,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:400}
+.hl{display:flex;align-items:center;gap:18px}
+.back{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-decoration:none;transition:color .2s}
+.back:hover{color:var(--gold)}
+.hdiv{width:1px;height:18px;background:var(--border)}
+.logo{font-family:"Cormorant Garamond",serif;font-size:17px;font-weight:500;letter-spacing:.06em}
+.logo span{font-style:italic;color:var(--gold);margin-right:8px;font-size:22px}
+.bnew{padding:7px 16px;background:var(--ink);color:var(--cream);border:none;cursor:pointer;font-family:"Jost",sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;transition:background .2s}
+.bnew:hover{background:var(--gold)}
+
+.ere-bar{display:flex;align-items:center;padding:0 28px;border-bottom:1px solid var(--border);background:var(--warm-white);gap:0;overflow-x:auto;flex-shrink:0;min-height:44px}
+.etab{padding:12px 0;margin-right:20px;background:none;border:none;cursor:pointer;font-family:"Jost",sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);position:relative;white-space:nowrap;transition:color .2s}
+.etab.active{color:var(--ink)}
+.etab::after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:1.5px;background:var(--gold);transform:scaleX(0);transition:transform .3s}
+.etab.active::after{transform:scaleX(1)}
+.ewrap{display:flex;align-items:center}
+.edel{background:none;border:none;cursor:pointer;font-size:11px;color:var(--border-strong);padding:2px 4px;transition:color .2s;line-height:1}
+.edel:hover{color:#9e5a5a}
+.eadd{background:none;border:1px dashed var(--border-strong);padding:4px 10px;cursor:pointer;font-family:"Jost",sans-serif;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);transition:all .2s;white-space:nowrap;margin-left:8px}
+.eadd:hover{border-color:var(--gold);color:var(--gold)}
+
+.toolbar{background:var(--warm-white);border-bottom:1px solid var(--border);padding:8px 28px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.tlab{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)}
+.fbtn{padding:4px 11px;border:1px solid var(--border);background:none;cursor:pointer;font-family:"Jost",sans-serif;font-size:10px;letter-spacing:.08em;color:var(--ink-faint);transition:all .2s;display:flex;align-items:center;gap:5px}
+.fbtn .fd{width:6px;height:6px;border-radius:50%}
+.fbtn.active{background:var(--gold-pale);border-color:var(--gold-light);color:var(--gold)}
+.tsep{width:1px;height:18px;background:var(--border)}
+.tsel{background:var(--cream);border:1px solid var(--border);padding:4px 9px;font-family:"Jost",sans-serif;font-size:10.5px;color:var(--ink-faint);outline:none;-webkit-appearance:none}
+
+.frise-outer{flex:1;overflow:hidden;position:relative}
+.frise-scroll{width:100%;height:100%;overflow-x:auto;overflow-y:hidden;padding:0 28px;display:flex;align-items:flex-start;cursor:grab;user-select:none}
+.frise-scroll:active{cursor:grabbing}
+.frise-scroll::-webkit-scrollbar{height:4px}
+.frise-scroll::-webkit-scrollbar-thumb{background:var(--border)}
+.frise-inner{display:flex;align-items:flex-start;min-width:max-content;padding:40px 0 20px;position:relative}
+.frise-line{position:absolute;top:50%;left:0;right:0;height:1px;background:var(--border);transform:translateY(60px);z-index:0;pointer-events:none}
+
+.era-block{display:flex;flex-direction:column;align-items:flex-start;padding:0 12px;margin-top:48px;flex-shrink:0}
+.era-name{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px;white-space:nowrap}
+.era-line{width:1px;height:70px;background:var(--border)}
+
+.evcol{display:flex;flex-direction:column;align-items:center;position:relative;margin:0 8px}
+.evcol.below{flex-direction:column-reverse}
+.evcard{width:195px;background:var(--warm-white);border:1px solid var(--border);padding:13px 15px;cursor:pointer;position:relative;transition:border-color .25s,transform .2s,box-shadow .25s;margin-bottom:12px}
+.evcol.below .evcard{margin-bottom:0;margin-top:12px}
+.evcard:hover{border-color:var(--border-strong);transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,23,20,.06)}
+.evcard::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--evcolor,var(--gold))}
+.evbadge{font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.evtitle{font-family:"Cormorant Garamond",serif;font-size:15px;font-weight:500;color:var(--ink);margin-bottom:3px;line-height:1.3}
+.evdate{font-size:10px;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:5px}
+.evdesc{font-size:11px;font-weight:300;color:var(--ink-faint);line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.evtags{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.evtag{font-size:9px;padding:2px 6px;border:1px solid var(--border);color:var(--border-strong)}
+.evdel{position:absolute;top:6px;right:6px;background:#9e5a5a;border:none;cursor:pointer;width:18px;height:18px;border-radius:50%;color:white;font-size:10px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;line-height:1;padding:0}
+.evcard:hover .evdel{opacity:1}
+.evconn{width:1px;background:var(--border);height:20px;flex-shrink:0}
+.evdot{width:11px;height:11px;border-radius:50%;border:2px solid var(--cream);flex-shrink:0;z-index:2;transition:transform .2s}
+.evcol:hover .evdot{transform:scale(1.4)}
+.evyear{font-size:10px;margin-top:6px;letter-spacing:.04em}
+.evcol.below .evyear{margin-top:0;margin-bottom:6px}
+.addcol{display:flex;flex-direction:column;align-items:center;gap:8px;margin:0 20px;cursor:pointer;opacity:.5;transition:opacity .2s}
+.addcol:hover{opacity:1}
+.addcircle{width:30px;height:30px;border-radius:50%;border:1.5px dashed var(--border-strong);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--gold);margin-top:48px}
+.addlabel{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap}
+
+.dp{position:fixed;right:0;top:60px;bottom:0;width:310px;background:var(--warm-white);border-left:1px solid var(--border);z-index:250;transform:translateX(100%);transition:transform .35s;display:flex;flex-direction:column}
+.dp.open{transform:translateX(0)}
+.dp-hd{padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between}
+.dp-type{font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px}
+.dp-title{font-family:"Cormorant Garamond",serif;font-size:19px;font-weight:400;color:var(--ink);line-height:1.2}
+.dp-date{font-size:11px;color:var(--ink-faint);margin-top:3px}
+.dp-x{background:none;border:none;cursor:pointer;font-size:17px;color:var(--ink-faint);flex-shrink:0}
+.dp-body{flex:1;overflow-y:auto;padding:16px 18px}
+.dp-lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:12px 0 6px;display:flex;align-items:center;gap:8px}
+.dp-lbl::after{content:"";flex:1;height:1px;background:var(--border)}
+.dp-txt{font-size:13px;font-weight:300;color:var(--ink-light);line-height:1.8;outline:none;min-height:36px;border-bottom:1px solid transparent;transition:border-color .2s;cursor:text}
+.dp-txt:hover{border-color:var(--gold-light)}
+.dp-txt:focus{border-color:var(--gold)}
+.dp-foot{padding:10px 18px;border-top:1px solid var(--border)}
+.dp-delbtn{width:100%;padding:8px;background:none;border:1px solid var(--border);cursor:pointer;font-family:"Jost",sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#9e5a5a;transition:all .2s}
+.dp-delbtn:hover{border-color:#9e5a5a;background:rgba(158,90,90,.06)}
+
+.mover{position:fixed;inset:0;background:rgba(26,23,20,.5);backdrop-filter:blur(4px);z-index:600;display:none;align-items:center;justify-content:center}
+.mover.open{display:flex}
+.modal{background:var(--warm-white);border:1px solid var(--border);width:460px;max-height:90vh;overflow-y:auto}
+.mhd{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.mtit{font-family:"Cormorant Garamond",serif;font-size:19px;font-weight:400}
+.mx{background:none;border:none;cursor:pointer;font-size:17px;color:var(--ink-faint)}
+.mbody{padding:18px 22px;display:grid;gap:13px}
+.mf label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:5px}
+.mf input,.mf select,.mf textarea{width:100%;padding:8px 11px;background:var(--cream);border:1px solid var(--border);font-family:"Jost",sans-serif;font-size:13px;font-weight:300;color:var(--ink);outline:none;transition:border-color .2s;-webkit-appearance:none;resize:vertical}
+.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--gold)}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.topt{padding:9px 6px;border:1px solid var(--border);cursor:pointer;text-align:center;background:none;transition:all .2s}
+.topt.sel{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 9%,transparent)}
+.topticon{font-size:19px;display:block;margin-bottom:3px}
+.toptlbl{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint)}
+.topt.sel .toptlbl{color:var(--tc)}
+.mfoot{padding:12px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.bcancel{padding:7px 14px;background:none;border:1px solid var(--border);cursor:pointer;font-family:"Jost",sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+.bsave{padding:7px 16px;background:var(--ink);border:none;cursor:pointer;font-family:"Jost",sans-serif;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--cream);transition:background .2s}
+.bsave:hover{background:var(--gold)}
+
+.dover{position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(4px);z-index:9999;display:none;align-items:center;justify-content:center}
+.dover.open{display:flex}
+.dbox{background:var(--warm-white);border:1px solid var(--border);padding:28px 32px;max-width:360px;width:92%;text-align:center}
+.dtit{font-family:"Cormorant Garamond",serif;font-size:21px;font-weight:400;color:var(--ink);margin-bottom:8px}
+.dmsg{font-size:12.5px;font-weight:300;color:var(--ink-faint);line-height:1.7;margin-bottom:22px}
+.dbtns{display:flex;gap:8px;justify-content:center}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--ink);color:var(--cream);padding:9px 18px;font-size:11.5px;letter-spacing:.06em;display:flex;align-items:center;gap:7px;opacity:0;transition:transform .3s,opacity .3s;z-index:999}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.tdot{width:5px;height:5px;background:var(--gold);border-radius:50%}
+
+@media(max-width:768px){
+  .frise-scroll{padding:0 12px}
+  .evcard{width:155px;padding:10px 11px}
+  .evtitle{font-size:13px}
+  .evdel{opacity:1}
+  .edel{opacity:1}
+  .mover.open{align-items:flex-end}
+  .modal{width:100%;border-radius:12px 12px 0 0}
+  header{padding:0 14px}
+  .toolbar,.ere-bar{padding:6px 12px;overflow-x:auto;flex-wrap:nowrap}
+  .fbtn,.tsel,.etab{font-size:9.5px;white-space:nowrap}
+  .dp{width:100%;top:auto;bottom:0;border-left:none;border-top:1px solid var(--border);border-radius:14px 14px 0 0;height:65vh}
+  .dp.open{transform:translateY(0)}
+  .dp:not(.open){transform:translateY(100%)}
 }
-</script>
+</style>
 </head>
 <body>
 <div class="app">
 
 <header>
-  <div class="header-left">
-    <a class="back-btn" href="atlas-hub.html">← Retour</a>
+  <div class="hl">
+    <a class="back" href="atlas-hub.html">&#8592; Retour</a>
     <div class="hdiv"></div>
-    <div class="header-logo"><span>𝒜</span>Chronologie</div>
+    <div class="logo"><span>&#119964;</span>Chronologie</div>
   </div>
-  <button class="btn-new" onclick="openModal()">+ Nouvel événement</button>
+  <button class="bnew" id="btnNew">+ Nouvel evenement</button>
 </header>
 
-<!-- ÈRES -->
-<div class="ere-tabs" id="ereTabs">
-  <button class="ere-tab active" onclick="filterEre(this,'toutes')">Toutes les ères</button>
+<div class="ere-bar" id="ereBar"></div>
 
-</div>
-
-<!-- FILTERS -->
 <div class="toolbar">
-  <span class="tb-label">Type</span>
-  <button class="filter-btn active" onclick="filterType(this,'tous')"><span class="fdot" style="background:var(--ink-faint)"></span>Tous</button>
-  <button class="filter-btn" onclick="filterType(this,'guerre')" style="--fc:var(--ev-guerre)"><span class="fdot" style="background:var(--ev-guerre)"></span>Guerre</button>
-  <button class="filter-btn" onclick="filterType(this,'decouverte')" style="--fc:var(--ev-decouverte)"><span class="fdot" style="background:var(--ev-decouverte)"></span>Découverte</button>
-  <button class="filter-btn" onclick="filterType(this,'magie')" style="--fc:var(--ev-magie)"><span class="fdot" style="background:var(--ev-magie)"></span>Magie</button>
-  <button class="filter-btn" onclick="filterType(this,'politique')" style="--fc:var(--ev-politique)"><span class="fdot" style="background:var(--ev-politique)"></span>Politique</button>
-  <button class="filter-btn" onclick="filterType(this,'mort')" style="--fc:var(--ev-mort)"><span class="fdot" style="background:var(--ev-mort)"></span>Mort</button>
-  <button class="filter-btn" onclick="filterType(this,'naissance')" style="--fc:var(--ev-naissance)"><span class="fdot" style="background:var(--ev-naissance)"></span>Naissance</button>
-  <div class="tb-sep"></div>
-  <span class="tb-label">Lié à</span>
-  <select class="tb-select" onchange="filterLinked(this.value)">
-    <option value="tous">— Tous</option>
-    <option value="seraphel">Seraphel</option>
-    <option value="mere">La Mère-Sans-Nom</option>
-    <option value="ordre">L'Ordre des Liants</option>
-    <option value="separes">Les Séparés</option>
-  </select>
+  <span class="tlab">Type</span>
+  <button class="fbtn active" data-type="tous"><span class="fd" style="background:var(--ink-faint)"></span>Tous</button>
+  <button class="fbtn" data-type="guerre"><span class="fd" style="background:var(--c-guerre)"></span>Guerre</button>
+  <button class="fbtn" data-type="decouverte"><span class="fd" style="background:var(--c-decouverte)"></span>Decouverte</button>
+  <button class="fbtn" data-type="magie"><span class="fd" style="background:var(--c-magie)"></span>Magie</button>
+  <button class="fbtn" data-type="politique"><span class="fd" style="background:var(--c-politique)"></span>Politique</button>
+  <button class="fbtn" data-type="mort"><span class="fd" style="background:var(--c-mort)"></span>Mort</button>
+  <button class="fbtn" data-type="naissance"><span class="fd" style="background:var(--c-naissance)"></span>Naissance</button>
+  <div class="tsep"></div>
+  <span class="tlab">Lie a</span>
+  <select class="tsel" id="linkedSel"><option value="tous">Tous</option></select>
 </div>
 
-<!-- FRISE -->
 <div class="frise-outer">
   <div class="frise-scroll" id="friseScroll">
-    <div class="frise-inner" id="friseInner">
-      <div class="frise-line"></div>
-      <!-- Populated by JS -->
-    </div>
+    <div class="frise-inner" id="friseInner"></div>
   </div>
 </div>
-
-</div><!-- /app -->
+</div>
 
 <!-- DETAIL PANEL -->
-<div class="detail-panel" id="detailPanel">
-  <div class="dp-header">
+<div class="dp" id="dpanel">
+  <div class="dp-hd">
     <div>
-      <div class="dp-type" id="dpType">Guerre</div>
-      <div class="dp-title" id="dpTitle">Titre</div>
-      <div class="dp-date" id="dpDate">An 0</div>
+      <div class="dp-type" id="dpType"></div>
+      <div class="dp-title" id="dpTitle"></div>
+      <div class="dp-date" id="dpDate"></div>
     </div>
-    <button class="dp-close" onclick="closeDetail()">✕</button>
+    <button class="dp-x" id="dpClose">&#10005;</button>
   </div>
   <div class="dp-body">
-    <div class="dp-section">
-      <div class="dp-label">Description</div>
-      <div class="dp-text" id="dpDesc" contenteditable="true" data-ph="Description de l'événement…"></div>
-    </div>
-    <div class="dp-section">
-      <div class="dp-label">Conséquences</div>
-      <div class="dp-text" id="dpConsequences" contenteditable="true" data-ph="Ce que cet événement a changé…"></div>
-    </div>
-    <div class="dp-section">
-      <div class="dp-label">Personnages & factions liés</div>
-      <div class="dp-tags-wrap" id="dpTags"></div>
-    </div>
-    <div style="padding:12px 22px;border-top:1px solid var(--border)">
-    <button onclick="deleteCurrentEvent()" style="width:100%;padding:9px;background:none;border:1px solid #e4ddd3;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9e5a5a;transition:all .2s;" onmouseover="this.style.borderColor='#9e5a5a'" onmouseout="this.style.borderColor='#e4ddd3'">✕ Supprimer cet événement</button>
+    <div class="dp-lbl">Description</div>
+    <div class="dp-txt" id="dpDesc" contenteditable="true"></div>
+    <div class="dp-lbl">Consequences</div>
+    <div class="dp-txt" id="dpConseq" contenteditable="true"></div>
+  </div>
+  <div class="dp-foot">
+    <button class="dp-delbtn" id="dpDel">&#10005; Supprimer cet evenement</button>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="evModal">
+<!-- MODAL EVENEMENT -->
+<div class="mover" id="evModal">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Nouvel événement</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="mhd">
+      <div class="mtit">Nouvel evenement</div>
+      <button class="mx" id="evClose">&#10005;</button>
     </div>
-    <div class="modal-body">
+    <div class="mbody">
       <div class="mf">
-        <label>Type d'événement</label>
-        <div class="type-grid">
-          <button class="type-opt sel" style="--to-c:var(--ev-guerre)" data-type="guerre" onclick="selEvType(this)"><span class="type-opt-icon">⚔</span><span class="type-opt-label">Guerre</span></button>
-          <button class="type-opt" style="--to-c:var(--ev-decouverte)" data-type="decouverte" onclick="selEvType(this)"><span class="type-opt-icon">🔭</span><span class="type-opt-label">Découverte</span></button>
-          <button class="type-opt" style="--to-c:var(--ev-magie)" data-type="magie" onclick="selEvType(this)"><span class="type-opt-icon">✦</span><span class="type-opt-label">Magie</span></button>
-          <button class="type-opt" style="--to-c:var(--ev-politique)" data-type="politique" onclick="selEvType(this)"><span class="type-opt-icon">👑</span><span class="type-opt-label">Politique</span></button>
-          <button class="type-opt" style="--to-c:var(--ev-mort)" data-type="mort" onclick="selEvType(this)"><span class="type-opt-icon">💀</span><span class="type-opt-label">Mort</span></button>
-          <button class="type-opt" style="--to-c:var(--ev-naissance)" data-type="naissance" onclick="selEvType(this)"><span class="type-opt-icon">🌱</span><span class="type-opt-label">Naissance</span></button>
+        <label>Type</label>
+        <div class="tgrid" id="typeGrid">
+          <button class="topt sel" data-type="guerre" style="--tc:var(--c-guerre)"><span class="topticon">&#9876;</span><span class="toptlbl">Guerre</span></button>
+          <button class="topt" data-type="decouverte" style="--tc:var(--c-decouverte)"><span class="topticon">&#128301;</span><span class="toptlbl">Decouverte</span></button>
+          <button class="topt" data-type="magie" style="--tc:var(--c-magie)"><span class="topticon">&#10022;</span><span class="toptlbl">Magie</span></button>
+          <button class="topt" data-type="politique" style="--tc:var(--c-politique)"><span class="topticon">&#128081;</span><span class="toptlbl">Politique</span></button>
+          <button class="topt" data-type="mort" style="--tc:var(--c-mort)"><span class="topticon">&#128128;</span><span class="toptlbl">Mort</span></button>
+          <button class="topt" data-type="naissance" style="--tc:var(--c-naissance)"><span class="topticon">&#127807;</span><span class="toptlbl">Naissance</span></button>
         </div>
       </div>
-      <div class="mf"><label>Titre</label><input type="text" id="ev-title" placeholder="Nom de l'événement…"></div>
-      <div class="mf"><label>Date / Année</label><input type="text" id="ev-date" placeholder="Ex : An 204, Ère des Cendres — An 12…"></div>
-      <div class="mf"><label>Ère</label>
-        <select id="ev-ere"><option value="general">Sans ère</option></select>
-      </div>
-      <div class="mf"><label>Description courte</label><textarea id="ev-desc" rows="3" placeholder="Résumé de l'événement…"></textarea></div>
-      <div class="mf"><label>Personnages / Factions liés (virgules)</label><input type="text" id="ev-tags" placeholder="Seraphel, L'Ordre, Les Séparés…"></div>
-      <div class="mf"><label>Position sur la frise</label>
-        <select id="ev-pos">
-          <option value="above">Au-dessus de la ligne</option>
-          <option value="below">En dessous de la ligne</option>
+      <div class="mf"><label>Titre *</label><input type="text" id="evTitle" placeholder="Nom de l evenement"></div>
+      <div class="mf"><label>Date</label><input type="text" id="evDate" placeholder="Ex : An 204"></div>
+      <div class="mf"><label>Ere</label><select id="evEre"><option value="general">Sans ere</option></select></div>
+      <div class="mf"><label>Description</label><textarea id="evDesc" rows="3" placeholder="Resume"></textarea></div>
+      <div class="mf"><label>Personnages lies</label><input type="text" id="evTags" placeholder="Seraphel, L Ordre..."></div>
+      <div class="mf"><label>Position</label>
+        <select id="evPos">
+          <option value="above">Au-dessus</option>
+          <option value="below">En dessous</option>
         </select>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-      <button class="btn-save" onclick="createEvent()">Ajouter à la frise</button>
+    <div class="mfoot">
+      <button class="bcancel" id="evCancel">Annuler</button>
+      <button class="bsave" id="evSave">Ajouter a la frise</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">Événement ajouté</span></div>
+<!-- MODAL ERE -->
+<div class="mover" id="ereModal">
+  <div class="modal" style="width:340px">
+    <div class="mhd">
+      <div class="mtit">Nouvelle ere</div>
+      <button class="mx" id="ereClose">&#10005;</button>
+    </div>
+    <div class="mbody">
+      <div class="mf"><label>Nom</label><input type="text" id="ereName" placeholder="Ex : Ere des Brumes"></div>
+    </div>
+    <div class="mfoot">
+      <button class="bcancel" id="ereCancel">Annuler</button>
+      <button class="bsave" id="ereSave">Creer</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="dover" id="dover">
+  <div class="dbox">
+    <div class="dtit" id="dtit">Supprimer ?</div>
+    <div class="dmsg" id="dmsg">Cette action est irreversible.</div>
+    <div class="dbtns">
+      <button class="bcancel" id="dcancel">Annuler</button>
+      <button class="bsave" style="background:#9e5a5a" id="dconfirm">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="tdot"></div><span id="tmsg">OK</span></div>
 
 <script>
-const EV_COLORS = { guerre:'#9e5a5a', decouverte:'#5a7e9e', mort:'#3d3830', politique:'#b8975a', magie:'#7a5a9e', naissance:'#5a8e6a' };
-const EV_LABELS = { guerre:'Guerre', decouverte:'Découverte', mort:'Mort', politique:'Politique', magie:'Magie', naissance:'Naissance' };
+var EVENTS = [];
+var ERES   = [];
+var activeEre  = "toutes";
+var activeType = "tous";
+var selType    = "guerre";
+var curEvId    = null;
+var _dcb       = null;
+var _tt;
 
-let currentEventId = null;
-function deleteEventById(id) {
-  askDelete('Supprimer cet événement ?', '', function() {
-    const idx = EVENTS.findIndex(e => e.id === id);
-    if (idx > -1) EVENTS.splice(idx, 1);
-    renderFrise();
-    window.fbSaveNow();
-  });
-}
-function deleteCurrentEvent() {
-  if (!currentEventId) return;
-  askDelete('Supprimer cet événement ?', 'Cette action est irréversible.', function() {
-    const idx = EVENTS.findIndex(e => e.id === currentEventId);
-    if (idx > -1) EVENTS.splice(idx, 1);
-    closeDetail();
-    renderFrise();
-    showToast('Événement supprimé');
-    currentEventId = null;
-  });
-}
-let activeEre = 'toutes', activeType = 'tous', activeLinked = 'tous';
+var COLORS = {guerre:"#9e5a5a",decouverte:"#5a7e9e",mort:"#3d3830",politique:"#b8975a",magie:"#7a5a9e",naissance:"#5a8e6a"};
+var LABELS = {guerre:"Guerre",decouverte:"Decouverte",mort:"Mort",politique:"Politique",magie:"Magie",naissance:"Naissance"};
 
+function toast(msg) {
+  document.getElementById("tmsg").textContent = msg;
+  var t = document.getElementById("toast");
+  t.classList.add("show");
+  clearTimeout(_tt);
+  _tt = setTimeout(function(){ t.classList.remove("show"); }, 2000);
+}
+
+// DELETE CONFIRM
+function askDel(title, cb) {
+  document.getElementById("dtit").textContent = title;
+  _dcb = cb;
+  document.getElementById("dover").classList.add("open");
+}
+document.getElementById("dconfirm").onclick = function() {
+  document.getElementById("dover").classList.remove("open");
+  if (_dcb) { _dcb(); _dcb = null; }
+};
+document.getElementById("dcancel").onclick = function() {
+  document.getElementById("dover").classList.remove("open");
+  _dcb = null;
+};
+
+// ERE BAR
+function renderEreTabs() {
+  var bar = document.getElementById("ereBar");
+  bar.innerHTML = "";
+
+  var a = document.createElement("button");
+  a.className = "etab" + (activeEre === "toutes" ? " active" : "");
+  a.textContent = "Toutes";
+  a.onclick = function() { activeEre = "toutes"; renderEreTabs(); renderFrise(); };
+  bar.appendChild(a);
+
+  ERES.forEach(function(ere) {
+    var w = document.createElement("div"); w.className = "ewrap";
+    var b = document.createElement("button"); b.className = "etab" + (activeEre === ere.id ? " active" : "");
+    b.textContent = ere.name;
+    b.onclick = function() { activeEre = ere.id; renderEreTabs(); renderFrise(); };
+    var d = document.createElement("button"); d.className = "edel"; d.textContent = "x";
+    d.onclick = function(e) {
+      e.stopPropagation();
+      askDel("Supprimer " + ere.name + " ?", function() {
+        ERES = ERES.filter(function(x){ return x.id !== ere.id; });
+        if (activeEre === ere.id) activeEre = "toutes";
+        renderEreTabs(); renderFrise(); saveNow(); toast("Ere supprimee");
+      });
+    };
+    w.appendChild(b); w.appendChild(d); bar.appendChild(w);
+  });
+
+  var add = document.createElement("button"); add.className = "eadd"; add.textContent = "+ Ere";
+  add.onclick = function() { openEreModal(); };
+  bar.appendChild(add);
+
+  // update ere select
+  var sel = document.getElementById("evEre");
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = "";
+  var def = document.createElement("option"); def.value = "general"; def.textContent = "Sans ere";
+  sel.appendChild(def);
+  ERES.forEach(function(ere) {
+    var o = document.createElement("option"); o.value = ere.id; o.textContent = ere.name;
+    sel.appendChild(o);
+  });
+  if (cur) sel.value = cur;
+}
+
+// ERE MODAL
+function openEreModal() {
+  document.getElementById("ereName").value = "";
+  document.getElementById("ereModal").classList.add("open");
+  setTimeout(function(){ document.getElementById("ereName").focus(); }, 80);
+}
+function closeEreModal() { document.getElementById("ereModal").classList.remove("open"); }
+document.getElementById("ereClose").onclick  = closeEreModal;
+document.getElementById("ereCancel").onclick = closeEreModal;
+document.getElementById("ereModal").onclick  = function(e){ if(e.target===this) closeEreModal(); };
+document.getElementById("ereSave").onclick   = function() {
+  var name = document.getElementById("ereName").value.trim();
+  if (!name) return;
+  ERES.push({ id: "e" + Date.now(), name: name });
+  renderEreTabs(); closeEreModal(); saveNow(); toast("Ere creee !");
+};
+document.getElementById("ereName").onkeydown = function(e) { if(e.key==="Enter") document.getElementById("ereSave").click(); };
+
+// EVENT MODAL
+function openEvModal() {
+  document.getElementById("evTitle").value = "";
+  document.getElementById("evDate").value  = "";
+  document.getElementById("evDesc").value  = "";
+  document.getElementById("evTags").value  = "";
+  document.getElementById("evPos").value   = "above";
+  document.getElementById("evEre").value   = "general";
+  document.querySelectorAll(".topt").forEach(function(b){ b.classList.toggle("sel", b.dataset.type === "guerre"); });
+  selType = "guerre";
+  document.getElementById("evModal").classList.add("open");
+  setTimeout(function(){ document.getElementById("evTitle").focus(); }, 80);
+}
+function closeEvModal() { document.getElementById("evModal").classList.remove("open"); }
+document.getElementById("btnNew").onclick   = openEvModal;
+document.getElementById("evClose").onclick  = closeEvModal;
+document.getElementById("evCancel").onclick = closeEvModal;
+document.getElementById("evModal").onclick  = function(e){ if(e.target===this) closeEvModal(); };
+
+document.getElementById("typeGrid").onclick = function(e) {
+  var b = e.target.closest(".topt"); if (!b) return;
+  document.querySelectorAll(".topt").forEach(function(x){ x.classList.remove("sel"); });
+  b.classList.add("sel"); selType = b.dataset.type;
+};
+
+document.getElementById("evSave").onclick = function() {
+  var title = document.getElementById("evTitle").value.trim();
+  if (!title) { document.getElementById("evTitle").style.borderColor = "#9e5a5a"; document.getElementById("evTitle").focus(); return; }
+  document.getElementById("evTitle").style.borderColor = "";
+  var nid = EVENTS.length > 0 ? Math.max.apply(null, EVENTS.map(function(e){ return e.id; })) + 1 : 1;
+  EVENTS.push({
+    id: nid, type: selType,
+    era:   document.getElementById("evEre").value,
+    title: title,
+    date:  document.getElementById("evDate").value.trim() || "Date inconnue",
+    desc:  document.getElementById("evDesc").value.trim(),
+    tags:  document.getElementById("evTags").value.split(",").map(function(t){ return t.trim(); }).filter(Boolean),
+    pos:   document.getElementById("evPos").value
+  });
+  closeEvModal(); renderFrise(); saveNow(); toast("Evenement ajoute !");
+};
+document.getElementById("evTitle").onkeydown = function(e) { if(e.key==="Enter") document.getElementById("evSave").click(); };
+
+// DETAIL PANEL
+document.getElementById("dpClose").onclick = function() {
+  document.getElementById("dpanel").classList.remove("open"); curEvId = null;
+};
+document.getElementById("dpDel").onclick = function() {
+  if (!curEvId) return;
+  var id = curEvId;
+  askDel("Supprimer cet evenement ?", function() {
+    var i = EVENTS.findIndex(function(x){ return x.id === id; });
+    if (i > -1) EVENTS.splice(i, 1);
+    document.getElementById("dpanel").classList.remove("open"); curEvId = null;
+    renderFrise(); saveNow(); toast("Supprime !");
+  });
+};
+function openDetail(id) {
+  var ev = EVENTS.find(function(e){ return e.id === id; }); if (!ev) return;
+  curEvId = id;
+  var c = COLORS[ev.type] || "var(--gold)";
+  document.getElementById("dpType").textContent  = LABELS[ev.type] || ev.type;
+  document.getElementById("dpType").style.color  = c;
+  document.getElementById("dpTitle").textContent = ev.title;
+  document.getElementById("dpDate").textContent  = ev.date;
+  document.getElementById("dpDesc").textContent  = ev.desc || "";
+  document.getElementById("dpConseq").textContent = ev.consequences || "";
+  document.getElementById("dpanel").classList.add("open");
+}
+document.getElementById("dpDesc").onblur  = function(){ if(curEvId){ var ev=EVENTS.find(function(e){return e.id===curEvId;}); if(ev){ev.desc=this.textContent;saveNow();} } };
+document.getElementById("dpConseq").onblur= function(){ if(curEvId){ var ev=EVENTS.find(function(e){return e.id===curEvId;}); if(ev){ev.consequences=this.textContent;saveNow();} } };
+
+// TYPE FILTERS
+document.querySelector(".toolbar").onclick = function(e) {
+  var b = e.target.closest(".fbtn"); if (!b) return;
+  activeType = b.dataset.type;
+  document.querySelectorAll(".fbtn").forEach(function(x){ x.classList.remove("active"); });
+  b.classList.add("active"); renderFrise();
+};
+document.getElementById("linkedSel").onchange = function() { renderFrise(); };
+
+// RENDER FRISE
 function renderFrise() {
-  const inner = document.getElementById('friseInner');
-  inner.innerHTML = '<div class="frise-line"></div>';
+  var inner = document.getElementById("friseInner");
+  inner.innerHTML = "";
+  var line = document.createElement("div"); line.className = "frise-line"; inner.appendChild(line);
 
-  let filtered = EVENTS.filter(e => {
-    const ereOk = activeEre === 'toutes' || e.era === activeEre;
-    const typeOk = activeType === 'tous' || e.type === activeType;
-    const linkedOk = activeLinked === 'tous' || e.tags.some(t => t.toLowerCase().includes(activeLinked));
+  var linked = document.getElementById("linkedSel").value;
+  var filtered = EVENTS.filter(function(ev) {
+    var ereOk    = activeEre  === "toutes" || ev.era  === activeEre;
+    var typeOk   = activeType === "tous"   || ev.type === activeType;
+    var linkedOk = linked === "tous" || !ev.tags || ev.tags.some(function(t){ return t.toLowerCase().indexOf(linked.toLowerCase()) > -1; });
     return ereOk && typeOk && linkedOk;
   });
 
-  let lastEra = null;
-  filtered.forEach((ev, i) => {
+  var lastEra = null;
+  filtered.forEach(function(ev) {
     if (ev.era !== lastEra) {
-      const eraNames = { 'ere-ancienne':'Ère Ancienne', 'ere-fondation':'Ère de la Fondation', 'ere-cendres':'Ère des Cendres', 'ere-actuelle':'Ère Actuelle' };
-      const eraDiv = document.createElement('div');
-      eraDiv.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;padding:0 8px 0 16px;margin-top:48px;flex-shrink:0';
-      eraDiv.innerHTML = `<div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap;margin-bottom:4px">${eraNames[ev.era]||ev.era}</div><div style="width:1px;height:70px;background:var(--border)"></div>`;
-      inner.appendChild(eraDiv);
+      var eName = "Sans ere";
+      var ef = ERES.find(function(e){ return e.id === ev.era; });
+      if (ef) eName = ef.name;
+      var eb = document.createElement("div"); eb.className = "era-block";
+      var el = document.createElement("div"); el.className = "era-name"; el.textContent = eName;
+      var eli = document.createElement("div"); eli.className = "era-line";
+      eb.appendChild(el); eb.appendChild(eli); inner.appendChild(eb);
       lastEra = ev.era;
     }
 
-    const col = document.createElement('div');
-    col.className = `ev-col${ev.pos === 'below' ? ' below' : ''}`;
-    col.style.animationDelay = ev.delay + 's';
-    const color = EV_COLORS[ev.type] || 'var(--gold)';
-    const tagsHtml = ev.tags.map(t => `<span class="ev-tag">${t}</span>`).join('');
+    var color = COLORS[ev.type] || "#b8975a";
+    var col = document.createElement("div");
+    col.className = "evcol" + (ev.pos === "below" ? " below" : "");
 
-    col.innerHTML = `
-      <div class="ev-card" style="--ev-color:${color};animation-delay:${ev.delay}s;position:relative" onclick="openDetail(${ev.id})">
-        <button class="ev-del-btn" data-evid="${ev.id}">✕</button>
-        <div class="ev-type-badge" style="color:${color}">${EV_LABELS[ev.type]||ev.type}</div>
-        <div class="ev-title">${ev.title}</div>
-        <div class="ev-date">${ev.date}</div>
-        <div class="ev-desc">${ev.desc}</div>
-        <div class="ev-tags">${tagsHtml}</div>
-      </div>
-      <div class="ev-connector"></div>
-      <div class="ev-dot" style="background:${color};margin-top:${ev.pos==='below'?'':''}0"></div>
-      <div class="ev-year" style="color:${color};font-size:10px">${ev.date.split('—')[0].trim()}</div>`;
+    var card = document.createElement("div");
+    card.className = "evcard";
+    card.style.setProperty("--evcolor", color);
 
+    var del = document.createElement("button");
+    del.className = "evdel"; del.textContent = "x";
+    del.onclick = (function(id) { return function(e) {
+      e.stopPropagation();
+      askDel("Supprimer ?", function() {
+        var i = EVENTS.findIndex(function(x){ return x.id === id; });
+        if (i > -1) EVENTS.splice(i, 1);
+        renderFrise(); saveNow(); toast("Supprime !");
+      });
+    }; })(ev.id);
+
+    var badge = document.createElement("div"); badge.className = "evbadge";
+    badge.style.color = color; badge.textContent = LABELS[ev.type] || ev.type;
+    var tit = document.createElement("div"); tit.className = "evtitle"; tit.textContent = ev.title;
+    var dt  = document.createElement("div"); dt.className  = "evdate";  dt.textContent  = ev.date;
+
+    card.appendChild(del); card.appendChild(badge); card.appendChild(tit); card.appendChild(dt);
+
+    if (ev.desc) {
+      var d = document.createElement("div"); d.className = "evdesc"; d.textContent = ev.desc;
+      card.appendChild(d);
+    }
+    if (ev.tags && ev.tags.length) {
+      var tw = document.createElement("div"); tw.className = "evtags";
+      ev.tags.forEach(function(tag){ var t=document.createElement("span"); t.className="evtag"; t.textContent=tag; tw.appendChild(t); });
+      card.appendChild(tw);
+    }
+    card.onclick = (function(id){ return function(){ openDetail(id); }; })(ev.id);
+
+    var conn = document.createElement("div"); conn.className = "evconn";
+    var dot  = document.createElement("div"); dot.className  = "evdot"; dot.style.background = color;
+    var yr   = document.createElement("div"); yr.className   = "evyear"; yr.style.color = color;
+    yr.textContent = ev.date.split("—")[0].trim();
+
+    col.appendChild(card); col.appendChild(conn); col.appendChild(dot); col.appendChild(yr);
     inner.appendChild(col);
   });
 
   // Add button
-  const addBtn = document.createElement('div');
-  addBtn.className = 'add-ev-btn';
-  addBtn.innerHTML = `<div class="add-ev-circle">+</div><div class="add-ev-label">Ajouter</div>`;
-  addBtn.onclick = openModal;
-  inner.appendChild(addBtn);
+  var ac = document.createElement("div"); ac.className = "addcol"; ac.onclick = openEvModal;
+  ac.innerHTML = "<div class='addcircle'>+</div><div class='addlabel'>Ajouter</div>";
+  inner.appendChild(ac);
 }
 
-function openDetail(id) {
-  const ev = EVENTS.find(e => e.id === id); if (!ev) return;
-  currentEventId = id;
-  const color = EV_COLORS[ev.type] || 'var(--gold)';
-  document.getElementById('dpType').textContent = EV_LABELS[ev.type] || ev.type;
-  document.getElementById('dpType').style.color = color;
-  document.getElementById('dpTitle').textContent = ev.title;
-  document.getElementById('dpDate').textContent = ev.date;
-  document.getElementById('dpDesc').textContent = ev.desc;
-  document.getElementById('dpConsequences').textContent = '';
-  const tagsWrap = document.getElementById('dpTags');
-  tagsWrap.innerHTML = ev.tags.map(t => `<span class="dp-tag">${t}</span>`).join('');
-  document.getElementById('detailPanel').classList.add('open');
-}
-function closeDetail() { document.getElementById('detailPanel').classList.remove('open'); currentEventId = null; }
+// DRAG SCROLL
+var sc = document.getElementById("friseScroll");
+var drag=false, sx, ss;
+sc.addEventListener("mousedown", function(e){ drag=true; sx=e.pageX-sc.offsetLeft; ss=sc.scrollLeft; });
+window.addEventListener("mouseup",   function(){ drag=false; });
+window.addEventListener("mousemove", function(e){ if(!drag)return; e.preventDefault(); sc.scrollLeft=ss-(e.pageX-sc.offsetLeft-sx)*1.2; });
 
-function filterEre(btn, ere) {
-  document.querySelectorAll('.ere-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); activeEre = ere; renderFrise();
-}
-function filterType(btn, type) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); activeType = type; renderFrise();
-}
-function filterLinked(val) { activeLinked = val; renderFrise(); }
-// Make sure 'general' era shows in renderFrise
-
-
-// MODAL
-let selEvTypeVal = 'guerre';
-function openModal() { document.getElementById('evModal').classList.add('open'); }
-function closeModal() { document.getElementById('evModal').classList.remove('open'); }
-document.getElementById('evModal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
-function selEvType(btn) {
-  document.querySelectorAll('.type-opt').forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel'); selEvTypeVal = btn.dataset.type;
-}
-function createEvent() {
-  const title = document.getElementById('ev-title').value.trim(); if(!title) return;
-  const date = document.getElementById('ev-date').value.trim() || 'Date inconnue';
-  const era = document.getElementById('ev-ere').value;
-  const desc = document.getElementById('ev-desc').value.trim() || '';
-  const tags = document.getElementById('ev-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  const pos = document.getElementById('ev-pos').value === 'below' ? 'below' : 'above';
-  const newId = EVENTS.length > 0 ? Math.max(...EVENTS.map(e=>e.id)) + 1 : 1;
-  EVENTS.push({ id: newId, type: selEvTypeVal, era, title, date, desc, tags, pos, delay: 0.05 });
-  closeModal();
-  renderFrise();
-  window.fbSaveNow();
-  showToast('Événement ajouté !');
-  ['ev-title','ev-date','ev-desc','ev-tags'].forEach(id=>document.getElementById(id).value='');
-}
-
-// Drag to scroll
-const scroll = document.getElementById('friseScroll');
-let isDown=false, startX, scrollLeft;
-scroll.addEventListener('mousedown', e=>{ isDown=true; startX=e.pageX-scroll.offsetLeft; scrollLeft=scroll.scrollLeft; });
-scroll.addEventListener('mouseleave', ()=>isDown=false);
-scroll.addEventListener('mouseup', ()=>isDown=false);
-scroll.addEventListener('mousemove', e=>{ if(!isDown) return; e.preventDefault(); const x=e.pageX-scroll.offsetLeft; scroll.scrollLeft=scrollLeft-(x-startX)*1.2; });
-
-// TOAST
-let toastTimer;
-function showToast(msg) {
-  document.getElementById('toastMsg').textContent = msg;
-  const t = document.getElementById('toast'); t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2400);
-}
-
+// INIT
+renderEreTabs();
 renderFrise();
-
 </script>
-
-
-<!-- MODAL NOUVELLE ÈRE -->
-<div class="modal-overlay" id="ereModal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Nouvelle ère</div>
-      <button class="modal-close" onclick="closeEreModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="mf">
-        <label>Nom de l'ère</label>
-        <input type="text" id="ere-name" placeholder="Ex : Ère des Brumes, Âge d'Or…">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeEreModal()">Annuler</button>
-      <button class="btn-save" onclick="addEre()">Créer l'ère</button>
-    </div>
-  </div>
-</div>
-
-<!-- DELETE CONFIRM OVERLAY -->
-<div id="deleteOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fdfbf7;border:1px solid #e4ddd3;padding:32px 36px;max-width:380px;width:90%;text-align:center;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#1a1714;margin-bottom:10px" id="deleteOverlayTitle">Supprimer cet élément ?</div>
-    <div style="font-size:13px;font-weight:300;color:#8a8278;line-height:1.7;margin-bottom:24px" id="deleteOverlayMsg">Cette action est irréversible.</div>
-    <div style="display:flex;gap:10px;justify-content:center;">
-      <button onclick="cancelDelete()" style="padding:9px 20px;background:none;border:1px solid #e4ddd3;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8a8278;transition:border-color .2s;">Annuler</button>
-      <button onclick="confirmDelete()" style="padding:9px 20px;background:#9e5a5a;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fdfbf7;transition:background .2s;">Supprimer</button>
-    </div>
-  </div>
-</div>
-<script>
-// ── GLOBAL DELETE SYSTEM
-let _deleteCallback = null;
-function askDelete(title, msg, callback) {
-  document.getElementById('deleteOverlayTitle').textContent = title || 'Supprimer ?';
-  document.getElementById('deleteOverlayMsg').textContent = msg || 'Cette action est irréversible.';
-  _deleteCallback = callback;
-  const ov = document.getElementById('deleteOverlay');
-  ov.style.display = 'flex';
-}
-function confirmDelete() {
-  document.getElementById('deleteOverlay').style.display = 'none';
-  if (_deleteCallback) { _deleteCallback(); _deleteCallback = null; }
-}
-function cancelDelete() {
-  document.getElementById('deleteOverlay').style.display = 'none';
-  _deleteCallback = null;
-}
-
-
-
-
-// Event delegation for ev-del-btn
-document.addEventListener('click', function(e) {
-  var btn = e.target;
-  if (!btn.classList.contains('ev-del-btn')) return;
-  e.stopPropagation();
-  e.preventDefault();
-  var evid = parseInt(btn.getAttribute('data-evid'));
-  if (!evid) return;
-  askDelete('Supprimer cet événement ?', '', function() {
-    var idx = EVENTS.findIndex(function(ev){ return ev.id === evid; });
-    if (idx > -1) EVENTS.splice(idx, 1);
-    renderFrise();
-    window.fbSaveNow();
-  });
-});
-
-</script>
-
-
-<script>
-// ── ÈRE MANAGEMENT (clean block)
-var ERES = window.ERES || [];
-
-function openAddEreModal() {
-  document.getElementById("ereModal").classList.add("open");
-}
-function closeEreModal() {
-  document.getElementById("ereModal").classList.remove("open");
-  document.getElementById("ere-name").value = "";
-}
-document.getElementById("ereModal").addEventListener("click", function(e) {
-  if (e.target === this) closeEreModal();
-});
-
-function addEre() {
-  var name = document.getElementById("ere-name").value.trim();
-  if (!name) return;
-  var slug = "ere" + Date.now();
-  ERES.push({ id: slug, name: name });
-  renderEreTabs();
-  closeEreModal();
-  window.fbSaveNow();
-  showToast("Ere creee !");
-}
-
-function deleteEre(slug) {
-  askDelete("Supprimer cette ere ?", "Les evenements lies resteront.", function() {
-    ERES = ERES.filter(function(e) { return e.id !== slug; });
-    for (var i = EVENTS.length - 1; i >= 0; i--) {
-      if (EVENTS[i].era === slug) EVENTS.splice(i, 1);
-    }
-    renderEreTabs();
-    renderFrise();
-    window.fbSaveNow();
-    showToast("Ere supprimee");
-  });
-}
-
-function renderEreTabs() {
-  var tabs = document.getElementById("ereTabs");
-  if (!tabs) return;
-  tabs.innerHTML = "";
-
-  var allBtn = document.createElement("button");
-  allBtn.className = "ere-tab active";
-  allBtn.textContent = "Toutes";
-  allBtn.onclick = function() { filterEre(this, "toutes"); };
-  tabs.appendChild(allBtn);
-
-  ERES.forEach(function(ere) {
-    var wrap = document.createElement("div");
-    wrap.className = "ere-tab-wrap";
-    var tab = document.createElement("button");
-    tab.className = "ere-tab";
-    tab.textContent = ere.name;
-    tab.onclick = function() { filterEre(this, ere.id); };
-    var del = document.createElement("button");
-    del.className = "ere-del";
-    del.textContent = "x";
-    del.onclick = function(e) { e.stopPropagation(); deleteEre(ere.id); };
-    wrap.appendChild(tab);
-    wrap.appendChild(del);
-    tabs.appendChild(wrap);
-  });
-
-  var addBtn = document.createElement("button");
-  addBtn.className = "ere-add-btn";
-  addBtn.textContent = "+ Ere";
-  addBtn.onclick = openAddEreModal;
-  tabs.appendChild(addBtn);
-
-  updateEreSelect();
-}
-
-function updateEreSelect() {
-  var sel = document.getElementById("ev-ere");
-  if (!sel) return;
-  sel.innerHTML = "";
-  var defaultOpt = document.createElement("option");
-  defaultOpt.value = "general";
-  defaultOpt.textContent = "Sans ere";
-  sel.appendChild(defaultOpt);
-  ERES.forEach(function(ere) {
-    var opt = document.createElement("option");
-    opt.value = ere.id;
-    opt.textContent = ere.name;
-    sel.appendChild(opt);
-  });
-}
-
-// Override fbGetData to include ERES
-window.addEventListener("load", function() {
-  var origFbGetData = window.fbGetData;
-  if (origFbGetData) {
-    window.fbGetData = function() {
-      var data = origFbGetData();
-      data.eres = JSON.stringify(ERES);
-      return data;
-    };
-  }
-
-  var origFbOnAuth = window.fbOnAuth;
-  if (origFbOnAuth) {
-    window.fbOnAuth = function(user) {
-      window.fbLoad(function(data) {
-        if (data && data.eres) {
-          try { ERES = JSON.parse(data.eres); } catch(e) {}
-        }
-        if (data && data.events) {
-          try {
-            var evs = JSON.parse(data.events);
-            EVENTS.splice(0, EVENTS.length);
-            evs.forEach(function(ev) { EVENTS.push(ev); });
-          } catch(e) {}
-        }
-        renderEreTabs();
-        renderFrise();
-      });
-    };
-  } else {
-    renderEreTabs();
-  }
-});
-</script>
-
 </body>
 </html>
