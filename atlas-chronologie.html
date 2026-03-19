@@ -437,23 +437,26 @@ setInterval(function() {
 var EVENTS = [];
 
 function fbGetData() {
-  return { events: JSON.stringify(window.EVENTS || []) };
+  return {
+    events: JSON.stringify(EVENTS || []),
+    eres: JSON.stringify(ERES || [])
+  };
 }
 
 function fbOnAuth(user) {
   fbLoad(function(data) {
+    if (data.eres) {
+      try { ERES = JSON.parse(data.eres); } catch(e){}
+    }
     if (data.events) {
       try {
         var evs = JSON.parse(data.events);
-        // Clear and repopulate the EVENTS array in place
         EVENTS.splice(0, EVENTS.length);
         evs.forEach(function(ev){ EVENTS.push(ev); });
-        if (typeof renderFrise === 'function') renderFrise();
-      } catch(e){ console.log('Load events err:', e); }
-    } else {
-      // No saved data — just render with defaults
-      if (typeof renderFrise === 'function') renderFrise();
+      } catch(e){ console.log('Load err:', e); }
     }
+    renderEreTabs();
+    renderFrise();
   });
 }
 </script>
@@ -559,12 +562,7 @@ function fbOnAuth(user) {
       <div class="mf"><label>Titre</label><input type="text" id="ev-title" placeholder="Nom de l'événement…"></div>
       <div class="mf"><label>Date / Année</label><input type="text" id="ev-date" placeholder="Ex : An 204, Ère des Cendres — An 12…"></div>
       <div class="mf"><label>Ère</label>
-        <select id="ev-ere">
-          <option value="ere-ancienne">Ère Ancienne</option>
-          <option value="ere-fondation">Ère de la Fondation</option>
-          <option value="ere-cendres">Ère des Cendres</option>
-          <option value="ere-actuelle">Ère Actuelle</option>
-        </select>
+        <select id="ev-ere"><option value="general">Sans ère</option></select>
       </div>
       <div class="mf"><label>Description courte</label><textarea id="ev-desc" rows="3" placeholder="Résumé de l'événement…"></textarea></div>
       <div class="mf"><label>Personnages / Factions liés (virgules)</label><input type="text" id="ev-tags" placeholder="Seraphel, L'Ordre, Les Séparés…"></div>
@@ -861,34 +859,7 @@ function updateEreSelect() {
   });
 }
 
-// Override fbGetData to include ERES
-var _origFbGetData = fbGetData;
-fbGetData = function() {
-  var data = _origFbGetData();
-  data.eres = JSON.stringify(ERES);
-  return data;
-};
 
-// Override fbOnAuth to also load ERES
-var _origFbOnAuth = fbOnAuth;
-fbOnAuth = function(user) {
-  fbLoad(function(data) {
-    // Load eres first
-    if (data.eres) {
-      try { ERES = JSON.parse(data.eres); } catch(e){}
-    }
-    renderEreTabs();
-    // Then load events
-    if (data.events) {
-      try {
-        var evs = JSON.parse(data.events);
-        EVENTS.splice(0, EVENTS.length);
-        evs.forEach(function(ev){ EVENTS.push(ev); });
-      } catch(e){}
-    }
-    if (typeof renderFrise === 'function') renderFrise();
-  });
-};
 
 
 // Event delegation for ev-del-btn
