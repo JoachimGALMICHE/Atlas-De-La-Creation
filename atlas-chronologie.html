@@ -338,6 +338,22 @@ header { height: 60px; flex-shrink: 0; background: rgba(249,246,240,0.96); backd
   .stat-divider { width: 20px; height: 1px; }
 }
 
+
+.ere-add-btn {
+  background: none; border: 1px dashed var(--border-strong);
+  padding: 8px 16px; cursor: pointer; font-family: 'Jost', sans-serif;
+  font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-faint); transition: all .2s; align-self: center; margin: 0 8px;
+}
+.ere-add-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.ere-tab-wrap { display: flex; align-items: center; gap: 0; }
+.ere-del { background: none; border: none; cursor: pointer; font-size: 11px;
+  color: var(--border-strong); padding: 2px 5px; opacity: 0; transition: opacity .2s;
+  margin-left: -4px; }
+.ere-tab-wrap:hover .ere-del { opacity: 1; }
+.ere-del:hover { color: #9e5a5a; }
+
 </style>
 
 <!-- Firebase compat (global scope) -->
@@ -418,20 +434,7 @@ setInterval(function() {
 }, 60000);
 </script>
 <script>
-var EVENTS = [
-  { id:1, type:'magie', era:'ere-ancienne', title:'Mort des Dieux Anciens', date:'An 0 — Ère Ancienne', desc:'Les dieux tissent leur essence dans la terre avant de périr. Le Flux est né de leurs corps dissolus.', tags:['L\'Ordre','Les Séparés'], pos:'above', delay:0.05 },
-  { id:2, type:'decouverte', era:'ere-ancienne', title:'Première Liaison', date:'An 412 — Ère Ancienne', desc:'Première manifestation documentée d\'un humain canalisant le Flux. Une enfant de sept ans lie instinctivement son âme à celle d\'un arbre mourant.', tags:['Seraphel'], pos:'below', delay:0.1 },
-  { id:3, type:'politique', era:'ere-fondation', title:'Fondation de l\'Académie', date:'An 1 — Ère de la Fondation', desc:'L\'Académie des Liants est fondée à Ael\'thar. Pour la première fois, la Liaison est codifiée, enseignée et contrôlée par une institution.', tags:['L\'Ordre'], pos:'above', delay:0.15 },
-  { id:4, type:'guerre', era:'ere-fondation', title:'Guerre des Flux Libres', date:'An 89 — Ère de la Fondation', desc:'Première grande rébellion contre l\'Académie. Des Liants refusant la codification se battent pendant 11 ans. Précurseurs des Séparés.', tags:['Les Séparés','L\'Ordre'], pos:'below', delay:0.2 },
-  { id:5, type:'politique', era:'ere-fondation', title:'Création de l\'Ordre Militaire', date:'An 134 — Ère de la Fondation', desc:'L\'Ordre des Liants militaires est fondé, distinct de l\'Académie. La Liaison devient une arme d\'État.', tags:['L\'Ordre'], pos:'above', delay:0.25 },
-  { id:6, type:'mort', era:'ere-cendres', title:'Massacre de la Tour Basse', date:'An 3 — Ère des Cendres', desc:'L\'Ordre détruit un foyer de Liants libres. 47 morts. Cet événement radicalise définitivement les Séparés.', tags:['Les Séparés','L\'Ordre'], pos:'below', delay:0.3 },
-  { id:7, type:'naissance', era:'ere-cendres', title:'Naissance de Seraphel Vorn', date:'An 22 — Ère des Cendres', desc:'Seraphel naît dans les faubourgs de la Citadelle. Son père est un forgeron sans Flux.', tags:['Seraphel'], pos:'above', delay:0.35 },
-  { id:8, type:'magie', era:'ere-cendres', title:'Éveil de Seraphel', date:'An 31 — Ère des Cendres', desc:'À 9 ans, Seraphel manifeste spontanément le Flux pour sauver son père mourant. Il est détecté et intégré à l\'Académie.', tags:['Seraphel','L\'Ordre'], pos:'below', delay:0.4 },
-  { id:9, type:'mort', era:'ere-cendres', title:'Disparition de la Tisserande', date:'An 47 — Ère des Cendres', desc:'La plus puissante Tisserande connue disparaît sans laisser de trace. L\'Ordre déclare sa mort. Certains doutent encore.', tags:['La Mère-Sans-Nom','L\'Ordre'], pos:'above', delay:0.45 },
-  { id:10, type:'politique', era:'ere-actuelle', title:'Seraphel devient Grand Liant', date:'An 8 — Ère Actuelle', desc:'À 27 ans, Seraphel est nommé Grand Liant — le plus jeune de l\'histoire de l\'Ordre.', tags:['Seraphel','L\'Ordre'], pos:'below', delay:0.5 },
-  { id:11, type:'decouverte', era:'ere-actuelle', title:'Empreinte inconnue à la Porte Basse', date:'An 15 — Ère Actuelle', desc:'Un Séparé laisse une empreinte de Flux que personne à l\'Ordre ne reconnaît. Seraphel commence à douter.', tags:['Seraphel','Les Séparés'], pos:'above', delay:0.55 },
-  { id:12, type:'magie', era:'ere-actuelle', title:'Réapparition de la Mère-Sans-Nom', date:'An 15 — Ère Actuelle', desc:'La Tisserande disparue réapparaît à la tête des Séparés. Son identité reste non confirmée mais très suspectée.', tags:['La Mère-Sans-Nom','Les Séparés'], pos:'below', delay:0.6 },
-];
+var EVENTS = [];
 
 function fbGetData() {
   return { events: JSON.stringify(window.EVENTS || []) };
@@ -470,10 +473,7 @@ function fbOnAuth(user) {
 <!-- ÈRES -->
 <div class="ere-tabs" id="ereTabs">
   <button class="ere-tab active" onclick="filterEre(this,'toutes')">Toutes les ères</button>
-  <button class="ere-tab" onclick="filterEre(this,'ere-ancienne')">Ère Ancienne</button>
-  <button class="ere-tab" onclick="filterEre(this,'ere-fondation')">Ère de la Fondation</button>
-  <button class="ere-tab" onclick="filterEre(this,'ere-cendres')">Ère des Cendres</button>
-  <button class="ere-tab" onclick="filterEre(this,'ere-actuelle')">Ère Actuelle</button>
+  <button class="ere-add-btn" onclick="openAddEreModal()" title="Nouvelle ère">+ Ère</button>
 </div>
 
 <!-- FILTERS -->
@@ -733,6 +733,27 @@ renderFrise();
 
 </script>
 
+
+<!-- MODAL NOUVELLE ÈRE -->
+<div class="modal-overlay" id="ereModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nouvelle ère</div>
+      <button class="modal-close" onclick="closeEreModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf">
+        <label>Nom de l'ère</label>
+        <input type="text" id="ere-name" placeholder="Ex : Ère des Brumes, Âge d'Or…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeEreModal()">Annuler</button>
+      <button class="btn-save" onclick="addEre()">Créer l'ère</button>
+    </div>
+  </div>
+</div>
+
 <!-- DELETE CONFIRM OVERLAY -->
 <div id="deleteOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#fdfbf7;border:1px solid #e4ddd3;padding:32px 36px;max-width:380px;width:90%;text-align:center;">
@@ -762,6 +783,111 @@ function cancelDelete() {
   document.getElementById('deleteOverlay').style.display = 'none';
   _deleteCallback = null;
 }
+
+// ── ÈRE MANAGEMENT
+var ERES = []; // { id, name, slug }
+
+function openAddEreModal() {
+  document.getElementById('ereModal').classList.add('open');
+  setTimeout(function(){ document.getElementById('ere-name').focus(); }, 100);
+}
+function closeEreModal() {
+  document.getElementById('ereModal').classList.remove('open');
+  document.getElementById('ere-name').value = '';
+}
+document.getElementById('ereModal').addEventListener('click', function(e){
+  if (e.target === this) closeEreModal();
+});
+
+function addEre() {
+  var name = document.getElementById('ere-name').value.trim();
+  if (!name) return;
+  var slug = 'ere-' + name.toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,20) + '-' + Date.now();
+  ERES.push({ id: slug, name: name });
+  renderEreTabs();
+  closeEreModal();
+  window.fbSaveNow();
+  showToast('Ère créée !');
+}
+
+function deleteEre(slug) {
+  askDelete('Supprimer cette ère ?', 'Les événements liés resteront mais sans ère assignée.', function() {
+    ERES = ERES.filter(function(e){ return e.id !== slug; });
+    // Remove events of this era
+    EVENTS = EVENTS.filter(function(e){ return e.era !== slug; });
+    renderEreTabs();
+    renderFrise();
+    window.fbSaveNow();
+    showToast('Ère supprimée');
+  });
+}
+
+function renderEreTabs() {
+  var tabs = document.getElementById('ereTabs');
+  // Keep first tab (Toutes) and add btn
+  tabs.innerHTML = '<button class="ere-tab active" onclick="filterEre(this,'toutes')">Toutes les ères</button>';
+  ERES.forEach(function(ere) {
+    var wrap = document.createElement('div');
+    wrap.className = 'ere-tab-wrap';
+    wrap.innerHTML = '<button class="ere-tab" onclick="filterEre(this,'' + ere.id + '')">' + ere.name + '</button>' +
+      '<button class="ere-del" onclick="deleteEre('' + ere.id + '')" title="Supprimer cette ère">✕</button>';
+    tabs.appendChild(wrap);
+  });
+  var addBtn = document.createElement('button');
+  addBtn.className = 'ere-add-btn';
+  addBtn.textContent = '+ Ère';
+  addBtn.onclick = openAddEreModal;
+  tabs.appendChild(addBtn);
+  // Update the ere select in the new event modal
+  updateEreSelect();
+}
+
+function updateEreSelect() {
+  var sel = document.getElementById('ev-ere');
+  if (!sel) return;
+  sel.innerHTML = '';
+  if (ERES.length === 0) {
+    var opt = document.createElement('option');
+    opt.value = ''; opt.textContent = '— Créez d'abord une ère';
+    sel.appendChild(opt);
+    return;
+  }
+  ERES.forEach(function(ere) {
+    var opt = document.createElement('option');
+    opt.value = ere.id; opt.textContent = ere.name;
+    sel.appendChild(opt);
+  });
+}
+
+// Override fbGetData to include ERES
+var _origFbGetData = fbGetData;
+fbGetData = function() {
+  var data = _origFbGetData();
+  data.eres = JSON.stringify(ERES);
+  return data;
+};
+
+// Override fbOnAuth to also load ERES
+var _origFbOnAuth = fbOnAuth;
+fbOnAuth = function(user) {
+  fbLoad(function(data) {
+    // Load eres first
+    if (data.eres) {
+      try { ERES = JSON.parse(data.eres); } catch(e){}
+    }
+    renderEreTabs();
+    // Then load events
+    if (data.events) {
+      try {
+        var evs = JSON.parse(data.events);
+        EVENTS.splice(0, EVENTS.length);
+        evs.forEach(function(ev){ EVENTS.push(ev); });
+      } catch(e){}
+    }
+    if (typeof renderFrise === 'function') renderFrise();
+  });
+};
+
 
 // Event delegation for ev-del-btn
 document.addEventListener('click', function(e) {
