@@ -450,6 +450,26 @@ header {
   .ressources-grid { grid-template-columns: repeat(2, 1fr); }
   .fields-grid { grid-template-columns: 1fr; }
 }
+
+/* ── DELETE BUTTONS (CSS hover) */
+.del-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; color: var(--border-strong);
+  padding: 2px 5px; line-height: 1;
+  opacity: 0; transition: opacity .15s, color .15s;
+  flex-shrink: 0;
+}
+.faction-card:hover .del-btn,
+.world-item:hover .del-btn,
+tr:hover .del-btn,
+.ressource-item:hover .del-btn { opacity: 1; }
+.del-btn:hover { color: #9e5a5a !important; opacity: 1 !important; }
+.faction-card { position: relative; }
+.faction-del { position: absolute; top: 10px; right: 10px; opacity: 0; }
+.faction-card:hover .faction-del { opacity: 1; }
+.world-item { position: relative; display: flex; align-items: center; }
+.world-item .del-btn { margin-left: auto; }
+
 </style>
 </head>
 <body>
@@ -484,16 +504,19 @@ header {
       <div class="world-name">Le Royaume d'Ael'thar</div>
       <div class="world-meta">3 factions · Magie du sang</div>
       <div class="world-dot"></div>
+      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove()})})(this.closest('.world-item'))">✕</button>
     </div>
     <div class="world-item" onclick="selectWorld(this, 1)">
       <div class="world-name">Les Terres de Kervash</div>
       <div class="world-meta">5 factions · Technologie arcane</div>
       <div class="world-dot"></div>
+      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove()})})(this.closest('.world-item'))">✕</button>
     </div>
     <div class="world-item" onclick="selectWorld(this, 2)">
       <div class="world-name">L'Archipel du Vide</div>
       <div class="world-meta">2 factions · Sans magie</div>
       <div class="world-dot"></div>
+      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove()})})(this.closest('.world-item'))">✕</button>
     </div>
   </div>
 
@@ -717,7 +740,7 @@ header {
     <div class="panel" id="panel-factions">
       <div class="factions-grid" id="factionsGrid">
 
-        <div class="faction-card" style="--faction-color:#b8975a" onclick="openEditFaction(0)"><button onclick="event.stopPropagation();(function(btn){askDelete('Supprimer cette faction ?','Cette action est irréversible.',function(){btn.closest('.faction-card').remove();})})(this)" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--border-strong);transition:color .2s;opacity:0;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">✕</button>
+        <div class="faction-card" style="--faction-color:#b8975a" onclick="openEditFaction(0)"><button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove()})})(this.closest('.faction-card'))">✕</button>
           <div class="faction-card-header">
             <div>
               <div class="faction-symbol">⚔</div>
@@ -749,6 +772,7 @@ header {
         </div>
 
         <div class="faction-card" style="--faction-color:#7a5a9e" onclick="openEditFaction(1)">
+          <button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove()})})(this.closest('.faction-card'))">✕</button>
           <div class="faction-card-header">
             <div><div class="faction-symbol">🌑</div></div>
             <div class="faction-color-dot"></div>
@@ -778,6 +802,7 @@ header {
         </div>
 
         <div class="faction-card" style="--faction-color:#5a8e6a" onclick="openEditFaction(2)">
+          <button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove()})})(this.closest('.faction-card'))">✕</button>
           <div class="faction-card-header">
             <div><div class="faction-symbol">🌿</div></div>
             <div class="faction-color-dot"></div>
