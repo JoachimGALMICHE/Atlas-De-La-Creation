@@ -75,28 +75,139 @@
   @media(max-width:700px){ header{padding:0 24px} .hero{padding:40px 24px 32px;flex-direction:column;gap:32px;align-items:flex-start} main{padding:32px 24px} .tiles-grid{grid-template-columns:1fr} .tile.large{grid-column:span 1} .activity-strip{grid-template-columns:1fr} footer{padding:24px;flex-direction:column;gap:16px} }
 </style>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  const app = initializeApp({
-    apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
-    authDomain:"atlas-de-la-creation.firebaseapp.com",
-    projectId:"atlas-de-la-creation",
-    storageBucket:"atlas-de-la-creation.firebasestorage.app",
-    messagingSenderId:"641852939635",
-    appId:"1:641852939635:web:48273ca3eaea29fdebf906"
-  });
-  const auth = getAuth(app);
-  onAuthStateChanged(auth, user => {
-    if (!user) { window.location.href = 'index.html'; return; }
-    const nameEl = document.getElementById('userName');
-    const avatarEl = document.getElementById('userAvatar');
-    if (nameEl) nameEl.textContent = user.displayName || user.email.split('@')[0];
-    if (avatarEl) avatarEl.textContent = (user.displayName || user.email)[0].toUpperCase();
-  });
-  window.doSignOut = async function() {
-    await signOut(auth);
-    window.location.href = 'index.html';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
+  authDomain:"atlas-de-la-creation.firebaseapp.com",
+  projectId:"atlas-de-la-creation",
+  storageBucket:"atlas-de-la-creation.firebasestorage.app",
+  messagingSenderId:"641852939635",
+  appId:"1:641852939635:web:48273ca3eaea29fdebf906"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+function countInHTML(html, selector) {
+  if (!html) return 0;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.querySelectorAll(selector).length;
+}
+
+async function loadStats(uid) {
+  // Load each page data and count elements
+  const pages = {
+    worldbuilding: { doc:'worldbuilding', counters:[
+      { sel:'.world-item', id:'stat-worlds', label:'monde' },
+      { sel:'.faction-card', id:'stat-factions', label:'faction' },
+    ]},
+    personnages: { doc:'personnages', counters:[
+      { sel:'.char-item', id:'stat-chars', label:'personnage' },
+    ]},
+    notes: { doc:'notes', counters:[
+      { sel:'.note-card', id:'stat-notes', label:'note' },
+    ]},
+    ecriture: { doc:'ecriture', counters:[
+      { sel:'.proj-group', id:'stat-projects', label:'projet' },
+    ]},
+    chronologie: { doc:'chronologie', isJson:'events', id:'stat-events', label:'événement' },
+    carte: { doc:'carte', isJson:'markers', id:'stat-markers', label:'marqueur' },
   };
+
+  let totalWorlds=0, totalChars=0, totalNotes=0, totalProjects=0, totalEvents=0;
+
+  try {
+    // Worldbuilding
+    const wb = await getDoc(doc(db,'users',uid,'pages','worldbuilding'));
+    if (wb.exists()) {
+      const d = wb.data();
+      totalWorlds = countInHTML(d.worldList, '.world-item');
+      const factions = countInHTML(d.factionsGrid, '.faction-card');
+      const lieux = countInHTML(d.lieuxBody, 'tr');
+      setTileCount('tile-worldbuilding', totalWorlds + ' monde' + (totalWorlds>1?'s':''), factions + ' faction' + (factions>1?'s':''));
+    }
+
+    // Personnages
+    const pe = await getDoc(doc(db,'users',uid,'pages','personnages'));
+    if (pe.exists()) {
+      const d = pe.data();
+      totalChars = countInHTML(d.charList, '.char-item');
+      setTileCount('tile-personnages', totalChars + ' personnage' + (totalChars>1?'s':''));
+    }
+
+    // Notes
+    const no = await getDoc(doc(db,'users',uid,'pages','notes'));
+    if (no.exists()) {
+      const d = no.data();
+      totalNotes = countInHTML(d.grid, '.note-card');
+      setTileCount('tile-notes', totalNotes + ' note' + (totalNotes>1?'s':''));
+    }
+
+    // Ecriture
+    const ec = await getDoc(doc(db,'users',uid,'pages','ecriture'));
+    if (ec.exists()) {
+      const d = ec.data();
+      totalProjects = countInHTML(d.projectList, '.proj-group');
+      setTileCount('tile-ecriture', totalProjects + ' projet' + (totalProjects>1?'s':''));
+    }
+
+    // Chronologie
+    const ch = await getDoc(doc(db,'users',uid,'pages','chronologie'));
+    if (ch.exists()) {
+      const d = ch.data();
+      try { totalEvents = JSON.parse(d.events||'[]').length; } catch(e){}
+      setTileCount('tile-chronologie', totalEvents + ' événement' + (totalEvents>1?'s':''));
+    }
+
+    // Carte
+    const ca = await getDoc(doc(db,'users',uid,'pages','carte'));
+    if (ca.exists()) {
+      const d = ca.data();
+      let mkCount = 0;
+      try { mkCount = JSON.parse(d.markers||'[]').length; } catch(e){}
+      setTileCount('tile-carte', mkCount + ' marqueur' + (mkCount>1?'s':''));
+    }
+
+    // Hero stats
+    const heroProjects = document.getElementById('hero-stat-projects');
+    const heroNotes = document.getElementById('hero-stat-notes');
+    if (heroProjects) heroProjects.textContent = totalWorlds + totalProjects;
+    if (heroNotes) heroNotes.textContent = totalNotes;
+
+  } catch(e) { console.log('Stats error:', e); }
+}
+
+function setTileCount(tileId, ...counts) {
+  const tile = document.getElementById(tileId);
+  if (!tile) return;
+  const metaSpans = tile.querySelectorAll('.tile-count');
+  counts.forEach((txt, i) => {
+    if (metaSpans[i]) {
+      // preserve the <strong> tag
+      const parts = txt.split(' ');
+      const num = parts[0];
+      const label = parts.slice(1).join(' ');
+      metaSpans[i].innerHTML = '<strong>' + num + '</strong> ' + label;
+    }
+  });
+}
+
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'index.html'; return; }
+  const nameEl = document.getElementById('userName');
+  const avatarEl = document.getElementById('userAvatar');
+  if (nameEl) nameEl.textContent = user.displayName || user.email.split('@')[0];
+  if (avatarEl) avatarEl.textContent = (user.displayName || user.email)[0].toUpperCase();
+  await loadStats(user.uid);
+});
+
+window.doSignOut = async function() {
+  await signOut(auth);
+  window.location.href = 'index.html';
+};
 </script>
 </head>
 <body>
@@ -116,11 +227,11 @@
     <p class="hero-desc">Organisez vos univers, personnages et idées dans un espace pensé pour les auteurs et créateurs.</p>
   </div>
   <div class="hero-right">
-    <div class="hero-stat"><span class="stat-number">3</span><span class="stat-label">Projets actifs</span></div>
+    <div class="hero-stat"><span class="stat-number" id="hero-stat-projects">—</span><span class="stat-label">Projets actifs</span></div>
     <div class="stat-divider"></div>
-    <div class="hero-stat"><span class="stat-number">12</span><span class="stat-label">Notes créées</span></div>
+    <div class="hero-stat"><span class="stat-number" id="hero-stat-notes">—</span><span class="stat-label">Notes créées</span></div>
     <div class="stat-divider"></div>
-    <div class="hero-stat"><span class="stat-number">2</span><span class="stat-label">Collaborateurs</span></div>
+    <div class="hero-stat"><span class="stat-number">—</span><span class="stat-label">Collaborateurs</span></div>
   </div>
 </section>
 <main>
@@ -133,12 +244,12 @@
   </div>
   <div class="section-header"><div class="section-title">Vos espaces de création</div></div>
   <div class="tiles-grid">
-    <a class="tile large" href="atlas-worldbuilding.html"><div class="tile-arrow">→</div><span class="tile-icon">🗺</span><div class="tile-category">Univers & Lore</div><div class="tile-title">Worldbuilding</div><div class="tile-desc">Construisez vos mondes de A à Z — géographie, factions, langues, histoire, magie, cosmologie. Tout l'édifice de votre univers en un seul endroit structuré.</div><div class="tile-meta"><span class="tile-count"><strong>4</strong> mondes</span><span class="tile-count"><strong>18</strong> entrées</span><span class="tile-badge">Actif</span></div></a>
-    <a class="tile" href="atlas-personnages.html"><div class="tile-arrow">→</div><span class="tile-icon">🪞</span><div class="tile-category">Casting</div><div class="tile-title">Personnages</div><div class="tile-desc">Fiches détaillées, traits, arcs narratifs, relations et évolutions. Vos personnages prennent vie ici.</div><div class="tile-meta"><span class="tile-count"><strong>23</strong> personnages</span><span class="tile-badge">Actif</span></div></a>
-    <a class="tile" href="atlas-notes.html"><div class="tile-arrow">→</div><span class="tile-icon">✦</span><div class="tile-category">Idées & Brainstorming</div><div class="tile-title">Notes de création</div><div class="tile-desc">Capturez vos idées, références et réflexions sans perdre l'élan. Un espace libre et sans contrainte.</div><div class="tile-meta"><span class="tile-count"><strong>47</strong> notes</span><span class="tile-badge new">Récent</span></div></a>
-    <a class="tile" href="atlas-ecriture.html"><div class="tile-arrow">→</div><span class="tile-icon">✒</span><div class="tile-category">Manuscrits</div><div class="tile-title">Écriture</div><div class="tile-desc">Rédigez chapitres, nouvelles et fragments directement dans l'Atlas, organisés par projet.</div><div class="tile-meta"><span class="tile-count"><strong>5</strong> projets</span><span class="tile-badge">Actif</span></div></a>
-    <a class="tile" href="atlas-chronologie.html"><div class="tile-arrow">→</div><span class="tile-icon">⏳</span><div class="tile-category">Temporel</div><div class="tile-title">Chronologies</div><div class="tile-desc">Visualisez l'histoire de vos univers sur une frise interactive. Ères, événements, points de bascule.</div><div class="tile-meta"><span class="tile-count"><strong>12</strong> événements</span><span class="tile-badge new">Nouveau</span></div></a>
-    <a class="tile" href="atlas-carte.html"><div class="tile-arrow">→</div><span class="tile-icon">🧭</span><div class="tile-category">Cartographie</div><div class="tile-title">Cartes interactives</div><div class="tile-desc">Uploadez ou générez des cartes, placez des marqueurs et reliez vos lieux entre eux.</div><div class="tile-meta"><span class="tile-count"><strong>2</strong> cartes</span><span class="tile-badge new">Nouveau</span></div></a>
+    <a class="tile large" id="tile-worldbuilding" href="atlas-worldbuilding.html"><div class="tile-arrow">→</div><span class="tile-icon">🗺</span><div class="tile-category">Univers & Lore</div><div class="tile-title">Worldbuilding</div><div class="tile-desc">Construisez vos mondes de A à Z — géographie, factions, langues, histoire, magie, cosmologie. Tout l'édifice de votre univers en un seul endroit structuré.</div><div class="tile-meta"><span class="tile-count"><strong>4</strong> mondes</span><span class="tile-count"><strong>18</strong> entrées</span><span class="tile-badge">Actif</span></div></a>
+    <a class="tile" id="tile-personnages" href="atlas-personnages.html"><div class="tile-arrow">→</div><span class="tile-icon">🪞</span><div class="tile-category">Casting</div><div class="tile-title">Personnages</div><div class="tile-desc">Fiches détaillées, traits, arcs narratifs, relations et évolutions. Vos personnages prennent vie ici.</div><div class="tile-meta"><span class="tile-count"><strong>23</strong> personnages</span><span class="tile-badge">Actif</span></div></a>
+    <a class="tile" id="tile-notes" href="atlas-notes.html"><div class="tile-arrow">→</div><span class="tile-icon">✦</span><div class="tile-category">Idées & Brainstorming</div><div class="tile-title">Notes de création</div><div class="tile-desc">Capturez vos idées, références et réflexions sans perdre l'élan. Un espace libre et sans contrainte.</div><div class="tile-meta"><span class="tile-count"><strong>47</strong> notes</span><span class="tile-badge new">Récent</span></div></a>
+    <a class="tile" id="tile-ecriture" href="atlas-ecriture.html"><div class="tile-arrow">→</div><span class="tile-icon">✒</span><div class="tile-category">Manuscrits</div><div class="tile-title">Écriture</div><div class="tile-desc">Rédigez chapitres, nouvelles et fragments directement dans l'Atlas, organisés par projet.</div><div class="tile-meta"><span class="tile-count"><strong>5</strong> projets</span><span class="tile-badge">Actif</span></div></a>
+    <a class="tile" id="tile-chronologie" href="atlas-chronologie.html"><div class="tile-arrow">→</div><span class="tile-icon">⏳</span><div class="tile-category">Temporel</div><div class="tile-title">Chronologies</div><div class="tile-desc">Visualisez l'histoire de vos univers sur une frise interactive. Ères, événements, points de bascule.</div><div class="tile-meta"><span class="tile-count"><strong>12</strong> événements</span><span class="tile-badge new">Nouveau</span></div></a>
+    <a class="tile" id="tile-carte" href="atlas-carte.html"><div class="tile-arrow">→</div><span class="tile-icon">🧭</span><div class="tile-category">Cartographie</div><div class="tile-title">Cartes interactives</div><div class="tile-desc">Uploadez ou générez des cartes, placez des marqueurs et reliez vos lieux entre eux.</div><div class="tile-meta"><span class="tile-count"><strong>2</strong> cartes</span><span class="tile-badge new">Nouveau</span></div></a>
   </div>
 </main>
 <footer>

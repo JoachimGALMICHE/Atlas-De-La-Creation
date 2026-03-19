@@ -1346,6 +1346,49 @@ function showSaveToast() {
   if (window._firebaseSave) window._firebaseSave();
 }
 
+
+// Add del buttons to pre-existing world items that don't have them
+document.querySelectorAll('.world-item').forEach(function(item) {
+  if (item.querySelector('.del-btn')) return;
+  item.style.display = 'flex';
+  item.style.alignItems = 'center';
+  const btn = document.createElement('button');
+  btn.className = 'del-btn';
+  btn.innerHTML = '✕';
+  btn.style.marginLeft = 'auto';
+  btn.onclick = function(e) {
+    e.stopPropagation();
+    askDelete('Supprimer ce monde ?', '', function(){ item.remove(); showSaveToast(); });
+  };
+  item.appendChild(btn);
+});
+
+// Add del buttons to pre-existing faction cards that don't have them
+document.querySelectorAll('.faction-card').forEach(function(card) {
+  if (card.querySelector('.faction-del')) return;
+  card.style.position = 'relative';
+  const btn = document.createElement('button');
+  btn.className = 'del-btn faction-del';
+  btn.innerHTML = '✕';
+  btn.onclick = function(e) {
+    e.stopPropagation();
+    askDelete('Supprimer cette faction ?', '', function(){ card.remove(); showSaveToast(); });
+  };
+  card.appendChild(btn);
+});
+
+// Add del buttons to pre-existing lieux rows
+document.querySelectorAll('#lieuxBody tr').forEach(function(row) {
+  const lastCell = row.cells[row.cells.length-1];
+  if (!lastCell || lastCell.querySelector('[onclick*="askDelete"]')) return;
+  const delBtn = document.createElement('button');
+  delBtn.className = 'td-edit';
+  delBtn.innerHTML = '✕';
+  delBtn.style.color = '#9e5a5a';
+  delBtn.onclick = function(){ askDelete('Supprimer ce lieu ?','',function(){row.remove();showSaveToast();}); };
+  lastCell.appendChild(delBtn);
+});
+
 // ── AUTO-SAVE on all contenteditable changes
 document.addEventListener('input', function(e) {
   if (e.target.contentEditable === 'true') showSaveToast();
