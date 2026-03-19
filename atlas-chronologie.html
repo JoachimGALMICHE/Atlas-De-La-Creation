@@ -687,6 +687,8 @@ function filterType(btn, type) {
   btn.classList.add('active'); activeType = type; renderFrise();
 }
 function filterLinked(val) { activeLinked = val; renderFrise(); }
+// Make sure 'general' era shows in renderFrise
+
 
 // MODAL
 let selEvTypeVal = 'guerre';
@@ -704,7 +706,7 @@ function createEvent() {
   const desc = document.getElementById('ev-desc').value.trim() || '';
   const tags = document.getElementById('ev-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
   const pos = document.getElementById('ev-pos').value === 'below' ? 'below' : 'above';
-  const newId = Math.max(...EVENTS.map(e=>e.id)) + 1;
+  const newId = EVENTS.length > 0 ? Math.max(...EVENTS.map(e=>e.id)) + 1 : 1;
   EVENTS.push({ id: newId, type: selEvTypeVal, era, title, date, desc, tags, pos, delay: 0.05 });
   closeModal();
   renderFrise();
