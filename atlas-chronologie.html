@@ -384,10 +384,14 @@ function fbLoad(cb) {
     .catch(function(e){ console.log('Load err:', e); });
 }
 
+var _fbLoaded = false;
 _fbAuth.onAuthStateChanged(function(user) {
   if (!user) { window.location.href = 'index.html'; return; }
   _fbUid = user.uid;
-  if (typeof fbOnAuth === 'function') fbOnAuth(user);
+  if (!_fbLoaded && typeof fbOnAuth === 'function') {
+    _fbLoaded = true;
+    fbOnAuth(user);
+  }
 });
 
 // Auto-save every 60 seconds as backup
@@ -687,6 +691,7 @@ function createEvent() {
   EVENTS.push({ id: newId, type: selEvTypeVal, era, title, date, desc, tags, pos, delay: 0.05 });
   closeModal();
   renderFrise();
+  window.fbSaveNow();
   showToast('Événement ajouté !');
   ['ev-title','ev-date','ev-desc','ev-tags'].forEach(id=>document.getElementById(id).value='');
 }
