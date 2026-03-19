@@ -163,54 +163,71 @@ canvas#genMap { position: absolute; top: 0; left: 0; }
 
 </style>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const app = initializeApp({
-    apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
-    authDomain:"atlas-de-la-creation.firebaseapp.com",
-    projectId:"atlas-de-la-creation",
-    storageBucket:"atlas-de-la-creation.firebasestorage.app",
-    messagingSenderId:"641852939635",
-    appId:"1:641852939635:web:48273ca3eaea29fdebf906"
-  });
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  let currentUser = null;
-  const PAGE_KEY = window.location.pathname.split('/').pop().replace('.html','');
+const app = initializeApp({
+  apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
+  authDomain:"atlas-de-la-creation.firebaseapp.com",
+  projectId:"atlas-de-la-creation",
+  storageBucket:"atlas-de-la-creation.firebasestorage.app",
+  messagingSenderId:"641852939635",
+  appId:"1:641852939635:web:48273ca3eaea29fdebf906"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
+let uid = null;
 
-  onAuthStateChanged(auth, async user => {
-    if (!user) { window.location.href = 'index.html'; return; }
-    currentUser = user;
-    // Load saved data
-    try {
-      const snap = await getDoc(doc(db, 'users', user.uid, 'pages', PAGE_KEY));
-      if (snap.exists()) {
-        const data = snap.data();
-        if (data.html) {
-          const main = document.getElementById('firebaseContent');
-          if (main) main.innerHTML = data.html;
-        }
+async function saveData() {
+  if (!uid || !window.markers) return;
+  try {
+    await setDoc(doc(db,'users',uid,'pages','carte'), {
+      markers: JSON.stringify(window.markers),
+      routes: JSON.stringify(window.routes || []),
+      mapSrc: document.getElementById('mapImg')?.src || '',
+      updatedAt: new Date().toISOString()
+    });
+  } catch(e) { console.log('Save err:',e); }
+}
+
+async function loadData() {
+  if (!uid) return;
+  try {
+    const snap = await getDoc(doc(db,'users',uid,'pages','carte'));
+    if (!snap.exists()) return;
+    const data = snap.data();
+    if (data.markers) { try { window.markers = JSON.parse(data.markers); } catch(e){} }
+    if (data.routes)  { try { window.routes  = JSON.parse(data.routes);  } catch(e){} }
+    if (data.mapSrc && data.mapSrc.length > 10) {
+      const img = document.getElementById('mapImg');
+      if (img) {
+        img.src = data.mapSrc;
+        img.style.display = 'block';
+        document.getElementById('uploadOverlay').classList.add('hidden');
+        document.getElementById('mapCanvasWrap').style.display = 'block';
+        document.getElementById('mapToolbar').style.display = 'flex';
+        document.getElementById('filterPanel').style.display = 'block';
+        document.getElementById('legend').style.display = 'block';
+        document.getElementById('zoomCtrl').style.display = 'flex';
+        window.mapLoaded = true;
+        img.onload = () => { if(window.fitMap) window.fitMap(img.naturalWidth, img.naturalHeight); if(window.renderMarkers) window.renderMarkers(); window.setupPan && window.setupPan(); };
       }
-    } catch(e) { console.log('Load error', e); }
-  });
+    } else if (window.markers && window.markers.length > 0) {
+      if(window.renderMarkers) window.renderMarkers();
+    }
+  } catch(e) { console.log('Load err:',e); }
+}
 
-  // Auto-save every 30 seconds + on page unload
-  window.fbSave = async function() {
-    if (!currentUser) return;
-    const main = document.getElementById('firebaseContent');
-    if (!main) return;
-    try {
-      await setDoc(doc(db, 'users', currentUser.uid, 'pages', PAGE_KEY), {
-        html: main.innerHTML,
-        updatedAt: new Date().toISOString()
-      });
-    } catch(e) { console.log('Save error', e); }
-  };
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'index.html'; return; }
+  uid = user.uid;
+  await loadData();
+});
 
-  setInterval(window.fbSave, 30000);
-  window.addEventListener('beforeunload', window.fbSave);
+let saveDebounce;
+window._firebaseSave = function() { clearTimeout(saveDebounce); saveDebounce = setTimeout(saveData, 2000); };
+window.addEventListener('beforeunload', saveData);
 </script>
 </head>
 <body>
@@ -622,6 +639,7 @@ function toggleFilter(btn, type) {
 // TOAST
 let toastTimer;
 function showToast(msg) {
+  if (window._firebaseSave) window._firebaseSave();
   document.getElementById('toastMsg').textContent = msg;
   const t = document.getElementById('toast'); t.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2400);
