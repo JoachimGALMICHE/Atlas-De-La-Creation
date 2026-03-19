@@ -175,12 +175,13 @@ header { height: 60px; flex-shrink: 0; background: rgba(249,246,240,0.96); backd
 .ev-del-btn:hover { color: #9e5a5a; }
 
 </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const app = initializeApp({
+<!-- Firebase compat (global scope) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
   apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
   authDomain:"atlas-de-la-creation.firebaseapp.com",
   projectId:"atlas-de-la-creation",
@@ -188,45 +189,60 @@ const app = initializeApp({
   messagingSenderId:"641852939635",
   appId:"1:641852939635:web:48273ca3eaea29fdebf906"
 });
-const auth = getAuth(app);
-const db = getFirestore(app);
-let uid = null;
+var _fbAuth = firebase.auth();
+var _fbDb   = firebase.firestore();
+var _fbUid  = null;
+var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
+var _saveTimer = null;
 
-async function saveData() {
-  if (!uid || !window.EVENTS) return;
-  try {
-    await setDoc(doc(db,'users',uid,'pages','chronologie'), {
-      events: JSON.stringify(window.EVENTS),
-      updatedAt: new Date().toISOString()
-    });
-  } catch(e) { console.log('Save err:',e); }
+function fbSave(data) {
+  if (!_fbUid) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function() {
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data(), { updatedAt: new Date().toISOString() }))
+      .catch(function(e){ console.log('Save err:', e); });
+  }, 2000);
 }
 
-async function loadData() {
-  if (!uid) return;
-  try {
-    const snap = await getDoc(doc(db,'users',uid,'pages','chronologie'));
-    if (!snap.exists()) return;
-    const data = snap.data();
-    if (data.events) {
-      try {
-        window.EVENTS.length = 0;
-        JSON.parse(data.events).forEach(e => window.EVENTS.push(e));
-        if (window.renderFrise) window.renderFrise();
-      } catch(e) {}
-    }
-  } catch(e) { console.log('Load err:',e); }
+function fbLoad(cb) {
+  if (!_fbUid) return;
+  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+    .get().then(function(snap) { if (snap.exists) cb(snap.data()); })
+    .catch(function(e){ console.log('Load err:', e); });
 }
 
-onAuthStateChanged(auth, async user => {
+_fbAuth.onAuthStateChanged(function(user) {
   if (!user) { window.location.href = 'index.html'; return; }
-  uid = user.uid;
-  await loadData();
+  _fbUid = user.uid;
+  if (typeof fbOnAuth === 'function') fbOnAuth(user);
 });
 
-let saveDebounce;
-window._firebaseSave = function() { clearTimeout(saveDebounce); saveDebounce = setTimeout(saveData, 2000); };
-window.addEventListener('beforeunload', saveData);
+window.addEventListener('beforeunload', function() {
+  if (typeof fbGetData === 'function' && _fbUid) {
+    var data = fbGetData();
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data, { updatedAt: new Date().toISOString() }));
+  }
+});
+</script>
+<script>
+function fbGetData() {
+  return { events: JSON.stringify(window.EVENTS || []) };
+}
+
+function fbOnAuth(user) {
+  fbLoad(function(data) {
+    if (data.events) {
+      try {
+        var evs = JSON.parse(data.events);
+        window.EVENTS.length = 0;
+        evs.forEach(function(e){ window.EVENTS.push(e); });
+        if (window.renderFrise) renderFrise();
+      } catch(e){}
+    }
+  });
+}
 </script>
 </head>
 <body>

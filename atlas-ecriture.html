@@ -242,12 +242,13 @@ body.focus header:hover .header-left, body.focus header:hover .header-right { op
   .wc-pill { display: none; }
 }
 </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const app = initializeApp({
+<!-- Firebase compat (global scope) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
   apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
   authDomain:"atlas-de-la-creation.firebaseapp.com",
   projectId:"atlas-de-la-creation",
@@ -255,58 +256,73 @@ const app = initializeApp({
   messagingSenderId:"641852939635",
   appId:"1:641852939635:web:48273ca3eaea29fdebf906"
 });
-const auth = getAuth(app);
-const db = getFirestore(app);
-let uid = null;
+var _fbAuth = firebase.auth();
+var _fbDb   = firebase.firestore();
+var _fbUid  = null;
+var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
+var _saveTimer = null;
 
-async function saveData() {
-  if (!uid) return;
-  const projList = document.getElementById('projectList');
-  const prose = document.getElementById('proseEditor');
-  const title = document.getElementById('chapterTitle');
-  const subtitle = document.getElementById('chapterSubtitle');
-  if (!projList) return;
-  try {
-    await setDoc(doc(db,'users',uid,'pages','ecriture'), {
-      projectList: projList.innerHTML,
-      proseEditor: prose ? prose.innerHTML : '',
-      chapterTitle: title ? title.value : '',
-      chapterSubtitle: subtitle ? subtitle.value : '',
-      chaptersContent: JSON.stringify(window.chaptersContent || {}),
-      updatedAt: new Date().toISOString()
-    });
-  } catch(e) { console.log('Save err:',e); }
+function fbSave(data) {
+  if (!_fbUid) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function() {
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data(), { updatedAt: new Date().toISOString() }))
+      .catch(function(e){ console.log('Save err:', e); });
+  }, 2000);
 }
 
-async function loadData() {
-  if (!uid) return;
-  try {
-    const snap = await getDoc(doc(db,'users',uid,'pages','ecriture'));
-    if (!snap.exists()) return;
-    const data = snap.data();
-    const projList = document.getElementById('projectList');
-    if (projList && data.projectList) projList.innerHTML = data.projectList;
-    const prose = document.getElementById('proseEditor');
-    if (prose && data.proseEditor) prose.innerHTML = data.proseEditor;
-    const title = document.getElementById('chapterTitle');
-    if (title && data.chapterTitle) title.value = data.chapterTitle;
-    const subtitle = document.getElementById('chapterSubtitle');
-    if (subtitle && data.chapterSubtitle) subtitle.value = data.chapterSubtitle;
-    if (data.chaptersContent) { try { Object.assign(window.chaptersContent, JSON.parse(data.chaptersContent)); } catch(e){} }
-    if (window.countWords) window.countWords();
-    if (window.updateBreadcrumb) window.updateBreadcrumb();
-  } catch(e) { console.log('Load err:',e); }
+function fbLoad(cb) {
+  if (!_fbUid) return;
+  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+    .get().then(function(snap) { if (snap.exists) cb(snap.data()); })
+    .catch(function(e){ console.log('Load err:', e); });
 }
 
-onAuthStateChanged(auth, async user => {
+_fbAuth.onAuthStateChanged(function(user) {
   if (!user) { window.location.href = 'index.html'; return; }
-  uid = user.uid;
-  await loadData();
+  _fbUid = user.uid;
+  if (typeof fbOnAuth === 'function') fbOnAuth(user);
 });
 
-let saveDebounce;
-window._firebaseSave = function() { clearTimeout(saveDebounce); saveDebounce = setTimeout(saveData, 2000); };
-window.addEventListener('beforeunload', saveData);
+window.addEventListener('beforeunload', function() {
+  if (typeof fbGetData === 'function' && _fbUid) {
+    var data = fbGetData();
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data, { updatedAt: new Date().toISOString() }));
+  }
+});
+</script>
+<script>
+function fbGetData() {
+  var pl = document.getElementById('projectList');
+  var pr = document.getElementById('proseEditor');
+  var ct = document.getElementById('chapterTitle');
+  var cs = document.getElementById('chapterSubtitle');
+  return {
+    projectList: pl ? pl.innerHTML : '',
+    prose: pr ? pr.innerHTML : '',
+    chapterTitle: ct ? ct.value : '',
+    chapterSubtitle: cs ? cs.value : '',
+    chaptersContent: JSON.stringify(window.chaptersContent || {})
+  };
+}
+
+function fbOnAuth(user) {
+  fbLoad(function(data) {
+    var pl = document.getElementById('projectList');
+    if (pl && data.projectList) pl.innerHTML = data.projectList;
+    var pr = document.getElementById('proseEditor');
+    if (pr && data.prose) pr.innerHTML = data.prose;
+    var ct = document.getElementById('chapterTitle');
+    if (ct && data.chapterTitle) ct.value = data.chapterTitle;
+    var cs = document.getElementById('chapterSubtitle');
+    if (cs && data.chapterSubtitle) cs.value = data.chapterSubtitle;
+    if (data.chaptersContent) { try{ Object.assign(window.chaptersContent||{}, JSON.parse(data.chaptersContent)); }catch(e){} }
+    if (window.countWords) countWords();
+    if (window.updateBreadcrumb) updateBreadcrumb();
+  });
+}
 </script>
 </head>
 <body>
@@ -830,7 +846,7 @@ function triggerSave() {
 // ── TOAST
 let toastTimer;
 function showToast(msg) {
-  if (window._firebaseSave) window._firebaseSave();
+  fbSave(fbGetData);
   document.getElementById('toastMsg').textContent = msg || 'Sauvegardé';
   const t = document.getElementById('toastEl');
   t.classList.add('show');

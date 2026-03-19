@@ -5,71 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>L'Atlas de la Création — Connexion</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
-    authDomain: "atlas-de-la-creation.firebaseapp.com",
-    projectId: "atlas-de-la-creation",
-    storageBucket: "atlas-de-la-creation.firebasestorage.app",
-    messagingSenderId: "641852939635",
-    appId: "1:641852939635:web:48273ca3eaea29fdebf906"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  onAuthStateChanged(auth, user => { if (user) window.location.href = 'atlas-hub.html'; });
-
-  window.handleLogin = async function() {
-    const email = document.getElementById('login-email').value.trim();
-    const pass  = document.getElementById('login-pass').value;
-    let valid = true;
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    showErr('login-email-err',!emailOk); setFErr('login-email',!emailOk); if(!emailOk) valid=false;
-    showErr('login-pass-err',!pass); setFErr('login-pass',!pass); if(!pass) valid=false;
-    if(!valid) return;
-    setBtnLoad('login-btn',true);
-    try {
-      await signInWithEmailAndPassword(auth,email,pass);
-      window.location.href='atlas-hub.html';
-    } catch(e) {
-      setBtnLoad('login-btn',false);
-      showFBErr('firebase-err', e.code==='auth/invalid-credential'?'Email ou mot de passe incorrect.':'Erreur de connexion.');
-    }
-  };
-
-  window.handleRegister = async function() {
-    const name=document.getElementById('reg-name').value.trim();
-    const email=document.getElementById('reg-email').value.trim();
-    const pass=document.getElementById('reg-pass').value;
-    const confirm=document.getElementById('reg-confirm').value;
-    let valid=true;
-    showErr('reg-name-err',!name); setFErr('reg-name',!name); if(!name) valid=false;
-    const emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    showErr('reg-email-err',!emailOk); setFErr('reg-email',!emailOk); if(!emailOk) valid=false;
-    showErr('reg-pass-err',pass.length<8); setFErr('reg-pass',pass.length<8); if(pass.length<8) valid=false;
-    const cOk=pass===confirm&&confirm.length>0;
-    showErr('reg-confirm-err',!cOk); setFErr('reg-confirm',!cOk); if(!cOk) valid=false;
-    if(!valid) return;
-    setBtnLoad('reg-btn',true);
-    try {
-      const cred=await createUserWithEmailAndPassword(auth,email,pass);
-      await updateProfile(cred.user,{displayName:name});
-      window.location.href='atlas-hub.html';
-    } catch(e) {
-      setBtnLoad('reg-btn',false);
-      showFBErr('firebase-err-reg', e.code==='auth/email-already-in-use'?'Cet email est déjà utilisé.':'Erreur lors de la création du compte.');
-    }
-  };
-
-  function showErr(id,show){const el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
-  function setFErr(id,has){const el=document.getElementById(id);if(el)el.classList.toggle('error',has);}
-  function setBtnLoad(id,on){const btn=document.getElementById(id);if(!btn)return;btn.disabled=on;btn.textContent=on?'Chargement…':btn.dataset.label;}
-  function showFBErr(id,msg){const el=document.getElementById(id);el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
-</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--cream:#f9f6f0;--warm-white:#fdfbf7;--ink:#1a1714;--ink-light:#3d3830;--ink-faint:#8a8278;--gold:#b8975a;--gold-light:#d4b07a;--border:#e4ddd3;--border-strong:#c8bfb3;--error:#9b4d4d}
@@ -126,6 +62,60 @@ body{display:flex;min-height:100vh}
 .invite-note{margin-top:28px;padding:14px 16px;border:1px solid var(--border);border-left:2px solid var(--gold);background:var(--warm-white);font-size:12px;color:var(--ink-faint);line-height:1.7;letter-spacing:.02em}
 @media(max-width:900px){body{flex-direction:column}.left-panel{padding:48px 32px;border-right:none;border-bottom:1px solid var(--border)}.right-panel{width:100%;padding:48px 32px}}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
+  authDomain:"atlas-de-la-creation.firebaseapp.com",
+  projectId:"atlas-de-la-creation",
+  storageBucket:"atlas-de-la-creation.firebasestorage.app",
+  messagingSenderId:"641852939635",
+  appId:"1:641852939635:web:48273ca3eaea29fdebf906"
+});
+var auth = firebase.auth();
+
+auth.onAuthStateChanged(function(user){ if(user) window.location.href='atlas-hub.html'; });
+
+function showErr(id,show){var el=document.getElementById(id);if(el)el.style.display=show?'block':'none';}
+function setFErr(id,has){var el=document.getElementById(id);if(el)el.classList.toggle('error',has);}
+function setBtnLoad(id,on){var btn=document.getElementById(id);if(!btn)return;btn.disabled=on;btn.textContent=on?'Chargement…':btn.dataset.label;}
+function showFBErr(id,msg){var el=document.getElementById(id);if(!el)return;el.textContent=msg;el.style.display='block';setTimeout(function(){el.style.display='none';},4000);}
+
+function handleLogin(){
+  var email=document.getElementById('login-email').value.trim();
+  var pass=document.getElementById('login-pass').value;
+  var valid=true;
+  var emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  showErr('login-email-err',!emailOk);setFErr('login-email',!emailOk);if(!emailOk)valid=false;
+  showErr('login-pass-err',!pass);setFErr('login-pass',!pass);if(!pass)valid=false;
+  if(!valid)return;
+  setBtnLoad('login-btn',true);
+  auth.signInWithEmailAndPassword(email,pass)
+    .then(function(){ window.location.href='atlas-hub.html'; })
+    .catch(function(e){ setBtnLoad('login-btn',false); showFBErr('firebase-err', e.code==='auth/invalid-credential'?'Email ou mot de passe incorrect.':'Erreur de connexion.'); });
+}
+
+function handleRegister(){
+  var name=document.getElementById('reg-name').value.trim();
+  var email=document.getElementById('reg-email').value.trim();
+  var pass=document.getElementById('reg-pass').value;
+  var confirm=document.getElementById('reg-confirm').value;
+  var valid=true;
+  showErr('reg-name-err',!name);setFErr('reg-name',!name);if(!name)valid=false;
+  var emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  showErr('reg-email-err',!emailOk);setFErr('reg-email',!emailOk);if(!emailOk)valid=false;
+  showErr('reg-pass-err',pass.length<8);setFErr('reg-pass',pass.length<8);if(pass.length<8)valid=false;
+  var cOk=pass===confirm&&confirm.length>0;
+  showErr('reg-confirm-err',!cOk);setFErr('reg-confirm',!cOk);if(!cOk)valid=false;
+  if(!valid)return;
+  setBtnLoad('reg-btn',true);
+  auth.createUserWithEmailAndPassword(email,pass)
+    .then(function(cred){ return cred.user.updateProfile({displayName:name}); })
+    .then(function(){ window.location.href='atlas-hub.html'; })
+    .catch(function(e){ setBtnLoad('reg-btn',false); showFBErr('firebase-err-reg', e.code==='auth/email-already-in-use'?'Cet email est déjà utilisé.':'Erreur lors de la création.'); });
+}
+</script>
 </head>
 <body>
 <div class="left-panel">

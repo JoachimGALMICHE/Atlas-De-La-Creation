@@ -277,12 +277,13 @@ canvas#relGraph { display: block; }
 .char-item { position:relative; }
 
 </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const app = initializeApp({
+<!-- Firebase compat (global scope) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
   apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
   authDomain:"atlas-de-la-creation.firebaseapp.com",
   projectId:"atlas-de-la-creation",
@@ -290,42 +291,94 @@ const app = initializeApp({
   messagingSenderId:"641852939635",
   appId:"1:641852939635:web:48273ca3eaea29fdebf906"
 });
-const auth = getAuth(app);
-const db = getFirestore(app);
-let uid = null;
+var _fbAuth = firebase.auth();
+var _fbDb   = firebase.firestore();
+var _fbUid  = null;
+var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
+var _saveTimer = null;
 
-const SAVE_IDS = ['charList','panel-apparence','panel-perso','panel-histoire','panel-competences','panel-relations','panel-arc','charName','charEpithet'];
-
-async function saveData() {
-  if (!uid) return;
-  const data = {};
-  SAVE_IDS.forEach(id => { const el = document.getElementById(id); if (el) data[id] = el.innerHTML; });
-  data.skillsData = JSON.stringify(window.skills || []);
-  try {
-    await setDoc(doc(db,'users',uid,'pages','personnages'), {...data, updatedAt: new Date().toISOString()});
-  } catch(e) { console.log('Save err:',e); }
+function fbSave(data) {
+  if (!_fbUid) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function() {
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data(), { updatedAt: new Date().toISOString() }))
+      .catch(function(e){ console.log('Save err:', e); });
+  }, 2000);
 }
 
-async function loadData() {
-  if (!uid) return;
-  try {
-    const snap = await getDoc(doc(db,'users',uid,'pages','personnages'));
-    if (!snap.exists()) return;
-    const data = snap.data();
-    SAVE_IDS.forEach(id => { const el = document.getElementById(id); if (el && data[id]) el.innerHTML = data[id]; });
-    if (data.skillsData) { try { window.skills = JSON.parse(data.skillsData); if(window.renderSkills) window.renderSkills(); } catch(e){} }
-  } catch(e) { console.log('Load err:',e); }
+function fbLoad(cb) {
+  if (!_fbUid) return;
+  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+    .get().then(function(snap) { if (snap.exists) cb(snap.data()); })
+    .catch(function(e){ console.log('Load err:', e); });
 }
 
-onAuthStateChanged(auth, async user => {
+_fbAuth.onAuthStateChanged(function(user) {
   if (!user) { window.location.href = 'index.html'; return; }
-  uid = user.uid;
-  await loadData();
+  _fbUid = user.uid;
+  if (typeof fbOnAuth === 'function') fbOnAuth(user);
 });
 
-let saveDebounce;
-window._firebaseSave = function() { clearTimeout(saveDebounce); saveDebounce = setTimeout(saveData, 2000); };
-window.addEventListener('beforeunload', saveData);
+window.addEventListener('beforeunload', function() {
+  if (typeof fbGetData === 'function' && _fbUid) {
+    var data = fbGetData();
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data, { updatedAt: new Date().toISOString() }));
+  }
+});
+</script>
+<script>
+function fbGetData() {
+  var cl = document.getElementById('charList');
+  var pa = document.getElementById('panel-apparence');
+  var pp = document.getElementById('panel-perso');
+  var ph = document.getElementById('panel-histoire');
+  var pc = document.getElementById('panel-competences');
+  var pr = document.getElementById('panel-relations');
+  var parc = document.getElementById('panel-arc');
+  return {
+    charList: cl ? cl.innerHTML : '',
+    apparence: pa ? pa.innerHTML : '',
+    perso: pp ? pp.innerHTML : '',
+    histoire: ph ? ph.innerHTML : '',
+    competences: pc ? pc.innerHTML : '',
+    relations: pr ? pr.innerHTML : '',
+    arc: parc ? parc.innerHTML : '',
+    charName: document.getElementById('charName') ? document.getElementById('charName').textContent : '',
+    charEpithet: document.getElementById('charEpithet') ? document.getElementById('charEpithet').textContent : '',
+    skillsData: JSON.stringify(window.skills || [])
+  };
+}
+
+function fbOnAuth(user) {
+  fbLoad(function(data) {
+    var ids = {charList:'charList',apparence:'panel-apparence',perso:'panel-perso',histoire:'panel-histoire',competences:'panel-competences',relations:'panel-relations',arc:'panel-arc'};
+    Object.keys(ids).forEach(function(k){ var el=document.getElementById(ids[k]); if(el&&data[k]) el.innerHTML=data[k]; });
+    if (data.charName) document.getElementById('charName').textContent = data.charName;
+    if (data.charEpithet) document.getElementById('charEpithet').textContent = data.charEpithet;
+    if (data.skillsData) { try{ window.skills=JSON.parse(data.skillsData); if(window.renderSkills) renderSkills(); }catch(e){} }
+    attachDeleteButtons();
+  });
+}
+
+function attachDeleteButtons() {
+  document.querySelectorAll('.char-item').forEach(function(item) {
+    if (item.querySelector('.del-btn')) return;
+    item.style.cssText += ';display:flex;align-items:center';
+    var btn = document.createElement('button');
+    btn.className='del-btn'; btn.innerHTML='✕'; btn.style.marginLeft='auto';
+    btn.onclick=function(e){e.stopPropagation();askDelete('Supprimer ce personnage ?','',function(){item.remove();saveToast();});};
+    item.appendChild(btn);
+  });
+  document.querySelectorAll('.rel-item').forEach(function(item) {
+    if (item.querySelector('.del-btn')) return;
+    var btn = document.createElement('button');
+    btn.className='del-btn'; btn.innerHTML='✕'; btn.style.cssText='margin-left:auto;align-self:flex-start;';
+    btn.onclick=function(e){e.stopPropagation();askDelete('Supprimer cette relation ?','',function(){item.remove();saveToast();});};
+    item.appendChild(btn);
+  });
+}
 </script>
 </head>
 <body>
@@ -1094,7 +1147,7 @@ function saveRelation() {
 // ── SAVE TOAST
 let toastTimer;
 function saveToast() {
-  if (window._firebaseSave) window._firebaseSave();
+  fbSave(fbGetData);
   const t = document.getElementById('saveToastEl');
   t.classList.add('show');
   clearTimeout(toastTimer);

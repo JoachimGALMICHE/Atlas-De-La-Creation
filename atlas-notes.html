@@ -219,12 +219,13 @@ header {
   .notes-list-panel { width: 100%; height: 200px; }
 }
 </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const app = initializeApp({
+<!-- Firebase compat (global scope) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
   apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
   authDomain:"atlas-de-la-creation.firebaseapp.com",
   projectId:"atlas-de-la-creation",
@@ -232,52 +233,66 @@ const app = initializeApp({
   messagingSenderId:"641852939635",
   appId:"1:641852939635:web:48273ca3eaea29fdebf906"
 });
-const auth = getAuth(app);
-const db = getFirestore(app);
-let uid = null;
+var _fbAuth = firebase.auth();
+var _fbDb   = firebase.firestore();
+var _fbUid  = null;
+var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
+var _saveTimer = null;
 
-async function saveData() {
-  if (!uid) return;
-  const grid = document.getElementById('notesGrid');
-  const list = document.getElementById('editorNotesList');
-  if (!grid) return;
-  try {
-    await setDoc(doc(db,'users',uid,'pages','notes'), {
-      grid: grid.innerHTML,
-      list: list ? list.innerHTML : '',
-      notesData: JSON.stringify(window.notesData || []),
-      updatedAt: new Date().toISOString()
-    });
-  } catch(e) { console.log('Save err:',e); }
+function fbSave(data) {
+  if (!_fbUid) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function() {
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data(), { updatedAt: new Date().toISOString() }))
+      .catch(function(e){ console.log('Save err:', e); });
+  }, 2000);
 }
 
-async function loadData() {
-  if (!uid) return;
-  try {
-    const snap = await getDoc(doc(db,'users',uid,'pages','notes'));
-    if (!snap.exists()) return;
-    const data = snap.data();
-    const grid = document.getElementById('notesGrid');
-    const list = document.getElementById('editorNotesList');
-    if (grid && data.grid) grid.innerHTML = data.grid;
-    if (list && data.list) list.innerHTML = data.list;
-    if (data.notesData) { try { window.notesData = JSON.parse(data.notesData); } catch(e){} }
-    // update count
-    const count = document.querySelectorAll('.note-card').length;
-    const countEl = document.getElementById('noteCount');
-    if (countEl) countEl.textContent = count + ' notes';
-  } catch(e) { console.log('Load err:',e); }
+function fbLoad(cb) {
+  if (!_fbUid) return;
+  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+    .get().then(function(snap) { if (snap.exists) cb(snap.data()); })
+    .catch(function(e){ console.log('Load err:', e); });
 }
 
-onAuthStateChanged(auth, async user => {
+_fbAuth.onAuthStateChanged(function(user) {
   if (!user) { window.location.href = 'index.html'; return; }
-  uid = user.uid;
-  await loadData();
+  _fbUid = user.uid;
+  if (typeof fbOnAuth === 'function') fbOnAuth(user);
 });
 
-let saveDebounce;
-window._firebaseSave = function() { clearTimeout(saveDebounce); saveDebounce = setTimeout(saveData, 2000); };
-window.addEventListener('beforeunload', saveData);
+window.addEventListener('beforeunload', function() {
+  if (typeof fbGetData === 'function' && _fbUid) {
+    var data = fbGetData();
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data, { updatedAt: new Date().toISOString() }));
+  }
+});
+</script>
+<script>
+function fbGetData() {
+  var grid = document.getElementById('notesGrid');
+  var list = document.getElementById('editorNotesList');
+  return {
+    grid: grid ? grid.innerHTML : '',
+    editorList: list ? list.innerHTML : '',
+    notesData: JSON.stringify(window.notesData || [])
+  };
+}
+
+function fbOnAuth(user) {
+  fbLoad(function(data) {
+    var grid = document.getElementById('notesGrid');
+    var list = document.getElementById('editorNotesList');
+    if (grid && data.grid) grid.innerHTML = data.grid;
+    if (list && data.editorList) list.innerHTML = data.editorList;
+    if (data.notesData) { try{ window.notesData=JSON.parse(data.notesData); }catch(e){} }
+    var cnt = document.querySelectorAll('.note-card').length;
+    var el = document.getElementById('noteCount');
+    if (el) el.textContent = cnt + ' notes';
+  });
+}
 </script>
 </head>
 <body>
@@ -836,7 +851,7 @@ function deleteNote(btn) {
 // ── SAVE TOAST
 let toastTimer;
 function saveToast() {
-  if (window._firebaseSave) window._firebaseSave();
+  fbSave(fbGetData);
   const t = document.getElementById('saveToastEl');
   t.classList.add('show');
   clearTimeout(toastTimer);

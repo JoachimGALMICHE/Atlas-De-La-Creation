@@ -74,12 +74,12 @@
   @media(max-width:1100px){ .tiles-grid{grid-template-columns:repeat(2,1fr)} .tile.large{grid-column:span 1} .activity-strip{grid-template-columns:repeat(2,1fr)} }
   @media(max-width:700px){ header{padding:0 24px} .hero{padding:40px 24px 32px;flex-direction:column;gap:32px;align-items:flex-start} main{padding:32px 24px} .tiles-grid{grid-template-columns:1fr} .tile.large{grid-column:span 1} .activity-strip{grid-template-columns:1fr} footer{padding:24px;flex-direction:column;gap:16px} }
 </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const app = initializeApp({
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
   apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
   authDomain:"atlas-de-la-creation.firebaseapp.com",
   projectId:"atlas-de-la-creation",
@@ -87,127 +87,85 @@ const app = initializeApp({
   messagingSenderId:"641852939635",
   appId:"1:641852939635:web:48273ca3eaea29fdebf906"
 });
-const auth = getAuth(app);
-const db = getFirestore(app);
+var _auth = firebase.auth();
+var _db   = firebase.firestore();
 
-function countInHTML(html, selector) {
+function countHTML(html, sel) {
   if (!html) return 0;
-  const tmp = document.createElement('div');
+  var tmp = document.createElement('div');
   tmp.innerHTML = html;
-  return tmp.querySelectorAll(selector).length;
+  return tmp.querySelectorAll(sel).length;
 }
 
-async function loadStats(uid) {
-  // Load each page data and count elements
-  const pages = {
-    worldbuilding: { doc:'worldbuilding', counters:[
-      { sel:'.world-item', id:'stat-worlds', label:'monde' },
-      { sel:'.faction-card', id:'stat-factions', label:'faction' },
-    ]},
-    personnages: { doc:'personnages', counters:[
-      { sel:'.char-item', id:'stat-chars', label:'personnage' },
-    ]},
-    notes: { doc:'notes', counters:[
-      { sel:'.note-card', id:'stat-notes', label:'note' },
-    ]},
-    ecriture: { doc:'ecriture', counters:[
-      { sel:'.proj-group', id:'stat-projects', label:'projet' },
-    ]},
-    chronologie: { doc:'chronologie', isJson:'events', id:'stat-events', label:'événement' },
-    carte: { doc:'carte', isJson:'markers', id:'stat-markers', label:'marqueur' },
-  };
-
-  let totalWorlds=0, totalChars=0, totalNotes=0, totalProjects=0, totalEvents=0;
-
-  try {
-    // Worldbuilding
-    const wb = await getDoc(doc(db,'users',uid,'pages','worldbuilding'));
-    if (wb.exists()) {
-      const d = wb.data();
-      totalWorlds = countInHTML(d.worldList, '.world-item');
-      const factions = countInHTML(d.factionsGrid, '.faction-card');
-      const lieux = countInHTML(d.lieuxBody, 'tr');
-      setTileCount('tile-worldbuilding', totalWorlds + ' monde' + (totalWorlds>1?'s':''), factions + ' faction' + (factions>1?'s':''));
-    }
-
-    // Personnages
-    const pe = await getDoc(doc(db,'users',uid,'pages','personnages'));
-    if (pe.exists()) {
-      const d = pe.data();
-      totalChars = countInHTML(d.charList, '.char-item');
-      setTileCount('tile-personnages', totalChars + ' personnage' + (totalChars>1?'s':''));
-    }
-
-    // Notes
-    const no = await getDoc(doc(db,'users',uid,'pages','notes'));
-    if (no.exists()) {
-      const d = no.data();
-      totalNotes = countInHTML(d.grid, '.note-card');
-      setTileCount('tile-notes', totalNotes + ' note' + (totalNotes>1?'s':''));
-    }
-
-    // Ecriture
-    const ec = await getDoc(doc(db,'users',uid,'pages','ecriture'));
-    if (ec.exists()) {
-      const d = ec.data();
-      totalProjects = countInHTML(d.projectList, '.proj-group');
-      setTileCount('tile-ecriture', totalProjects + ' projet' + (totalProjects>1?'s':''));
-    }
-
-    // Chronologie
-    const ch = await getDoc(doc(db,'users',uid,'pages','chronologie'));
-    if (ch.exists()) {
-      const d = ch.data();
-      try { totalEvents = JSON.parse(d.events||'[]').length; } catch(e){}
-      setTileCount('tile-chronologie', totalEvents + ' événement' + (totalEvents>1?'s':''));
-    }
-
-    // Carte
-    const ca = await getDoc(doc(db,'users',uid,'pages','carte'));
-    if (ca.exists()) {
-      const d = ca.data();
-      let mkCount = 0;
-      try { mkCount = JSON.parse(d.markers||'[]').length; } catch(e){}
-      setTileCount('tile-carte', mkCount + ' marqueur' + (mkCount>1?'s':''));
-    }
-
-    // Hero stats
-    const heroProjects = document.getElementById('hero-stat-projects');
-    const heroNotes = document.getElementById('hero-stat-notes');
-    if (heroProjects) heroProjects.textContent = totalWorlds + totalProjects;
-    if (heroNotes) heroNotes.textContent = totalNotes;
-
-  } catch(e) { console.log('Stats error:', e); }
-}
-
-function setTileCount(tileId, ...counts) {
-  const tile = document.getElementById(tileId);
+function setTile(id, counts) {
+  var tile = document.getElementById(id);
   if (!tile) return;
-  const metaSpans = tile.querySelectorAll('.tile-count');
-  counts.forEach((txt, i) => {
-    if (metaSpans[i]) {
-      // preserve the <strong> tag
-      const parts = txt.split(' ');
-      const num = parts[0];
-      const label = parts.slice(1).join(' ');
-      metaSpans[i].innerHTML = '<strong>' + num + '</strong> ' + label;
-    }
+  var spans = tile.querySelectorAll('.tile-count');
+  counts.forEach(function(txt, i) {
+    if (!spans[i]) return;
+    var parts = txt.split(' ');
+    spans[i].innerHTML = '<strong>' + parts[0] + '</strong> ' + parts.slice(1).join(' ');
   });
 }
 
-onAuthStateChanged(auth, async user => {
+_auth.onAuthStateChanged(function(user) {
   if (!user) { window.location.href = 'index.html'; return; }
-  const nameEl = document.getElementById('userName');
-  const avatarEl = document.getElementById('userAvatar');
+  var nameEl = document.getElementById('userName');
+  var avatarEl = document.getElementById('userAvatar');
   if (nameEl) nameEl.textContent = user.displayName || user.email.split('@')[0];
   if (avatarEl) avatarEl.textContent = (user.displayName || user.email)[0].toUpperCase();
-  await loadStats(user.uid);
+
+  var uid = user.uid;
+  var pagesRef = _db.collection('users').doc(uid).collection('pages');
+
+  pagesRef.doc('worldbuilding').get().then(function(s) {
+    if (!s.exists) return;
+    var d = s.data();
+    var worlds = countHTML(d.worldList, '.world-item');
+    var factions = countHTML(d.factionsGrid, '.faction-card');
+    setTile('tile-worldbuilding', [worlds + ' monde' + (worlds>1?'s':''), factions + ' faction' + (factions>1?'s':'')]);
+    var hp = document.getElementById('hero-stat-projects');
+    if (hp) hp.textContent = worlds;
+  });
+
+  pagesRef.doc('personnages').get().then(function(s) {
+    if (!s.exists) return;
+    var chars = countHTML(s.data().charList, '.char-item');
+    setTile('tile-personnages', [chars + ' personnage' + (chars>1?'s':'')]);
+  });
+
+  pagesRef.doc('notes').get().then(function(s) {
+    if (!s.exists) return;
+    var notes = countHTML(s.data().grid, '.note-card');
+    setTile('tile-notes', [notes + ' note' + (notes>1?'s':'')]);
+    var hn = document.getElementById('hero-stat-notes');
+    if (hn) hn.textContent = notes;
+  });
+
+  pagesRef.doc('ecriture').get().then(function(s) {
+    if (!s.exists) return;
+    var proj = countHTML(s.data().projectList, '.proj-group');
+    setTile('tile-ecriture', [proj + ' projet' + (proj>1?'s':'')]);
+  });
+
+  pagesRef.doc('chronologie').get().then(function(s) {
+    if (!s.exists) return;
+    var evs = 0;
+    try { evs = JSON.parse(s.data().events||'[]').length; } catch(e){}
+    setTile('tile-chronologie', [evs + ' événement' + (evs>1?'s':'')]);
+  });
+
+  pagesRef.doc('carte').get().then(function(s) {
+    if (!s.exists) return;
+    var mk = 0;
+    try { mk = JSON.parse(s.data().markers||'[]').length; } catch(e){}
+    setTile('tile-carte', [mk + ' marqueur' + (mk>1?'s':'')]);
+  });
 });
 
-window.doSignOut = async function() {
-  await signOut(auth);
-  window.location.href = 'index.html';
-};
+function doSignOut() {
+  _auth.signOut().then(function(){ window.location.href='index.html'; });
+}
 </script>
 </head>
 <body>

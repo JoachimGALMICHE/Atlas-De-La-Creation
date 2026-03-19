@@ -471,12 +471,13 @@ tr:hover .del-btn,
 .world-item .del-btn { margin-left: auto; }
 
 </style>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const app = initializeApp({
+<!-- Firebase compat (global scope) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
   apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
   authDomain:"atlas-de-la-creation.firebaseapp.com",
   projectId:"atlas-de-la-creation",
@@ -484,85 +485,110 @@ const app = initializeApp({
   messagingSenderId:"641852939635",
   appId:"1:641852939635:web:48273ca3eaea29fdebf906"
 });
-const auth = getAuth(app);
-const db = getFirestore(app);
-let uid = null;
+var _fbAuth = firebase.auth();
+var _fbDb   = firebase.firestore();
+var _fbUid  = null;
+var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
+var _saveTimer = null;
 
-// Sections to save/restore
-const SAVE_IDS = [
-  'worldList',        // sidebar worlds
-  'factionsGrid',     // factions
-  'lieuxBody',        // lieux table rows
-  'biomesPills',      // biome pills
-  'ressourcesGrid',   // ressources
-  'worldTitle',       // current world title
-  'worldSubtitle',    // subtitle
-];
-
-// Editable text fields (by data-placeholder or class)
-function getAllEditables() {
-  return Array.from(document.querySelectorAll('.et, .editable-text, .world-title-display, .world-subtitle-display'));
+function fbSave(data) {
+  if (!_fbUid) return;
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(function() {
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data(), { updatedAt: new Date().toISOString() }))
+      .catch(function(e){ console.log('Save err:', e); });
+  }, 2000);
 }
 
-async function saveData() {
-  if (!uid) return;
-  const data = {};
-  // Save containers
-  SAVE_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) data[id] = el.innerHTML;
-  });
-  // Save all editable texts with their index
-  getAllEditables().forEach((el, i) => {
-    data['editable_' + i] = el.innerHTML || el.textContent;
-  });
-  // Save world title input
-  const wt = document.getElementById('worldTitle');
-  if (wt) data['worldTitleText'] = wt.textContent;
-  try {
-    await setDoc(doc(db, 'users', uid, 'pages', 'worldbuilding'), {
-      ...data, updatedAt: new Date().toISOString()
-    });
-  } catch(e) { console.log('Save err:', e); }
+function fbLoad(cb) {
+  if (!_fbUid) return;
+  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+    .get().then(function(snap) { if (snap.exists) cb(snap.data()); })
+    .catch(function(e){ console.log('Load err:', e); });
 }
 
-async function loadData() {
-  if (!uid) return;
-  try {
-    const snap = await getDoc(doc(db, 'users', uid, 'pages', 'worldbuilding'));
-    if (!snap.exists()) return;
-    const data = snap.data();
-    SAVE_IDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (el && data[id]) el.innerHTML = data[id];
-    });
-    getAllEditables().forEach((el, i) => {
-      if (data['editable_' + i] !== undefined) {
-        if (el.contentEditable === 'true' || el.getAttribute('contenteditable') !== null) {
-          el.innerHTML = data['editable_' + i];
-        }
-      }
-    });
-    if (data['worldTitleText']) {
-      const wt = document.getElementById('worldTitle');
-      if (wt) wt.textContent = data['worldTitleText'];
-    }
-  } catch(e) { console.log('Load err:', e); }
-}
-
-onAuthStateChanged(auth, async user => {
+_fbAuth.onAuthStateChanged(function(user) {
   if (!user) { window.location.href = 'index.html'; return; }
-  uid = user.uid;
-  await loadData();
+  _fbUid = user.uid;
+  if (typeof fbOnAuth === 'function') fbOnAuth(user);
 });
 
-// Hook into existing showSaveToast — save on every change
-let saveDebounce;
-window._firebaseSave = function() {
-  clearTimeout(saveDebounce);
-  saveDebounce = setTimeout(saveData, 2000);
-};
-window.addEventListener('beforeunload', saveData);
+window.addEventListener('beforeunload', function() {
+  if (typeof fbGetData === 'function' && _fbUid) {
+    var data = fbGetData();
+    _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+      .set(Object.assign(data, { updatedAt: new Date().toISOString() }));
+  }
+});
+</script>
+<script>
+function fbGetData() {
+  var wl = document.getElementById('worldList'); 
+  var fg = document.getElementById('factionsGrid');
+  var lb = document.getElementById('lieuxBody');
+  var rg = document.getElementById('ressourcesGrid');
+  var wt = document.getElementById('worldTitle');
+  var ws = document.getElementById('worldSubtitle');
+  // collect all editable texts
+  var editables = {};
+  document.querySelectorAll('[contenteditable]').forEach(function(el,i){ editables['ed_'+i] = el.innerHTML; });
+  return {
+    worldList: wl ? wl.innerHTML : '',
+    factionsGrid: fg ? fg.innerHTML : '',
+    lieuxBody: lb ? lb.innerHTML : '',
+    ressourcesGrid: rg ? rg.innerHTML : '',
+    worldTitle: wt ? wt.textContent : '',
+    worldSubtitle: ws ? ws.textContent : '',
+    editables: JSON.stringify(editables)
+  };
+}
+
+function fbOnAuth(user) {
+  fbLoad(function(data) {
+    if (data.worldList) document.getElementById('worldList').innerHTML = data.worldList;
+    if (data.factionsGrid) document.getElementById('factionsGrid').innerHTML = data.factionsGrid;
+    if (data.lieuxBody) document.getElementById('lieuxBody').innerHTML = data.lieuxBody;
+    if (data.ressourcesGrid) document.getElementById('ressourcesGrid').innerHTML = data.ressourcesGrid;
+    if (data.worldTitle) document.getElementById('worldTitle').textContent = data.worldTitle;
+    if (data.worldSubtitle) document.getElementById('worldSubtitle').textContent = data.worldSubtitle;
+    if (data.editables) {
+      try {
+        var ed = JSON.parse(data.editables);
+        document.querySelectorAll('[contenteditable]').forEach(function(el,i){ if(ed['ed_'+i]) el.innerHTML = ed['ed_'+i]; });
+      } catch(e){}
+    }
+    // Re-attach delete buttons after load
+    attachDeleteButtons();
+  });
+}
+
+function attachDeleteButtons() {
+  document.querySelectorAll('.world-item').forEach(function(item) {
+    if (item.querySelector('.del-btn')) return;
+    item.style.cssText += ';display:flex;align-items:center';
+    var btn = document.createElement('button');
+    btn.className = 'del-btn'; btn.innerHTML = '✕'; btn.style.marginLeft = 'auto';
+    btn.onclick = function(e){ e.stopPropagation(); askDelete('Supprimer ce monde ?','',function(){item.remove();showSaveToast();}); };
+    item.appendChild(btn);
+  });
+  document.querySelectorAll('.faction-card').forEach(function(card) {
+    if (card.querySelector('.faction-del')) return;
+    var btn = document.createElement('button');
+    btn.className = 'del-btn faction-del'; btn.innerHTML = '✕';
+    btn.onclick = function(e){ e.stopPropagation(); askDelete('Supprimer cette faction ?','',function(){card.remove();showSaveToast();}); };
+    card.appendChild(btn);
+  });
+  document.querySelectorAll('#lieuxBody tr').forEach(function(row) {
+    if (row.querySelector('[onclick*="askDelete"]')) return;
+    var lastCell = row.cells[row.cells.length-1];
+    if (!lastCell) return;
+    var btn = document.createElement('button');
+    btn.className = 'td-edit'; btn.innerHTML = '✕'; btn.style.color = '#9e5a5a';
+    btn.onclick = function(){ askDelete('Supprimer ce lieu ?','',function(){row.remove();showSaveToast();}); };
+    lastCell.appendChild(btn);
+  });
+}
 </script>
 </head>
 <body>
@@ -1339,6 +1365,7 @@ document.getElementById('factionModal').addEventListener('click', function(e) {
 // ── SAVE TOAST
 let toastTimer;
 function showSaveToast() {
+  fbSave(fbGetData);
   const t = document.getElementById('saveToast');
   t.classList.add('show');
   clearTimeout(toastTimer);
