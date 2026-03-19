@@ -74,6 +74,30 @@
   @media(max-width:1100px){ .tiles-grid{grid-template-columns:repeat(2,1fr)} .tile.large{grid-column:span 1} .activity-strip{grid-template-columns:repeat(2,1fr)} }
   @media(max-width:700px){ header{padding:0 24px} .hero{padding:40px 24px 32px;flex-direction:column;gap:32px;align-items:flex-start} main{padding:32px 24px} .tiles-grid{grid-template-columns:1fr} .tile.large{grid-column:span 1} .activity-strip{grid-template-columns:1fr} footer{padding:24px;flex-direction:column;gap:16px} }
 </style>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  const app = initializeApp({
+    apiKey:"AIzaSyC_U94Cy-rx0pgh2vWcuuM9cuj8PNWzpDk",
+    authDomain:"atlas-de-la-creation.firebaseapp.com",
+    projectId:"atlas-de-la-creation",
+    storageBucket:"atlas-de-la-creation.firebasestorage.app",
+    messagingSenderId:"641852939635",
+    appId:"1:641852939635:web:48273ca3eaea29fdebf906"
+  });
+  const auth = getAuth(app);
+  onAuthStateChanged(auth, user => {
+    if (!user) { window.location.href = 'index.html'; return; }
+    const nameEl = document.getElementById('userName');
+    const avatarEl = document.getElementById('userAvatar');
+    if (nameEl) nameEl.textContent = user.displayName || user.email.split('@')[0];
+    if (avatarEl) avatarEl.textContent = (user.displayName || user.email)[0].toUpperCase();
+  });
+  window.doSignOut = async function() {
+    await signOut(auth);
+    window.location.href = 'index.html';
+  };
+</script>
 </head>
 <body>
 <header>
@@ -82,7 +106,7 @@
     <a class="nav-item" href="#">Projets</a>
     <a class="nav-item" href="#">Collaborateurs</a>
     <a class="nav-item" href="#">Aide</a>
-    <a class="user-chip" href="atlas-auth.html"><div class="user-avatar">A</div><span class="user-name">Mon Atlas</span></a>
+    <div class="user-chip" style="cursor:pointer" onclick="doSignOut()"><div class="user-avatar" id="userAvatar">A</div><span class="user-name" id="userName">Mon Atlas</span></div>
   </nav>
 </header>
 <section class="hero">
@@ -119,7 +143,7 @@
 </main>
 <footer>
   <div class="footer-brand">L'Atlas de la Création</div>
-  <div class="footer-links"><a class="footer-link" href="atlas-auth.html">Se déconnecter</a><a class="footer-link" href="#">Paramètres</a><a class="footer-link" href="#">Contact</a></div>
+  <div class="footer-links"><a class="footer-link" href="#" onclick="doSignOut()">Se déconnecter</a><a class="footer-link" href="#">Paramètres</a><a class="footer-link" href="#">Contact</a></div>
 </footer>
 </body>
 </html>
