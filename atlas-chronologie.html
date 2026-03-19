@@ -418,6 +418,21 @@ setInterval(function() {
 }, 60000);
 </script>
 <script>
+var EVENTS = [
+  { id:1, type:'magie', era:'ere-ancienne', title:'Mort des Dieux Anciens', date:'An 0 — Ère Ancienne', desc:'Les dieux tissent leur essence dans la terre avant de périr. Le Flux est né de leurs corps dissolus.', tags:['L\'Ordre','Les Séparés'], pos:'above', delay:0.05 },
+  { id:2, type:'decouverte', era:'ere-ancienne', title:'Première Liaison', date:'An 412 — Ère Ancienne', desc:'Première manifestation documentée d\'un humain canalisant le Flux. Une enfant de sept ans lie instinctivement son âme à celle d\'un arbre mourant.', tags:['Seraphel'], pos:'below', delay:0.1 },
+  { id:3, type:'politique', era:'ere-fondation', title:'Fondation de l\'Académie', date:'An 1 — Ère de la Fondation', desc:'L\'Académie des Liants est fondée à Ael\'thar. Pour la première fois, la Liaison est codifiée, enseignée et contrôlée par une institution.', tags:['L\'Ordre'], pos:'above', delay:0.15 },
+  { id:4, type:'guerre', era:'ere-fondation', title:'Guerre des Flux Libres', date:'An 89 — Ère de la Fondation', desc:'Première grande rébellion contre l\'Académie. Des Liants refusant la codification se battent pendant 11 ans. Précurseurs des Séparés.', tags:['Les Séparés','L\'Ordre'], pos:'below', delay:0.2 },
+  { id:5, type:'politique', era:'ere-fondation', title:'Création de l\'Ordre Militaire', date:'An 134 — Ère de la Fondation', desc:'L\'Ordre des Liants militaires est fondé, distinct de l\'Académie. La Liaison devient une arme d\'État.', tags:['L\'Ordre'], pos:'above', delay:0.25 },
+  { id:6, type:'mort', era:'ere-cendres', title:'Massacre de la Tour Basse', date:'An 3 — Ère des Cendres', desc:'L\'Ordre détruit un foyer de Liants libres. 47 morts. Cet événement radicalise définitivement les Séparés.', tags:['Les Séparés','L\'Ordre'], pos:'below', delay:0.3 },
+  { id:7, type:'naissance', era:'ere-cendres', title:'Naissance de Seraphel Vorn', date:'An 22 — Ère des Cendres', desc:'Seraphel naît dans les faubourgs de la Citadelle. Son père est un forgeron sans Flux.', tags:['Seraphel'], pos:'above', delay:0.35 },
+  { id:8, type:'magie', era:'ere-cendres', title:'Éveil de Seraphel', date:'An 31 — Ère des Cendres', desc:'À 9 ans, Seraphel manifeste spontanément le Flux pour sauver son père mourant. Il est détecté et intégré à l\'Académie.', tags:['Seraphel','L\'Ordre'], pos:'below', delay:0.4 },
+  { id:9, type:'mort', era:'ere-cendres', title:'Disparition de la Tisserande', date:'An 47 — Ère des Cendres', desc:'La plus puissante Tisserande connue disparaît sans laisser de trace. L\'Ordre déclare sa mort. Certains doutent encore.', tags:['La Mère-Sans-Nom','L\'Ordre'], pos:'above', delay:0.45 },
+  { id:10, type:'politique', era:'ere-actuelle', title:'Seraphel devient Grand Liant', date:'An 8 — Ère Actuelle', desc:'À 27 ans, Seraphel est nommé Grand Liant — le plus jeune de l\'histoire de l\'Ordre.', tags:['Seraphel','L\'Ordre'], pos:'below', delay:0.5 },
+  { id:11, type:'decouverte', era:'ere-actuelle', title:'Empreinte inconnue à la Porte Basse', date:'An 15 — Ère Actuelle', desc:'Un Séparé laisse une empreinte de Flux que personne à l\'Ordre ne reconnaît. Seraphel commence à douter.', tags:['Seraphel','Les Séparés'], pos:'above', delay:0.55 },
+  { id:12, type:'magie', era:'ere-actuelle', title:'Réapparition de la Mère-Sans-Nom', date:'An 15 — Ère Actuelle', desc:'La Tisserande disparue réapparaît à la tête des Séparés. Son identité reste non confirmée mais très suspectée.', tags:['La Mère-Sans-Nom','Les Séparés'], pos:'below', delay:0.6 },
+];
+
 function fbGetData() {
   return { events: JSON.stringify(window.EVENTS || []) };
 }
@@ -427,10 +442,14 @@ function fbOnAuth(user) {
     if (data.events) {
       try {
         var evs = JSON.parse(data.events);
-        window.EVENTS.length = 0;
-        evs.forEach(function(e){ window.EVENTS.push(e); });
-        if (window.renderFrise) renderFrise();
-      } catch(e){}
+        // Clear and repopulate the EVENTS array in place
+        EVENTS.splice(0, EVENTS.length);
+        evs.forEach(function(ev){ EVENTS.push(ev); });
+        if (typeof renderFrise === 'function') renderFrise();
+      } catch(e){ console.log('Load events err:', e); }
+    } else {
+      // No saved data — just render with defaults
+      if (typeof renderFrise === 'function') renderFrise();
     }
   });
 }
@@ -568,21 +587,6 @@ function fbOnAuth(user) {
 <script>
 const EV_COLORS = { guerre:'#9e5a5a', decouverte:'#5a7e9e', mort:'#3d3830', politique:'#b8975a', magie:'#7a5a9e', naissance:'#5a8e6a' };
 const EV_LABELS = { guerre:'Guerre', decouverte:'Découverte', mort:'Mort', politique:'Politique', magie:'Magie', naissance:'Naissance' };
-
-const EVENTS = [
-  { id:1, type:'magie', era:'ere-ancienne', title:'Mort des Dieux Anciens', date:'An 0 — Ère Ancienne', desc:'Les dieux tissent leur essence dans la terre avant de périr. Le Flux est né de leurs corps dissolus.', tags:['L\'Ordre','Les Séparés'], pos:'above', delay:0.05 },
-  { id:2, type:'decouverte', era:'ere-ancienne', title:'Première Liaison', date:'An 412 — Ère Ancienne', desc:'Première manifestation documentée d\'un humain canalisant le Flux. Une enfant de sept ans lie instinctivement son âme à celle d\'un arbre mourant.', tags:['Seraphel'], pos:'below', delay:0.1 },
-  { id:3, type:'politique', era:'ere-fondation', title:'Fondation de l\'Académie', date:'An 1 — Ère de la Fondation', desc:'L\'Académie des Liants est fondée à Ael\'thar. Pour la première fois, la Liaison est codifiée, enseignée et contrôlée par une institution.', tags:['L\'Ordre'], pos:'above', delay:0.15 },
-  { id:4, type:'guerre', era:'ere-fondation', title:'Guerre des Flux Libres', date:'An 89 — Ère de la Fondation', desc:'Première grande rébellion contre l\'Académie. Des Liants refusant la codification se battent pendant 11 ans. Précurseurs des Séparés.', tags:['Les Séparés','L\'Ordre'], pos:'below', delay:0.2 },
-  { id:5, type:'politique', era:'ere-fondation', title:'Création de l\'Ordre Militaire', date:'An 134 — Ère de la Fondation', desc:'L\'Ordre des Liants militaires est fondé, distinct de l\'Académie. La Liaison devient une arme d\'État.', tags:['L\'Ordre'], pos:'above', delay:0.25 },
-  { id:6, type:'mort', era:'ere-cendres', title:'Massacre de la Tour Basse', date:'An 3 — Ère des Cendres', desc:'L\'Ordre détruit un foyer de Liants libres. 47 morts. Cet événement radicalise définitivement les Séparés.', tags:['Les Séparés','L\'Ordre'], pos:'below', delay:0.3 },
-  { id:7, type:'naissance', era:'ere-cendres', title:'Naissance de Seraphel Vorn', date:'An 22 — Ère des Cendres', desc:'Seraphel naît dans les faubourgs de la Citadelle. Son père est un forgeron sans Flux.', tags:['Seraphel'], pos:'above', delay:0.35 },
-  { id:8, type:'magie', era:'ere-cendres', title:'Éveil de Seraphel', date:'An 31 — Ère des Cendres', desc:'À 9 ans, Seraphel manifeste spontanément le Flux pour sauver son père mourant. Il est détecté et intégré à l\'Académie.', tags:['Seraphel','L\'Ordre'], pos:'below', delay:0.4 },
-  { id:9, type:'mort', era:'ere-cendres', title:'Disparition de la Tisserande', date:'An 47 — Ère des Cendres', desc:'La plus puissante Tisserande connue disparaît sans laisser de trace. L\'Ordre déclare sa mort. Certains doutent encore.', tags:['La Mère-Sans-Nom','L\'Ordre'], pos:'above', delay:0.45 },
-  { id:10, type:'politique', era:'ere-actuelle', title:'Seraphel devient Grand Liant', date:'An 8 — Ère Actuelle', desc:'À 27 ans, Seraphel est nommé Grand Liant — le plus jeune de l\'histoire de l\'Ordre.', tags:['Seraphel','L\'Ordre'], pos:'below', delay:0.5 },
-  { id:11, type:'decouverte', era:'ere-actuelle', title:'Empreinte inconnue à la Porte Basse', date:'An 15 — Ère Actuelle', desc:'Un Séparé laisse une empreinte de Flux que personne à l\'Ordre ne reconnaît. Seraphel commence à douter.', tags:['Seraphel','Les Séparés'], pos:'above', delay:0.55 },
-  { id:12, type:'magie', era:'ere-actuelle', title:'Réapparition de la Mère-Sans-Nom', date:'An 15 — Ère Actuelle', desc:'La Tisserande disparue réapparaît à la tête des Séparés. Son identité reste non confirmée mais très suspectée.', tags:['La Mère-Sans-Nom','Les Séparés'], pos:'below', delay:0.6 },
-];
 
 let currentEventId = null;
 function deleteEventById(id) {
