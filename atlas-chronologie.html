@@ -824,13 +824,25 @@ function deleteEre(slug) {
 
 function renderEreTabs() {
   var tabs = document.getElementById('ereTabs');
-  // Keep first tab (Toutes) and add btn
-  tabs.innerHTML = '<button class="ere-tab active" onclick="filterEre(this,\'toutes\')">Toutes les ères</button>';
+  tabs.innerHTML = '';
+  var allBtn = document.createElement('button');
+  allBtn.className = 'ere-tab active';
+  allBtn.textContent = 'Toutes les ères';
+  allBtn.onclick = function(){ filterEre(this, 'toutes'); };
+  tabs.appendChild(allBtn);
   ERES.forEach(function(ere) {
     var wrap = document.createElement('div');
     wrap.className = 'ere-tab-wrap';
-    wrap.innerHTML = '<button class="ere-tab" onclick="filterEre(this,'' + ere.id + '')">' + ere.name + '</button>' +
-      '<button class="ere-del" onclick="deleteEre('' + ere.id + '')" title="Supprimer cette ère">✕</button>';
+    var tab = document.createElement('button');
+    tab.className = 'ere-tab';
+    tab.textContent = ere.name;
+    tab.onclick = function(){ filterEre(this, ere.id); };
+    wrap.appendChild(tab);
+    var del = document.createElement('button');
+    del.className = 'ere-del';
+    del.innerHTML = '✕';
+    del.onclick = function(e){ e.stopPropagation(); deleteEre(ere.id); };
+    wrap.appendChild(del);
     tabs.appendChild(wrap);
   });
   var addBtn = document.createElement('button');
@@ -838,7 +850,6 @@ function renderEreTabs() {
   addBtn.textContent = '+ Ère';
   addBtn.onclick = openAddEreModal;
   tabs.appendChild(addBtn);
-  // Update the ere select in the new event modal
   updateEreSelect();
 }
 
@@ -848,7 +859,7 @@ function updateEreSelect() {
   sel.innerHTML = '';
   if (ERES.length === 0) {
     var opt = document.createElement('option');
-    opt.value = ''; opt.textContent = '— Créez d'abord une ère';
+    opt.value = ''; opt.textContent = "Aucune ere - cliquez + Ere";
     sel.appendChild(opt);
     return;
   }
