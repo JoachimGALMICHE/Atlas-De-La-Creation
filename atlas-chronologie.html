@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Atlas de la Création — Chronologie</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --cream: #f9f6f0; --warm-white: #fdfbf7; --ink: #1a1714; --ink-light: #3d3830;
+  --ink-faint: #8a8278; --gold: #b8975a; --gold-light: #d4b07a;
+  --gold-pale: rgba(184,151,90,0.09); --border: #e4ddd3; --border-strong: #c8bfb3;
+  --ev-guerre: #9e5a5a; --ev-decouverte: #5a7e9e; --ev-mort: #3d3830;
+  --ev-politique: #b8975a; --ev-magie: #7a5a9e; --ev-naissance: #5a8e6a;
+}
+html, body { height: 100%; background: var(--cream); color: var(--ink); font-family: 'Jost', sans-serif; font-weight: 300; overflow: hidden; }
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* HEADER */
+header { height: 60px; flex-shrink: 0; background: rgba(249,246,240,0.96); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 200; }
+.header-left { display: flex; align-items: center; gap: 18px; }
+.back-btn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; text-decoration: none; transition: color .2s; }
+.back-btn:hover { color: var(--gold); }
+.hdiv { width: 1px; height: 18px; background: var(--border); }
+.header-logo { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; letter-spacing: .06em; }
+.header-logo span { font-style: italic; color: var(--gold); margin-right: 8px; font-size: 22px; }
+.btn-new { padding: 7px 16px; background: var(--ink); color: var(--cream); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; transition: background .2s; position: relative; overflow: hidden; }
+.btn-new:hover { background: var(--ink-light); }
+.btn-new::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform .3s; }
+.btn-new:hover::after { transform: scaleX(1); }
+
+/* TOOLBAR */
+.toolbar { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 10px 28px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex-shrink: 0; }
+.tb-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+.filter-btn { padding: 4px 12px; border: 1px solid var(--border); background: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 10.5px; letter-spacing: .08em; color: var(--ink-faint); transition: all .2s; display: flex; align-items: center; gap: 6px; }
+.filter-btn .fdot { width: 7px; height: 7px; border-radius: 50%; }
+.filter-btn.active { background: var(--gold-pale); border-color: var(--gold-light); color: var(--gold); }
+.filter-btn:hover { border-color: var(--border-strong); }
+.tb-sep { width: 1px; height: 20px; background: var(--border); }
+.tb-select { background: var(--cream); border: 1px solid var(--border); padding: 5px 12px; font-family: 'Jost', sans-serif; font-size: 11px; color: var(--ink-faint); outline: none; cursor: pointer; -webkit-appearance: none; letter-spacing: .06em; }
+
+/* ERE SELECTOR */
+.ere-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); background: var(--warm-white); padding: 0 28px; flex-shrink: 0; overflow-x: auto; }
+.ere-tab { padding: 11px 20px; background: none; border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); position: relative; white-space: nowrap; transition: color .2s; }
+.ere-tab.active { color: var(--ink); }
+.ere-tab::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1.5px; background: var(--gold); transform: scaleX(0); transition: transform .3s; }
+.ere-tab.active::after { transform: scaleX(1); }
+
+/* FRISE CONTAINER */
+.frise-outer { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+
+/* FRISE SCROLL */
+.frise-scroll { flex: 1; overflow-x: auto; overflow-y: hidden; padding: 0 28px; display: flex; align-items: flex-start; cursor: grab; user-select: none; }
+.frise-scroll:active { cursor: grabbing; }
+.frise-scroll::-webkit-scrollbar { height: 4px; }
+.frise-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+
+.frise-inner { display: flex; align-items: flex-start; min-width: max-content; padding: 40px 0 20px; position: relative; gap: 0; }
+
+/* THE LINE */
+.frise-line { position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); transform: translateY(60px); z-index: 0; pointer-events: none; }
+
+/* ERA LABEL */
+.era-block { display: flex; flex-direction: column; align-items: flex-start; margin-right: 0; position: relative; }
+.era-label-wrap { padding: 0 32px 0 0; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.era-label { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
+.era-start-line { width: 1px; height: 80px; background: var(--border); margin-top: 8px; }
+
+/* EVENT CARD */
+.ev-col { display: flex; flex-direction: column; align-items: center; position: relative; margin: 0 8px; }
+.ev-col.below { flex-direction: column-reverse; }
+
+.ev-card {
+  width: 200px; background: var(--warm-white); border: 1px solid var(--border);
+  padding: 14px 16px; cursor: pointer; position: relative;
+  transition: border-color .25s, transform .2s, box-shadow .25s;
+  animation: evIn .4s ease backwards;
+  margin-bottom: 12px;
+}
+.ev-col.below .ev-card { margin-bottom: 0; margin-top: 12px; }
+.ev-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,23,20,.06); }
+.ev-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--ev-color, var(--gold)); }
+
+@keyframes evIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.ev-type-badge { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ev-color, var(--gold)); margin-bottom: 6px; }
+.ev-title { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 4px; line-height: 1.3; }
+.ev-date { font-size: 10px; letter-spacing: .06em; color: var(--ink-faint); margin-bottom: 6px; }
+.ev-desc { font-size: 11.5px; font-weight: 300; color: var(--ink-faint); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ev-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.ev-tag { font-size: 9.5px; padding: 2px 6px; border: 1px solid var(--border); color: var(--border-strong); }
+
+/* Connector line card→dot */
+.ev-connector { width: 1px; background: var(--border); flex-shrink: 0; }
+.ev-col:not(.below) .ev-connector { height: 20px; }
+.ev-col.below .ev-connector { height: 20px; }
+
+/* DOT on line */
+.ev-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--ev-color, var(--gold)); border: 2px solid var(--cream); flex-shrink: 0; z-index: 2; transition: transform .2s; }
+.ev-col:hover .ev-dot { transform: scale(1.4); }
+
+/* Year label */
+.ev-year { font-family: 'Cormorant Garamond', serif; font-size: 12px; color: var(--ink-faint); margin-top: 6px; letter-spacing: .04em; }
+.ev-col.below .ev-year { margin-top: 0; margin-bottom: 6px; }
+
+/* ADD BUTTON on frise */
+.add-ev-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 24px; cursor: pointer; opacity: .5; transition: opacity .2s; }
+.add-ev-btn:hover { opacity: 1; }
+.add-ev-circle { width: 32px; height: 32px; border-radius: 50%; border: 1.5px dashed var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--gold); margin-top: 48px; }
+.add-ev-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); white-space: nowrap; }
+
+/* DETAIL PANEL */
+.detail-panel {
+  position: fixed; right: 0; top: 60px; bottom: 0; width: 340px;
+  background: var(--warm-white); border-left: 1px solid var(--border);
+  z-index: 100; transform: translateX(100%); transition: transform .35s ease;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.detail-panel.open { transform: translateX(0); }
+.dp-header { padding: 20px 22px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dp-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--ink-faint); flex-shrink: 0; transition: color .2s; }
+.dp-close:hover { color: var(--ink); }
+.dp-type { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--dp-color, var(--gold)); margin-bottom: 6px; }
+.dp-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--ink); line-height: 1.2; }
+.dp-date { font-size: 11.5px; color: var(--ink-faint); margin-top: 5px; letter-spacing: .04em; }
+.dp-body { flex: 1; overflow-y: auto; padding: 20px 22px; }
+.dp-section { margin-bottom: 20px; }
+.dp-label { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.dp-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.dp-text { font-size: 13.5px; font-weight: 300; color: var(--ink-light); line-height: 1.8; letter-spacing: .02em; outline: none; width: 100%; min-height: 60px; border-bottom: 1px solid transparent; transition: border-color .2s; cursor: text; }
+.dp-text:hover { border-color: var(--gold-light); }
+.dp-text:focus { border-color: var(--gold); }
+.dp-text[data-ph]:empty::before { content: attr(data-ph); color: var(--border-strong); font-style: italic; font-family: 'Cormorant Garamond', serif; pointer-events: none; }
+.dp-tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.dp-tag { font-size: 10px; padding: 3px 9px; border: 1px solid var(--border); color: var(--ink-faint); }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,23,20,.5); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--warm-white); border: 1px solid var(--border); width: 500px; max-height: 90vh; overflow-y: auto; transform: translateY(14px); transition: transform .3s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--ink-faint); }
+.modal-body { padding: 22px 24px; display: grid; gap: 16px; }
+.mf label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 6px; }
+.mf input, .mf select, .mf textarea { width: 100%; padding: 9px 13px; background: var(--cream); border: 1px solid var(--border); font-family: 'Jost', sans-serif; font-size: 13.5px; font-weight: 300; color: var(--ink); outline: none; transition: border-color .2s; -webkit-appearance: none; resize: vertical; }
+.mf input:focus, .mf select:focus, .mf textarea:focus { border-color: var(--gold); }
+.type-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.type-opt { padding: 10px 8px; border: 1px solid var(--border); cursor: pointer; text-align: center; background: none; transition: all .2s; }
+.type-opt.sel { border-color: var(--to-c); background: color-mix(in srgb, var(--to-c) 9%, transparent); }
+.type-opt-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.type-opt-label { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+.type-opt.sel .type-opt-label { color: var(--to-c); }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--border); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+.btn-save { padding: 8px 18px; background: var(--ink); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); transition: background .2s; }
+.btn-save:hover { background: var(--gold); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--ink); color: var(--cream); padding: 10px 20px; font-size: 12px; letter-spacing: .06em; display: flex; align-items: center; gap: 8px; opacity: 0; transition: transform .3s, opacity .3s; z-index: 999; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="header-left">
+    <a class="back-btn" href="atlas-hub.html">← Retour</a>
+    <div class="hdiv"></div>
+    <div class="header-logo"><span>𝒜</span>Chronologie</div>
+  </div>
+  <button class="btn-new" onclick="openModal()">+ Nouvel événement</button>
+</header>
+
+<!-- ÈRES -->
+<div class="ere-tabs" id="ereTabs">
+  <button class="ere-tab active" onclick="filterEre(this,'toutes')">Toutes les ères</button>
+  <button class="ere-tab" onclick="filterEre(this,'ere-ancienne')">Ère Ancienne</button>
+  <button class="ere-tab" onclick="filterEre(this,'ere-fondation')">Ère de la Fondation</button>
+  <button class="ere-tab" onclick="filterEre(this,'ere-cendres')">Ère des Cendres</button>
+  <button class="ere-tab" onclick="filterEre(this,'ere-actuelle')">Ère Actuelle</button>
+</div>
+
+<!-- FILTERS -->
+<div class="toolbar">
+  <span class="tb-label">Type</span>
+  <button class="filter-btn active" onclick="filterType(this,'tous')"><span class="fdot" style="background:var(--ink-faint)"></span>Tous</button>
+  <button class="filter-btn" onclick="filterType(this,'guerre')" style="--fc:var(--ev-guerre)"><span class="fdot" style="background:var(--ev-guerre)"></span>Guerre</button>
+  <button class="filter-btn" onclick="filterType(this,'decouverte')" style="--fc:var(--ev-decouverte)"><span class="fdot" style="background:var(--ev-decouverte)"></span>Découverte</button>
+  <button class="filter-btn" onclick="filterType(this,'magie')" style="--fc:var(--ev-magie)"><span class="fdot" style="background:var(--ev-magie)"></span>Magie</button>
+  <button class="filter-btn" onclick="filterType(this,'politique')" style="--fc:var(--ev-politique)"><span class="fdot" style="background:var(--ev-politique)"></span>Politique</button>
+  <button class="filter-btn" onclick="filterType(this,'mort')" style="--fc:var(--ev-mort)"><span class="fdot" style="background:var(--ev-mort)"></span>Mort</button>
+  <button class="filter-btn" onclick="filterType(this,'naissance')" style="--fc:var(--ev-naissance)"><span class="fdot" style="background:var(--ev-naissance)"></span>Naissance</button>
+  <div class="tb-sep"></div>
+  <span class="tb-label">Lié à</span>
+  <select class="tb-select" onchange="filterLinked(this.value)">
+    <option value="tous">— Tous</option>
+    <option value="seraphel">Seraphel</option>
+    <option value="mere">La Mère-Sans-Nom</option>
+    <option value="ordre">L'Ordre des Liants</option>
+    <option value="separes">Les Séparés</option>
+  </select>
+</div>
+
+<!-- FRISE -->
+<div class="frise-outer">
+  <div class="frise-scroll" id="friseScroll">
+    <div class="frise-inner" id="friseInner">
+      <div class="frise-line"></div>
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <div class="dp-header">
+    <div>
+      <div class="dp-type" id="dpType">Guerre</div>
+      <div class="dp-title" id="dpTitle">Titre</div>
+      <div class="dp-date" id="dpDate">An 0</div>
+    </div>
+    <button class="dp-close" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="dp-body">
+    <div class="dp-section">
+      <div class="dp-label">Description</div>
+      <div class="dp-text" id="dpDesc" contenteditable="true" data-ph="Description de l'événement…"></div>
+    </div>
+    <div class="dp-section">
+      <div class="dp-label">Conséquences</div>
+      <div class="dp-text" id="dpConsequences" contenteditable="true" data-ph="Ce que cet événement a changé…"></div>
+    </div>
+    <div class="dp-section">
+      <div class="dp-label">Personnages & factions liés</div>
+      <div class="dp-tags-wrap" id="dpTags"></div>
+    </div>
+    <div style="padding:12px 22px;border-top:1px solid var(--border)">
+    <button onclick="deleteCurrentEvent()" style="width:100%;padding:9px;background:none;border:1px solid #e4ddd3;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#9e5a5a;transition:all .2s;" onmouseover="this.style.borderColor='#9e5a5a'" onmouseout="this.style.borderColor='#e4ddd3'">✕ Supprimer cet événement</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="evModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nouvel événement</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf">
+        <label>Type d'événement</label>
+        <div class="type-grid">
+          <button class="type-opt sel" style="--to-c:var(--ev-guerre)" data-type="guerre" onclick="selEvType(this)"><span class="type-opt-icon">⚔</span><span class="type-opt-label">Guerre</span></button>
+          <button class="type-opt" style="--to-c:var(--ev-decouverte)" data-type="decouverte" onclick="selEvType(this)"><span class="type-opt-icon">🔭</span><span class="type-opt-label">Découverte</span></button>
+          <button class="type-opt" style="--to-c:var(--ev-magie)" data-type="magie" onclick="selEvType(this)"><span class="type-opt-icon">✦</span><span class="type-opt-label">Magie</span></button>
+          <button class="type-opt" style="--to-c:var(--ev-politique)" data-type="politique" onclick="selEvType(this)"><span class="type-opt-icon">👑</span><span class="type-opt-label">Politique</span></button>
+          <button class="type-opt" style="--to-c:var(--ev-mort)" data-type="mort" onclick="selEvType(this)"><span class="type-opt-icon">💀</span><span class="type-opt-label">Mort</span></button>
+          <button class="type-opt" style="--to-c:var(--ev-naissance)" data-type="naissance" onclick="selEvType(this)"><span class="type-opt-icon">🌱</span><span class="type-opt-label">Naissance</span></button>
+        </div>
+      </div>
+      <div class="mf"><label>Titre</label><input type="text" id="ev-title" placeholder="Nom de l'événement…"></div>
+      <div class="mf"><label>Date / Année</label><input type="text" id="ev-date" placeholder="Ex : An 204, Ère des Cendres — An 12…"></div>
+      <div class="mf"><label>Ère</label>
+        <select id="ev-ere">
+          <option value="ere-ancienne">Ère Ancienne</option>
+          <option value="ere-fondation">Ère de la Fondation</option>
+          <option value="ere-cendres">Ère des Cendres</option>
+          <option value="ere-actuelle">Ère Actuelle</option>
+        </select>
+      </div>
+      <div class="mf"><label>Description courte</label><textarea id="ev-desc" rows="3" placeholder="Résumé de l'événement…"></textarea></div>
+      <div class="mf"><label>Personnages / Factions liés (virgules)</label><input type="text" id="ev-tags" placeholder="Seraphel, L'Ordre, Les Séparés…"></div>
+      <div class="mf"><label>Position sur la frise</label>
+        <select id="ev-pos">
+          <option value="above">Au-dessus de la ligne</option>
+          <option value="below">En dessous de la ligne</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" onclick="createEvent()">Ajouter à la frise</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">Événement ajouté</span></div>
+
+<script>
+const EV_COLORS = { guerre:'#9e5a5a', decouverte:'#5a7e9e', mort:'#3d3830', politique:'#b8975a', magie:'#7a5a9e', naissance:'#5a8e6a' };
+const EV_LABELS = { guerre:'Guerre', decouverte:'Découverte', mort:'Mort', politique:'Politique', magie:'Magie', naissance:'Naissance' };
+
+const EVENTS = [
+  { id:1, type:'magie', era:'ere-ancienne', title:'Mort des Dieux Anciens', date:'An 0 — Ère Ancienne', desc:'Les dieux tissent leur essence dans la terre avant de périr. Le Flux est né de leurs corps dissolus.', tags:['L\'Ordre','Les Séparés'], pos:'above', delay:0.05 },
+  { id:2, type:'decouverte', era:'ere-ancienne', title:'Première Liaison', date:'An 412 — Ère Ancienne', desc:'Première manifestation documentée d\'un humain canalisant le Flux. Une enfant de sept ans lie instinctivement son âme à celle d\'un arbre mourant.', tags:['Seraphel'], pos:'below', delay:0.1 },
+  { id:3, type:'politique', era:'ere-fondation', title:'Fondation de l\'Académie', date:'An 1 — Ère de la Fondation', desc:'L\'Académie des Liants est fondée à Ael\'thar. Pour la première fois, la Liaison est codifiée, enseignée et contrôlée par une institution.', tags:['L\'Ordre'], pos:'above', delay:0.15 },
+  { id:4, type:'guerre', era:'ere-fondation', title:'Guerre des Flux Libres', date:'An 89 — Ère de la Fondation', desc:'Première grande rébellion contre l\'Académie. Des Liants refusant la codification se battent pendant 11 ans. Précurseurs des Séparés.', tags:['Les Séparés','L\'Ordre'], pos:'below', delay:0.2 },
+  { id:5, type:'politique', era:'ere-fondation', title:'Création de l\'Ordre Militaire', date:'An 134 — Ère de la Fondation', desc:'L\'Ordre des Liants militaires est fondé, distinct de l\'Académie. La Liaison devient une arme d\'État.', tags:['L\'Ordre'], pos:'above', delay:0.25 },
+  { id:6, type:'mort', era:'ere-cendres', title:'Massacre de la Tour Basse', date:'An 3 — Ère des Cendres', desc:'L\'Ordre détruit un foyer de Liants libres. 47 morts. Cet événement radicalise définitivement les Séparés.', tags:['Les Séparés','L\'Ordre'], pos:'below', delay:0.3 },
+  { id:7, type:'naissance', era:'ere-cendres', title:'Naissance de Seraphel Vorn', date:'An 22 — Ère des Cendres', desc:'Seraphel naît dans les faubourgs de la Citadelle. Son père est un forgeron sans Flux.', tags:['Seraphel'], pos:'above', delay:0.35 },
+  { id:8, type:'magie', era:'ere-cendres', title:'Éveil de Seraphel', date:'An 31 — Ère des Cendres', desc:'À 9 ans, Seraphel manifeste spontanément le Flux pour sauver son père mourant. Il est détecté et intégré à l\'Académie.', tags:['Seraphel','L\'Ordre'], pos:'below', delay:0.4 },
+  { id:9, type:'mort', era:'ere-cendres', title:'Disparition de la Tisserande', date:'An 47 — Ère des Cendres', desc:'La plus puissante Tisserande connue disparaît sans laisser de trace. L\'Ordre déclare sa mort. Certains doutent encore.', tags:['La Mère-Sans-Nom','L\'Ordre'], pos:'above', delay:0.45 },
+  { id:10, type:'politique', era:'ere-actuelle', title:'Seraphel devient Grand Liant', date:'An 8 — Ère Actuelle', desc:'À 27 ans, Seraphel est nommé Grand Liant — le plus jeune de l\'histoire de l\'Ordre.', tags:['Seraphel','L\'Ordre'], pos:'below', delay:0.5 },
+  { id:11, type:'decouverte', era:'ere-actuelle', title:'Empreinte inconnue à la Porte Basse', date:'An 15 — Ère Actuelle', desc:'Un Séparé laisse une empreinte de Flux que personne à l\'Ordre ne reconnaît. Seraphel commence à douter.', tags:['Seraphel','Les Séparés'], pos:'above', delay:0.55 },
+  { id:12, type:'magie', era:'ere-actuelle', title:'Réapparition de la Mère-Sans-Nom', date:'An 15 — Ère Actuelle', desc:'La Tisserande disparue réapparaît à la tête des Séparés. Son identité reste non confirmée mais très suspectée.', tags:['La Mère-Sans-Nom','Les Séparés'], pos:'below', delay:0.6 },
+];
+
+let currentEventId = null;
+function deleteCurrentEvent() {
+  if (!currentEventId) return;
+  askDelete('Supprimer cet événement ?', 'Cette action est irréversible.', function() {
+    const idx = EVENTS.findIndex(e => e.id === currentEventId);
+    if (idx > -1) EVENTS.splice(idx, 1);
+    closeDetail();
+    renderFrise();
+    showToast('Événement supprimé');
+    currentEventId = null;
+  });
+}
+let activeEre = 'toutes', activeType = 'tous', activeLinked = 'tous';
+
+function renderFrise() {
+  const inner = document.getElementById('friseInner');
+  inner.innerHTML = '<div class="frise-line"></div>';
+
+  let filtered = EVENTS.filter(e => {
+    const ereOk = activeEre === 'toutes' || e.era === activeEre;
+    const typeOk = activeType === 'tous' || e.type === activeType;
+    const linkedOk = activeLinked === 'tous' || e.tags.some(t => t.toLowerCase().includes(activeLinked));
+    return ereOk && typeOk && linkedOk;
+  });
+
+  let lastEra = null;
+  filtered.forEach((ev, i) => {
+    if (ev.era !== lastEra) {
+      const eraNames = { 'ere-ancienne':'Ère Ancienne', 'ere-fondation':'Ère de la Fondation', 'ere-cendres':'Ère des Cendres', 'ere-actuelle':'Ère Actuelle' };
+      const eraDiv = document.createElement('div');
+      eraDiv.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;padding:0 8px 0 16px;margin-top:48px;flex-shrink:0';
+      eraDiv.innerHTML = `<div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap;margin-bottom:4px">${eraNames[ev.era]||ev.era}</div><div style="width:1px;height:70px;background:var(--border)"></div>`;
+      inner.appendChild(eraDiv);
+      lastEra = ev.era;
+    }
+
+    const col = document.createElement('div');
+    col.className = `ev-col${ev.pos === 'below' ? ' below' : ''}`;
+    col.style.animationDelay = ev.delay + 's';
+    const color = EV_COLORS[ev.type] || 'var(--gold)';
+    const tagsHtml = ev.tags.map(t => `<span class="ev-tag">${t}</span>`).join('');
+
+    col.innerHTML = `
+      <div class="ev-card" style="--ev-color:${color};animation-delay:${ev.delay}s" onclick="openDetail(${ev.id})">
+        <div class="ev-type-badge" style="color:${color}">${EV_LABELS[ev.type]||ev.type}</div>
+        <div class="ev-title">${ev.title}</div>
+        <div class="ev-date">${ev.date}</div>
+        <div class="ev-desc">${ev.desc}</div>
+        <div class="ev-tags">${tagsHtml}</div>
+      </div>
+      <div class="ev-connector"></div>
+      <div class="ev-dot" style="background:${color};margin-top:${ev.pos==='below'?'':''}0"></div>
+      <div class="ev-year" style="color:${color};font-size:10px">${ev.date.split('—')[0].trim()}</div>`;
+
+    inner.appendChild(col);
+  });
+
+  // Add button
+  const addBtn = document.createElement('div');
+  addBtn.className = 'add-ev-btn';
+  addBtn.innerHTML = `<div class="add-ev-circle">+</div><div class="add-ev-label">Ajouter</div>`;
+  addBtn.onclick = openModal;
+  inner.appendChild(addBtn);
+}
+
+function openDetail(id) {
+  const ev = EVENTS.find(e => e.id === id); if (!ev) return;
+  currentEventId = id;
+  const color = EV_COLORS[ev.type] || 'var(--gold)';
+  document.getElementById('dpType').textContent = EV_LABELS[ev.type] || ev.type;
+  document.getElementById('dpType').style.color = color;
+  document.getElementById('dpTitle').textContent = ev.title;
+  document.getElementById('dpDate').textContent = ev.date;
+  document.getElementById('dpDesc').textContent = ev.desc;
+  document.getElementById('dpConsequences').textContent = '';
+  const tagsWrap = document.getElementById('dpTags');
+  tagsWrap.innerHTML = ev.tags.map(t => `<span class="dp-tag">${t}</span>`).join('');
+  document.getElementById('detailPanel').classList.add('open');
+}
+function closeDetail() { document.getElementById('detailPanel').classList.remove('open'); currentEventId = null; }
+
+function filterEre(btn, ere) {
+  document.querySelectorAll('.ere-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); activeEre = ere; renderFrise();
+}
+function filterType(btn, type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); activeType = type; renderFrise();
+}
+function filterLinked(val) { activeLinked = val; renderFrise(); }
+
+// MODAL
+let selEvTypeVal = 'guerre';
+function openModal() { document.getElementById('evModal').classList.add('open'); }
+function closeModal() { document.getElementById('evModal').classList.remove('open'); }
+document.getElementById('evModal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+function selEvType(btn) {
+  document.querySelectorAll('.type-opt').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel'); selEvTypeVal = btn.dataset.type;
+}
+function createEvent() {
+  const title = document.getElementById('ev-title').value.trim(); if(!title) return;
+  const date = document.getElementById('ev-date').value.trim() || 'Date inconnue';
+  const era = document.getElementById('ev-ere').value;
+  const desc = document.getElementById('ev-desc').value.trim() || '';
+  const tags = document.getElementById('ev-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const pos = document.getElementById('ev-pos').value === 'below' ? 'below' : 'above';
+  const newId = Math.max(...EVENTS.map(e=>e.id)) + 1;
+  EVENTS.push({ id: newId, type: selEvTypeVal, era, title, date, desc, tags, pos, delay: 0.05 });
+  closeModal();
+  renderFrise();
+  showToast('Événement ajouté !');
+  ['ev-title','ev-date','ev-desc','ev-tags'].forEach(id=>document.getElementById(id).value='');
+}
+
+// Drag to scroll
+const scroll = document.getElementById('friseScroll');
+let isDown=false, startX, scrollLeft;
+scroll.addEventListener('mousedown', e=>{ isDown=true; startX=e.pageX-scroll.offsetLeft; scrollLeft=scroll.scrollLeft; });
+scroll.addEventListener('mouseleave', ()=>isDown=false);
+scroll.addEventListener('mouseup', ()=>isDown=false);
+scroll.addEventListener('mousemove', e=>{ if(!isDown) return; e.preventDefault(); const x=e.pageX-scroll.offsetLeft; scroll.scrollLeft=scrollLeft-(x-startX)*1.2; });
+
+// TOAST
+let toastTimer;
+function showToast(msg) {
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast'); t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+renderFrise();
+</script>
+
+<!-- DELETE CONFIRM OVERLAY -->
+<div id="deleteOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fdfbf7;border:1px solid #e4ddd3;padding:32px 36px;max-width:380px;width:90%;text-align:center;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#1a1714;margin-bottom:10px" id="deleteOverlayTitle">Supprimer cet élément ?</div>
+    <div style="font-size:13px;font-weight:300;color:#8a8278;line-height:1.7;margin-bottom:24px" id="deleteOverlayMsg">Cette action est irréversible.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="cancelDelete()" style="padding:9px 20px;background:none;border:1px solid #e4ddd3;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8a8278;transition:border-color .2s;">Annuler</button>
+      <button onclick="confirmDelete()" style="padding:9px 20px;background:#9e5a5a;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fdfbf7;transition:background .2s;">Supprimer</button>
+    </div>
+  </div>
+</div>
+<script>
+// ── GLOBAL DELETE SYSTEM
+let _deleteCallback = null;
+function askDelete(title, msg, callback) {
+  document.getElementById('deleteOverlayTitle').textContent = title || 'Supprimer ?';
+  document.getElementById('deleteOverlayMsg').textContent = msg || 'Cette action est irréversible.';
+  _deleteCallback = callback;
+  const ov = document.getElementById('deleteOverlay');
+  ov.style.display = 'flex';
+}
+function confirmDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  if (_deleteCallback) { _deleteCallback(); _deleteCallback = null; }
+}
+function cancelDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  _deleteCallback = null;
+}
+</script>
+
+</body>
+</html>

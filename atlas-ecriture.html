@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Atlas de la Création — Écriture</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #f9f6f0;
+  --warm-white: #fdfbf7;
+  --ink: #1a1714;
+  --ink-light: #3d3830;
+  --ink-faint: #8a8278;
+  --gold: #b8975a;
+  --gold-light: #d4b07a;
+  --gold-pale: rgba(184,151,90,0.09);
+  --border: #e4ddd3;
+  --border-strong: #c8bfb3;
+
+  --type-roman:    #5a7e9e;
+  --type-nouvelle: #7a5a9e;
+  --type-fragment: #9e7a5a;
+  --type-poeme:    #5a8e6a;
+  --type-dialogue: #9e5a7a;
+}
+
+html, body { height: 100%; background: var(--cream); color: var(--ink); font-family: 'Jost', sans-serif; font-weight: 300; overflow: hidden; }
+.app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ══ HEADER ══ */
+header {
+  height: 60px; flex-shrink: 0;
+  background: rgba(249,246,240,0.96); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; z-index: 300;
+}
+.header-left { display: flex; align-items: center; gap: 18px; }
+.back-btn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; text-decoration: none; transition: color .2s; }
+.back-btn:hover { color: var(--gold); }
+.hdiv { width: 1px; height: 18px; background: var(--border); }
+.header-logo { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; letter-spacing: .06em; }
+.header-logo span { font-style: italic; color: var(--gold); margin-right: 8px; font-size: 22px; }
+.header-center { display: flex; align-items: center; gap: 16px; }
+.doc-title-display { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 400; font-style: italic; color: var(--ink-faint); letter-spacing: .02em; }
+.doc-title-display strong { font-style: normal; font-weight: 500; color: var(--ink); }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.hbtn { padding: 6px 14px; background: none; border: 1px solid var(--border); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); transition: all .2s; }
+.hbtn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+.hbtn.active { background: var(--gold-pale); border-color: var(--gold-light); color: var(--gold); }
+.hbtn.primary { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+.hbtn.primary:hover { background: var(--gold); border-color: var(--gold); }
+
+/* WORD COUNT pill */
+.wc-pill { display: flex; align-items: center; gap: 8px; padding: 5px 14px; border: 1px solid var(--border); background: var(--warm-white); }
+.wc-num { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; color: var(--ink); line-height: 1; }
+.wc-label { font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+.wc-sep { width: 1px; height: 16px; background: var(--border); }
+.wc-chars { font-size: 11px; color: var(--ink-faint); }
+
+/* ══ BODY ══ */
+.body { display: flex; flex: 1; overflow: hidden; }
+
+/* ══ SIDEBAR ══ */
+.sidebar {
+  width: 260px; flex-shrink: 0;
+  background: var(--warm-white); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: width .3s ease, opacity .3s ease;
+}
+.sidebar.hidden { width: 0; opacity: 0; pointer-events: none; }
+
+.sb-top { padding: 16px 16px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.sb-title { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); }
+.sb-add { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--gold); transition: transform .2s; }
+.sb-add:hover { transform: scale(1.2); }
+
+.sb-scroll { flex: 1; overflow-y: auto; padding: 8px 0; }
+.sb-scroll::-webkit-scrollbar { width: 3px; }
+.sb-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* Project group */
+.proj-group { margin-bottom: 4px; }
+.proj-header { display: flex; align-items: center; gap: 8px; padding: 9px 14px; cursor: pointer; user-select: none; transition: background .2s; }
+.proj-header:hover { background: var(--cream); }
+.proj-arrow { font-size: 10px; color: var(--ink-faint); transition: transform .25s; flex-shrink: 0; }
+.proj-group.open .proj-arrow { transform: rotate(90deg); }
+.proj-type-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.proj-name { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 400; color: var(--ink); flex: 1; }
+.proj-count { font-size: 10px; color: var(--ink-faint); }
+
+.proj-chapters { display: none; padding-left: 0; }
+.proj-group.open .proj-chapters { display: block; }
+
+.chap-item { display: flex; align-items: center; gap: 8px; padding: 7px 14px 7px 32px; cursor: pointer; border-left: 2px solid transparent; transition: background .2s, border-color .2s; }
+.chap-item:hover { background: var(--cream); }
+.chap-item.active { background: var(--gold-pale); border-left-color: var(--gold); }
+.chap-num { font-size: 10px; letter-spacing: .08em; color: var(--ink-faint); flex-shrink: 0; width: 20px; }
+.chap-name { font-size: 13px; font-weight: 300; color: var(--ink-light); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chap-item.active .chap-name { color: var(--ink); }
+.chap-wc { font-size: 10px; color: var(--border-strong); }
+
+.add-chap-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px 7px 32px; cursor: pointer; font-size: 11px; letter-spacing: .08em; color: var(--border-strong); transition: color .2s; background: none; border: none; width: 100%; text-align: left; }
+.add-chap-btn:hover { color: var(--gold); }
+
+.sb-footer { padding: 12px 14px; border-top: 1px solid var(--border); }
+.add-proj-btn { width: 100%; padding: 8px; background: none; border: 1px dashed var(--border-strong); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); transition: border-color .2s, color .2s; }
+.add-proj-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ══ EDITOR AREA ══ */
+.editor-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--cream); }
+
+/* Format bar */
+.fmt-bar {
+  height: 44px; flex-shrink: 0;
+  background: var(--warm-white); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 20px; gap: 2px; overflow-x: auto;
+  transition: opacity .3s, height .3s;
+}
+.fmt-bar.hidden { height: 0; opacity: 0; overflow: hidden; pointer-events: none; }
+.fmt-btn { padding: 5px 10px; background: none; border: 1px solid transparent; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 12px; color: var(--ink-faint); transition: all .2s; white-space: nowrap; }
+.fmt-btn:hover { border-color: var(--border); color: var(--ink); background: var(--cream); }
+.fmt-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+
+/* Writing canvas */
+.writing-canvas { flex: 1; overflow-y: auto; display: flex; justify-content: center; padding: 48px 24px 80px; transition: background .4s; }
+.writing-canvas::-webkit-scrollbar { width: 5px; }
+.writing-canvas::-webkit-scrollbar-thumb { background: var(--border); }
+.writing-canvas.focus-mode { background: #f2ede5; }
+
+.page {
+  width: 100%; max-width: 680px;
+  animation: pageIn .4s ease;
+}
+@keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Chapter meta */
+.chapter-meta { margin-bottom: 40px; text-align: center; }
+.chapter-ornament { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 24px; }
+.orn-line { flex: 1; max-width: 80px; height: 1px; background: linear-gradient(to right, transparent, var(--gold-light)); }
+.orn-line.r { background: linear-gradient(to left, transparent, var(--gold-light)); }
+.orn-diamond { width: 7px; height: 7px; background: var(--gold); transform: rotate(45deg); }
+
+.chapter-label { font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+.chapter-title-input {
+  font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400;
+  color: var(--ink); text-align: center; background: none; border: none;
+  outline: none; width: 100%; border-bottom: 1px solid transparent;
+  transition: border-color .2s; padding-bottom: 4px; letter-spacing: .01em;
+}
+.chapter-title-input:focus { border-color: var(--gold-light); }
+.chapter-title-input::placeholder { color: var(--border-strong); font-style: italic; }
+.chapter-subtitle-input {
+  font-family: 'Cormorant Garamond', serif; font-size: 15px; font-style: italic;
+  color: var(--ink-faint); text-align: center; background: none; border: none;
+  outline: none; width: 100%; margin-top: 8px;
+  border-bottom: 1px solid transparent; transition: border-color .2s;
+}
+.chapter-subtitle-input:focus { border-color: var(--gold-light); }
+.chapter-subtitle-input::placeholder { color: var(--border-strong); }
+.chapter-divider { width: 40px; height: 1px; background: var(--border); margin: 20px auto 0; }
+
+/* The actual writing area */
+.prose-editor {
+  font-family: 'EB Garamond', 'Cormorant Garamond', Georgia, serif;
+  font-size: 17.5px; font-weight: 400; line-height: 1.95;
+  color: var(--ink); letter-spacing: .01em;
+  min-height: 500px; outline: none;
+  caret-color: var(--gold);
+}
+.prose-editor:empty::before {
+  content: attr(data-ph);
+  color: var(--border-strong); font-style: italic;
+  pointer-events: none;
+}
+.prose-editor p { margin-bottom: 0; text-indent: 1.8em; }
+.prose-editor p:first-child { text-indent: 0; }
+.prose-editor h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--ink); margin: 32px 0 12px; text-indent: 0; letter-spacing: .02em; }
+.prose-editor h3 { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 400; font-style: italic; color: var(--ink-light); margin: 24px 0 10px; text-indent: 0; }
+.prose-editor blockquote { border-left: 2px solid var(--gold-light); padding-left: 20px; margin: 24px 0; font-style: italic; color: var(--ink-light); font-size: 16px; }
+.prose-editor hr { border: none; text-align: center; margin: 32px 0; color: var(--gold); font-size: 14px; letter-spacing: .4em; }
+.prose-editor hr::after { content: '✦ ✦ ✦'; }
+.prose-editor b, .prose-editor strong { font-weight: 600; }
+.prose-editor em, .prose-editor i { font-style: italic; }
+.prose-editor ul { padding-left: 1.5em; margin: 8px 0; }
+.prose-editor ul li { margin: 4px 0; text-indent: 0; }
+
+/* Status bar */
+.status-bar {
+  height: 32px; flex-shrink: 0;
+  background: var(--warm-white); border-top: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 20px; gap: 20px;
+}
+.sb-item { font-size: 10.5px; letter-spacing: .06em; color: var(--border-strong); display: flex; align-items: center; gap: 6px; }
+.sb-item strong { color: var(--ink-faint); }
+.sb-dot { width: 4px; height: 4px; background: var(--gold); border-radius: 50%; }
+.sb-saved { display: flex; align-items: center; gap: 5px; margin-left: auto; font-size: 10.5px; color: var(--border-strong); }
+.sb-saved.saving { color: var(--gold); }
+
+/* ══ FOCUS MODE ══ */
+body.focus .sidebar { width: 0; opacity: 0; pointer-events: none; }
+body.focus .fmt-bar { height: 0; opacity: 0; overflow: hidden; pointer-events: none; }
+body.focus .writing-canvas { background: #f2ede5; }
+body.focus .prose-editor { font-size: 19px; line-height: 2.1; max-width: 600px; margin: 0 auto; }
+body.focus header .header-left, body.focus header .header-right { opacity: .3; transition: opacity .3s; }
+body.focus header:hover .header-left, body.focus header:hover .header-right { opacity: 1; }
+
+/* ══ MODAL ══ */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,23,20,.5); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--warm-white); border: 1px solid var(--border); width: 460px; transform: translateY(14px); transition: transform .3s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--ink-faint); }
+.modal-body { padding: 22px 24px; display: grid; gap: 16px; }
+.mf label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 6px; }
+.mf input, .mf select, .mf textarea { width: 100%; padding: 9px 13px; background: var(--cream); border: 1px solid var(--border); font-family: 'Jost', sans-serif; font-size: 13.5px; font-weight: 300; color: var(--ink); outline: none; transition: border-color .2s; -webkit-appearance: none; }
+.mf input:focus, .mf select:focus { border-color: var(--gold); }
+/* Type options */
+.type-options { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; }
+.type-opt { padding: 10px 4px; border: 1px solid var(--border); cursor: pointer; text-align: center; transition: all .2s; background: none; }
+.type-opt.sel { border-color: var(--to-color); background: color-mix(in srgb, var(--to-color) 9%, transparent); }
+.type-opt-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+.type-opt-label { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+.type-opt.sel .type-opt-label { color: var(--to-color); }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--border); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+.btn-save { padding: 8px 18px; background: var(--ink); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); transition: background .2s; }
+.btn-save:hover { background: var(--gold); }
+
+/* TOAST */
+.toast { position: fixed; bottom: 28px; right: 28px; background: var(--ink); color: var(--cream); padding: 10px 18px; font-size: 12px; letter-spacing: .06em; display: flex; align-items: center; gap: 8px; transform: translateY(60px); opacity: 0; transition: transform .3s, opacity .3s; z-index: 999; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .wc-pill { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <a class="back-btn" href="atlas-hub.html">← Retour</a>
+    <div class="hdiv"></div>
+    <div class="header-logo"><span>𝒜</span>Écriture</div>
+  </div>
+
+  <div class="header-center">
+    <div class="doc-title-display" id="docBreadcrumb">
+      <strong>Le Royaume d'Ael'thar</strong> &nbsp;/&nbsp; Chapitre I — L'Éveil
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="wc-pill">
+      <div>
+        <div class="wc-num" id="wordCount">0</div>
+        <div class="wc-label">mots</div>
+      </div>
+      <div class="wc-sep"></div>
+      <div class="wc-chars" id="charCount">0 car.</div>
+    </div>
+    <button class="hbtn" id="focusBtn" onclick="toggleFocus()">⊙ Focus</button>
+    <button class="hbtn primary" onclick="openNewProjectModal()">+ Projet</button>
+  </div>
+</header>
+
+<div class="body">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <span class="sb-title">Projets</span>
+    <button class="sb-add" onclick="openNewProjectModal()" title="Nouveau projet">+</button>
+  </div>
+
+  <div class="sb-scroll" id="projectList">
+
+    <!-- Roman -->
+    <div class="proj-group open" data-type="roman">
+      <div class="proj-header" onclick="toggleGroup(this)">
+        <span class="proj-arrow">▶</span>
+        <span class="proj-type-dot" style="background:var(--type-roman)"></span>
+        <span class="proj-name">Le Royaume d'Ael'thar</span>
+        <span class="proj-count">4</span>
+      </div>
+      <div class="proj-chapters">
+        <div class="chap-item active" onclick="loadChapter(this, 'roman', 0)" style="position:relative">
+          <span class="chap-num">I</span>
+          <span class="chap-name">L'Éveil</span>
+          <span class="chap-wc">842</span>
+        </div>
+        <div class="chap-item" onclick="loadChapter(this, 'roman', 1)">
+          <span class="chap-num">II</span>
+          <span class="chap-name">La Citadelle</span>
+          <span class="chap-wc">1204</span>
+        </div>
+        <div class="chap-item" onclick="loadChapter(this, 'roman', 2)">
+          <span class="chap-num">III</span>
+          <span class="chap-name">Le Délitement</span>
+          <span class="chap-wc">673</span>
+        </div>
+        <div class="chap-item" onclick="loadChapter(this, 'roman', 3)">
+          <span class="chap-num">IV</span>
+          <span class="chap-name">La Mère-Sans-Nom</span>
+          <span class="chap-wc">0</span>
+        </div>
+        <button class="add-chap-btn" onclick="addChapter(this)">+ Ajouter un chapitre</button>
+      </div>
+    </div>
+
+    <!-- Nouvelle -->
+    <div class="proj-group" data-type="nouvelle">
+      <div class="proj-header" onclick="toggleGroup(this)">
+        <span class="proj-arrow">▶</span>
+        <span class="proj-type-dot" style="background:var(--type-nouvelle)"></span>
+        <span class="proj-name">La Dernière Liaison</span>
+        <span class="proj-count">1</span>
+      </div>
+      <div class="proj-chapters">
+        <div class="chap-item" onclick="loadChapter(this,'nouvelle',0)">
+          <span class="chap-num">—</span>
+          <span class="chap-name">Texte complet</span>
+          <span class="chap-wc">2100</span>
+        </div>
+        <button class="add-chap-btn" onclick="addChapter(this)">+ Ajouter une section</button>
+      </div>
+    </div>
+
+    <!-- Fragments -->
+    <div class="proj-group" data-type="fragment">
+      <div class="proj-header" onclick="toggleGroup(this)">
+        <span class="proj-arrow">▶</span>
+        <span class="proj-type-dot" style="background:var(--type-fragment)"></span>
+        <span class="proj-name">Fragments & Scènes</span>
+        <span class="proj-count">3</span>
+      </div>
+      <div class="proj-chapters">
+        <div class="chap-item" onclick="loadChapter(this,'fragment',0)">
+          <span class="chap-num">—</span>
+          <span class="chap-name">Scène du Miroir</span>
+          <span class="chap-wc">310</span>
+        </div>
+        <div class="chap-item" onclick="loadChapter(this,'fragment',1)">
+          <span class="chap-num">—</span>
+          <span class="chap-name">Dialogue : Seraphel / Kael</span>
+          <span class="chap-wc">188</span>
+        </div>
+        <div class="chap-item" onclick="loadChapter(this,'fragment',2)">
+          <span class="chap-num">—</span>
+          <span class="chap-name">Monologue de la Mère</span>
+          <span class="chap-wc">95</span>
+        </div>
+        <button class="add-chap-btn" onclick="addChapter(this)">+ Nouveau fragment</button>
+      </div>
+    </div>
+
+    <!-- Poèmes -->
+    <div class="proj-group" data-type="poeme">
+      <div class="proj-header" onclick="toggleGroup(this)">
+        <span class="proj-arrow">▶</span>
+        <span class="proj-type-dot" style="background:var(--type-poeme)"></span>
+        <span class="proj-name">Poèmes du Flux</span>
+        <span class="proj-count">2</span>
+      </div>
+      <div class="proj-chapters">
+        <div class="chap-item" onclick="loadChapter(this,'poeme',0)">
+          <span class="chap-num">—</span>
+          <span class="chap-name">Cantique des Liants</span>
+          <span class="chap-wc">64</span>
+        </div>
+        <div class="chap-item" onclick="loadChapter(this,'poeme',1)">
+          <span class="chap-num">—</span>
+          <span class="chap-name">Élégie du Délitement</span>
+          <span class="chap-wc">48</span>
+        </div>
+        <button class="add-chap-btn" onclick="addChapter(this)">+ Nouveau poème</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sb-footer">
+    <button class="add-proj-btn" onclick="openNewProjectModal()">+ Nouveau projet</button>
+  </div>
+</aside>
+
+<!-- EDITOR AREA -->
+<div class="editor-area">
+
+  <!-- FORMAT BAR -->
+  <div class="fmt-bar" id="fmtBar">
+    <button class="fmt-btn" onclick="fmt('bold')"><b>G</b></button>
+    <button class="fmt-btn" onclick="fmt('italic')"><i>I</i></button>
+    <button class="fmt-btn" onclick="fmt('underline')"><u>S</u></button>
+    <div class="fmt-sep"></div>
+    <button class="fmt-btn" onclick="fmtBlock('h2')">Titre</button>
+    <button class="fmt-btn" onclick="fmtBlock('h3')">Sous-titre</button>
+    <div class="fmt-sep"></div>
+    <button class="fmt-btn" onclick="fmtBlock('blockquote')">" Citation</button>
+    <button class="fmt-btn" onclick="insertSep()">✦ Séparateur</button>
+    <div class="fmt-sep"></div>
+    <button class="fmt-btn" onclick="fmtBlock('ul')">— Liste</button>
+  </div>
+
+  <!-- WRITING CANVAS -->
+  <div class="writing-canvas" id="writingCanvas">
+    <div class="page" id="page">
+
+      <div class="chapter-meta">
+        <div class="chapter-ornament">
+          <div class="orn-line"></div>
+          <div class="orn-diamond"></div>
+          <div class="orn-line r"></div>
+        </div>
+        <div class="chapter-label" id="chapterLabel">Chapitre I</div>
+        <input type="text" class="chapter-title-input" id="chapterTitle" value="L'Éveil" placeholder="Titre du chapitre…" oninput="updateBreadcrumb(); countWords()">
+        <input type="text" class="chapter-subtitle-input" id="chapterSubtitle" placeholder="Sous-titre ou épigraphe…" value="Dans lequel Seraphel découvre ce que son sang lui cache">
+        <div class="chapter-divider"></div>
+      </div>
+
+      <div class="prose-editor" id="proseEditor" contenteditable="true"
+           data-ph="Commencez à écrire…"
+           oninput="countWords(); triggerSave()">
+<p>On ne ressent pas le Flux comme une force. On le ressent comme un manque — la douleur d'un os qu'on n'a jamais eu, soudainement présent.</p>
+
+<p>Seraphel avait dit cette phrase à ses recrues pendant douze ans. Il la croyait. Il l'avait vécue, le jour de ses neuf ans, quand il avait posé les mains sur la poitrine de son père et senti quelque chose s'ouvrir dans sa cage thoracique comme une porte qu'on force de l'intérieur.</p>
+
+<p>Mais ce soir, assis devant le miroir de sa chambre dans la Tour des Liants, ce qu'il voyait dans ses propres yeux — cet éclat ambré qui refusait de s'éteindre, même hors de toute Liaison active — lui rappelait que certaines portes, une fois ouvertes, ne se referment jamais tout à fait.</p>
+
+<hr>
+
+<p>— Vous ne dormez pas, Grand Liant.</p>
+
+<p>La voix de Kael venait du couloir. Pas une question. Un constat, formulé avec la précision tranquille de quelqu'un qui a appris à lire les silences de son supérieur depuis trop longtemps.</p>
+
+<p>— Entrez, dit Seraphel sans se retourner.</p>
+
+<p>La porte s'ouvrit sur Kael — trente ans, regard vif, la cicatrice en croissant sous l'œil droit qu'il portait depuis leur troisième mission commune. Il tenait deux coupes. Du vin de Kervash, si Seraphel en jugeait à la couleur sombre.</p>
+
+<p>— Il s'est passé quelque chose ce soir à la Porte Basse, dit Kael en posant une coupe sur la table. Un Séparé a tenté de forcer une Liaison sur un garde. Raté. Mais le type a laissé une empreinte que personne ici ne reconnaît.</p>
+
+<p>Seraphel se retourna enfin. Prit la coupe. Ne but pas.</p>
+
+<p>— Montrez-moi.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="sb-item"><div class="sb-dot"></div><strong id="sb-wc">842</strong> mots</div>
+    <div class="sb-item"><strong id="sb-chars">4 821</strong> caractères</div>
+    <div class="sb-item"><strong id="sb-read">~4 min</strong> de lecture</div>
+    <div class="sb-saved" id="sbSaved">✦ Sauvegardé</div>
+  </div>
+
+</div><!-- /editor-area -->
+</div><!-- /body -->
+</div><!-- /app -->
+
+<!-- MODAL NOUVEAU PROJET -->
+<div class="modal-overlay" id="newProjModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nouveau projet</div>
+      <button class="modal-close" onclick="closeModal('newProjModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf">
+        <label>Type de projet</label>
+        <div class="type-options">
+          <button class="type-opt sel" style="--to-color:var(--type-roman)" data-type="roman" onclick="selType(this)">
+            <span class="type-opt-icon">📖</span>
+            <span class="type-opt-label">Roman</span>
+          </button>
+          <button class="type-opt" style="--to-color:var(--type-nouvelle)" data-type="nouvelle" onclick="selType(this)">
+            <span class="type-opt-icon">📄</span>
+            <span class="type-opt-label">Nouvelle</span>
+          </button>
+          <button class="type-opt" style="--to-color:var(--type-fragment)" data-type="fragment" onclick="selType(this)">
+            <span class="type-opt-icon">✂</span>
+            <span class="type-opt-label">Fragment</span>
+          </button>
+          <button class="type-opt" style="--to-color:var(--type-poeme)" data-type="poeme" onclick="selType(this)">
+            <span class="type-opt-icon">🌿</span>
+            <span class="type-opt-label">Poème</span>
+          </button>
+          <button class="type-opt" style="--to-color:var(--type-dialogue)" data-type="dialogue" onclick="selType(this)">
+            <span class="type-opt-icon">💬</span>
+            <span class="type-opt-label">Dialogue</span>
+          </button>
+        </div>
+      </div>
+      <div class="mf">
+        <label>Titre du projet</label>
+        <input type="text" id="np-title" placeholder="Ex : Le Royaume d'Ael'thar…">
+      </div>
+      <div class="mf">
+        <label>Premier chapitre / section (optionnel)</label>
+        <input type="text" id="np-chap" placeholder="Ex : Chapitre I, Prologue, Texte complet…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('newProjModal')">Annuler</button>
+      <button class="btn-save" onclick="createProject()">Créer le projet</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"><div class="toast-dot"></div><span id="toastMsg">Sauvegardé</span></div>
+
+<script>
+// ── CHAPTER DATA
+const chaptersContent = {
+  'roman-0': {
+    label: 'Chapitre I', title: "L'Éveil",
+    subtitle: 'Dans lequel Seraphel découvre ce que son sang lui cache',
+    body: document.getElementById('proseEditor')?.innerHTML || ''
+  },
+  'roman-1': {
+    label: 'Chapitre II', title: 'La Citadelle',
+    subtitle: 'Les murs qui protègent sont aussi ceux qui emprisonnent',
+    body: `<p>La Citadelle d'Ael'thar ne dort jamais vraiment. Même au cœur de la nuit, ses couloirs respiraient au rythme des patrouilles, des torches qui crachaient une lumière ambrée sur les mosaïques de Flux figé dans la pierre.</p><p>Seraphel connaissait chaque recoin de ces couloirs comme il connaissait les lignes de sa propre main. Vingt-deux ans ici. L'Académie d'abord, les dortoirs froids de l'aile nord, les salles d'entraînement qui sentaient le métal et la sueur. Puis la Tour des Liants, les appartements des confirmés, enfin la suite du Grand Liant au quatrième niveau — une suite qu'il habitait depuis sept ans et dans laquelle il n'avait jamais eu l'impression d'être chez lui.</p><hr><p>L'Archon l'attendait dans la salle du Conseil.</p>`
+  },
+  'roman-2': {
+    label: 'Chapitre III', title: 'Le Délitement',
+    subtitle: '',
+    body: `<p>Seraphel avait vu des Liants se Déliter avant. Deux fois. La première fois, il avait seize ans et c'était un maître de troisième rang qui avait poussé trop loin une Liaison d'urgence sur le champ de bataille des Marches. La deuxième fois, c'était Lyse.</p><p>Il ne pensait plus à Lyse. C'était une règle qu'il s'était fixée il y a douze ans et qu'il avait tenue avec la même rigueur qu'il appliquait à tout le reste.</p><p>Ce soir, la règle flanchait.</p>`
+  },
+  'roman-3': {
+    label: 'Chapitre IV', title: 'La Mère-Sans-Nom',
+    subtitle: '',
+    body: ''
+  },
+  'nouvelle-0': {
+    label: 'Nouvelle', title: 'La Dernière Liaison',
+    subtitle: '',
+    body: `<p>Il restait une heure avant l'aube quand Maren comprit qu'elle ne survivrait pas à la Liaison.</p><p>Ce n'était pas une certitude logique — c'était une sensation, viscérale et tranquille à la fois, comme reconnaître une odeur d'enfance dans un endroit qu'on n'a jamais visité. Son Flux intérieur était à bout. Elle le sentait s'effilocher aux bords, comme une tapisserie trop vieille qu'on tire trop fort.</p>`
+  },
+  'fragment-0': {
+    label: 'Fragment', title: 'Scène du Miroir',
+    subtitle: '',
+    body: `<p>Le Flux dans le miroir n'avait pas de visage. Il avait une silhouette — féminine, ou ce que la mémoire de Seraphel décidait d'y voir. Des filaments dorés là où il aurait dû y avoir des cheveux. Des yeux qui étaient deux absences lumineuses.</p><p>— Tu sais ce que tu es, dit-elle. Tu l'as toujours su.</p><p>— Je suis un Liant, dit-il.</p><p>— Tu es une porte. Et quelqu'un frappe de l'autre côté depuis trente-quatre ans.</p>`
+  },
+  'fragment-1': {
+    label: 'Dialogue', title: 'Seraphel / Kael',
+    subtitle: 'Version à tester',
+    body: `<p>— Vous allez encore refuser la mission, dit Kael.</p><p>— Je vais l'évaluer.</p><p>— C'est ce que vous dites à chaque fois que vous allez refuser.</p><p>Seraphel ne répondit pas. Kael prit le silence pour ce qu'il était — une confirmation — et s'assit sans y être invité, ce qu'il faisait depuis que Seraphel avait arrêté de lui dire de ne pas le faire.</p>`
+  },
+  'fragment-2': {
+    label: 'Fragment', title: 'Monologue de la Mère',
+    subtitle: '',
+    body: `<p>Ils m'ont appelée traîtresse. Comme si la trahison existait envers une institution qui s'est trahie elle-même la première. L'Ordre protège le Flux. L'Ordre utilise le Flux. Là où commence l'un et finit l'autre — voilà la vraie question. Voilà la question qu'ils refusent de poser.</p>`
+  },
+  'poeme-0': {
+    label: 'Poème', title: 'Cantique des Liants',
+    subtitle: '',
+    body: `<p>Nous sommes les fils que les dieux ont laissés,<br>les cicatrices dorées dans la pierre des morts.<br>Nous lions ce qui saigne, nous cousons ce qui cède,<br>et nous appelons ça servir.</p><p>Mais un fil tendu trop fort finit par rompre —<br>et quand il rompt, il emporte avec lui<br>tout ce qu'il reliait.</p>`
+  },
+  'poeme-1': {
+    label: 'Poème', title: "Élégie du Délitement",
+    subtitle: '',
+    body: `<p>D'abord les noms.<br>Les noms des gens qu'on a aimés<br>glissent comme de l'eau entre les doigts.</p><p>Puis les visages.<br>Puis ce qu'on ressentait en les voyant.</p><p>Puis soi-même.<br>C'est la dernière chose à partir —<br>et c'est la seule qu'on ne regrette plus.</p>`
+  }
+};
+
+// Store initial body
+chaptersContent['roman-0'].body = document.getElementById('proseEditor').innerHTML;
+
+// ── LOAD CHAPTER
+function loadChapter(el, proj, idx) {
+  document.querySelectorAll('.chap-item').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const key = `${proj}-${idx}`;
+  const data = chaptersContent[key] || { label: '—', title: 'Sans titre', subtitle: '', body: '' };
+  document.getElementById('chapterLabel').textContent = data.label;
+  document.getElementById('chapterTitle').value = data.title;
+  document.getElementById('chapterSubtitle').value = data.subtitle;
+  document.getElementById('proseEditor').innerHTML = data.body;
+  updateBreadcrumb();
+  countWords();
+  // scroll to top
+  document.getElementById('writingCanvas').scrollTop = 0;
+  // Re-animate page
+  const page = document.getElementById('page');
+  page.style.animation = 'none';
+  requestAnimationFrame(() => { page.style.animation = ''; });
+}
+
+// ── SIDEBAR GROUP TOGGLE
+function toggleGroup(header) {
+  const group = header.closest('.proj-group');
+  group.classList.toggle('open');
+}
+
+// ── BREADCRUMB
+function updateBreadcrumb() {
+  const active = document.querySelector('.chap-item.active');
+  if (!active) return;
+  const projName = active.closest('.proj-group')?.querySelector('.proj-name')?.textContent || '';
+  const chapName = active.querySelector('.chap-name')?.textContent || '';
+  const title = document.getElementById('chapterTitle').value;
+  document.getElementById('docBreadcrumb').innerHTML = `<strong>${projName}</strong> &nbsp;/&nbsp; ${title || chapName}`;
+}
+
+// ── WORD COUNT
+function countWords() {
+  const text = document.getElementById('proseEditor').innerText || '';
+  const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+  const chars = text.length;
+  document.getElementById('wordCount').textContent = words.toLocaleString('fr');
+  document.getElementById('charCount').textContent = chars.toLocaleString('fr') + ' car.';
+  document.getElementById('sb-wc').textContent = words.toLocaleString('fr');
+  document.getElementById('sb-chars').textContent = chars.toLocaleString('fr');
+  const readMin = Math.max(1, Math.round(words / 200));
+  document.getElementById('sb-read').textContent = `~${readMin} min`;
+  // Update chapter wc in sidebar
+  const active = document.querySelector('.chap-item.active');
+  if (active) active.querySelector('.chap-wc').textContent = words;
+}
+
+// ── FORMATTING
+function fmt(cmd) { document.execCommand(cmd, false, null); document.getElementById('proseEditor').focus(); }
+function fmtBlock(tag) {
+  if (tag === 'blockquote') { document.execCommand('formatBlock', false, 'blockquote'); return; }
+  if (tag === 'h2' || tag === 'h3') { document.execCommand('formatBlock', false, tag); return; }
+  if (tag === 'ul') { document.execCommand('insertUnorderedList', false, null); return; }
+  document.getElementById('proseEditor').focus();
+}
+function insertSep() { document.execCommand('insertHTML', false, '<hr>'); }
+
+// ── FOCUS MODE
+let focusOn = false;
+function toggleFocus() {
+  focusOn = !focusOn;
+  document.body.classList.toggle('focus', focusOn);
+  document.getElementById('focusBtn').classList.toggle('active', focusOn);
+  showToast(focusOn ? 'Mode focus activé — Appuyez sur ⊙ pour quitter' : 'Mode focus désactivé');
+}
+
+// ── ADD CHAPTER
+function addChapter(btn) {
+  const name = prompt('Nom du chapitre / de la section :'); if (!name) return;
+  const chapters = btn.closest('.proj-chapters');
+  const group = btn.closest('.proj-group');
+  const proj = group.dataset.type;
+  const existingChaps = chapters.querySelectorAll('.chap-item').length;
+  const idx = existingChaps;
+  const num = (proj === 'roman') ? toRoman(idx + 1) : '—';
+
+  const div = document.createElement('div');
+  div.className = 'chap-item';
+  div.innerHTML = `<span class="chap-num">${num}</span><span class="chap-name">${name}</span><span class="chap-wc">0</span><button onclick="event.stopPropagation();askDelete('Supprimer ce chapitre ?','Cette action est irréversible.',function(){div.remove();const c=group.querySelector('.proj-count');c.textContent=parseInt(c.textContent)-1;})" style="background:none;border:none;cursor:pointer;color:var(--border-strong);font-size:12px;margin-left:4px;opacity:0;transition:opacity .2s" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">✕</button>`;
+  div.onclick = function() { loadChapter(this, proj, idx); };
+  chapters.insertBefore(div, btn);
+
+  // Store empty content
+  chaptersContent[`${proj}-${idx}`] = { label: num === '—' ? '—' : `Chapitre ${num}`, title: name, subtitle: '', body: '' };
+
+  // Update count
+  const countEl = group.querySelector('.proj-count');
+  countEl.textContent = parseInt(countEl.textContent) + 1;
+
+  showToast('Chapitre ajouté');
+}
+
+function toRoman(n) {
+  const v = [1000,900,500,400,100,90,50,40,10,9,5,4,1];
+  const s = ['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
+  let r = '';
+  v.forEach((val,i) => { while(n>=val){ r+=s[i]; n-=val; } });
+  return r;
+}
+
+// ── NEW PROJECT MODAL
+let selTypeVal = 'roman';
+function openNewProjectModal() { document.getElementById('newProjModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.getElementById('newProjModal').addEventListener('click', function(e){ if(e.target===this) closeModal('newProjModal'); });
+
+function selType(btn) {
+  document.querySelectorAll('.type-opt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selTypeVal = btn.dataset.type;
+}
+
+const TYPE_COLORS = { roman:'var(--type-roman)', nouvelle:'var(--type-nouvelle)', fragment:'var(--type-fragment)', poeme:'var(--type-poeme)', dialogue:'var(--type-dialogue)' };
+
+function createProject() {
+  const title = document.getElementById('np-title').value.trim(); if (!title) return;
+  const chapName = document.getElementById('np-chap').value.trim() || 'Section 1';
+  const type = selTypeVal;
+  const color = TYPE_COLORS[type];
+
+  const list = document.getElementById('projectList');
+  const group = document.createElement('div');
+  group.className = 'proj-group open';
+  group.dataset.type = type;
+  const newProjIdx = 0;
+  group.innerHTML = `
+    <div class="proj-header" onclick="toggleGroup(this)">
+      <span class="proj-arrow">▶</span>
+      <span class="proj-type-dot" style="background:${color}"></span>
+      <span class="proj-name">${title}</span>
+      <span class="proj-count">1</span>
+    </div>
+    <div class="proj-chapters">
+      <div class="chap-item" onclick="loadChapter(this,'${type}_new_${Date.now()}',0)">
+        <span class="chap-num">—</span>
+        <span class="chap-name">${chapName}</span>
+        <span class="chap-wc">0</span>
+      </div>
+      <button class="add-chap-btn" onclick="addChapter(this)">+ Ajouter</button>
+    </div>`;
+  list.appendChild(group);
+  closeModal('newProjModal');
+  document.getElementById('np-title').value = '';
+  document.getElementById('np-chap').value = '';
+  showToast('Projet créé !');
+}
+
+// ── AUTO SAVE simulation
+let saveTimer;
+function triggerSave() {
+  const saved = document.getElementById('sbSaved');
+  saved.textContent = '… en cours';
+  saved.classList.add('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saved.textContent = '✦ Sauvegardé';
+    saved.classList.remove('saving');
+  }, 1200);
+}
+
+// ── TOAST
+let toastTimer;
+function showToast(msg) {
+  document.getElementById('toastMsg').textContent = msg || 'Sauvegardé';
+  const t = document.getElementById('toastEl');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── INIT
+countWords();
+updateBreadcrumb();
+</script>
+
+<!-- DELETE CONFIRM OVERLAY -->
+<div id="deleteOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fdfbf7;border:1px solid #e4ddd3;padding:32px 36px;max-width:380px;width:90%;text-align:center;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#1a1714;margin-bottom:10px" id="deleteOverlayTitle">Supprimer cet élément ?</div>
+    <div style="font-size:13px;font-weight:300;color:#8a8278;line-height:1.7;margin-bottom:24px" id="deleteOverlayMsg">Cette action est irréversible.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="cancelDelete()" style="padding:9px 20px;background:none;border:1px solid #e4ddd3;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8a8278;transition:border-color .2s;">Annuler</button>
+      <button onclick="confirmDelete()" style="padding:9px 20px;background:#9e5a5a;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fdfbf7;transition:background .2s;">Supprimer</button>
+    </div>
+  </div>
+</div>
+<script>
+// ── GLOBAL DELETE SYSTEM
+let _deleteCallback = null;
+function askDelete(title, msg, callback) {
+  document.getElementById('deleteOverlayTitle').textContent = title || 'Supprimer ?';
+  document.getElementById('deleteOverlayMsg').textContent = msg || 'Cette action est irréversible.';
+  _deleteCallback = callback;
+  const ov = document.getElementById('deleteOverlay');
+  ov.style.display = 'flex';
+}
+function confirmDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  if (_deleteCallback) { _deleteCallback(); _deleteCallback = null; }
+}
+function cancelDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  _deleteCallback = null;
+}
+</script>
+
+</body>
+</html>

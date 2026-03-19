@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Atlas de la Création — Worldbuilding</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #f9f6f0;
+  --warm-white: #fdfbf7;
+  --ink: #1a1714;
+  --ink-light: #3d3830;
+  --ink-faint: #8a8278;
+  --gold: #b8975a;
+  --gold-light: #d4b07a;
+  --gold-pale: rgba(184,151,90,0.09);
+  --border: #e4ddd3;
+  --border-strong: #c8bfb3;
+  --sidebar-w: 260px;
+}
+
+html, body { height: 100%; background: var(--cream); color: var(--ink); font-family: 'Jost', sans-serif; font-weight: 300; }
+
+/* ══════════════════════════════
+   LAYOUT
+══════════════════════════════ */
+.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* HEADER */
+header {
+  height: 60px; flex-shrink: 0;
+  background: rgba(249,246,240,0.95); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; z-index: 200;
+}
+.header-left { display: flex; align-items: center; gap: 20px; }
+.back-btn {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-faint); cursor: pointer; text-decoration: none;
+  transition: color .2s;
+}
+.back-btn:hover { color: var(--gold); }
+.header-divider { width: 1px; height: 18px; background: var(--border); }
+.header-logo { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; letter-spacing: .06em; color: var(--ink); }
+.header-logo span { font-style: italic; color: var(--gold); margin-right: 8px; font-size: 22px; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.btn-new {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 16px; background: var(--ink); color: var(--cream);
+  border: none; cursor: pointer; font-family: 'Jost', sans-serif;
+  font-size: 11px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase;
+  transition: background .2s, letter-spacing .2s; position: relative; overflow: hidden;
+}
+.btn-new:hover { background: var(--ink-light); letter-spacing: .15em; }
+.btn-new::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform .3s ease; }
+.btn-new:hover::after { transform: scaleX(1); }
+
+/* BODY = SIDEBAR + MAIN */
+.body { display: flex; flex: 1; overflow: hidden; }
+
+/* ══════════════════════════════
+   SIDEBAR
+══════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--warm-white); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.sidebar-header {
+  padding: 20px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-title {
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 12px;
+}
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; background: var(--cream); border: 1px solid var(--border);
+}
+.search-box input {
+  flex: 1; background: none; border: none; outline: none;
+  font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 300;
+  color: var(--ink); letter-spacing: .02em;
+}
+.search-box input::placeholder { color: var(--border-strong); font-style: italic; font-family: 'Cormorant Garamond', serif; }
+.search-icon { font-size: 12px; color: var(--border-strong); }
+
+.sidebar-list { flex: 1; overflow-y: auto; padding: 10px 0; }
+.sidebar-list::-webkit-scrollbar { width: 3px; }
+.sidebar-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+.world-item {
+  padding: 12px 20px; cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background .2s, border-color .2s;
+  position: relative;
+}
+.world-item:hover { background: var(--cream); }
+.world-item.active { background: var(--gold-pale); border-left-color: var(--gold); }
+.world-name {
+  font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 400;
+  color: var(--ink); margin-bottom: 3px; letter-spacing: .01em;
+}
+.world-item.active .world-name { color: var(--ink); font-weight: 500; }
+.world-meta { font-size: 11px; color: var(--ink-faint); letter-spacing: .02em; }
+.world-dot {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gold);
+  opacity: 0; transition: opacity .2s;
+}
+.world-item.active .world-dot { opacity: 1; }
+
+.sidebar-footer {
+  padding: 14px 20px; border-top: 1px solid var(--border);
+}
+.btn-add-world {
+  width: 100%; padding: 9px; background: none; border: 1px dashed var(--border-strong);
+  cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px;
+  color: var(--ink-faint); letter-spacing: .1em; text-transform: uppercase;
+  transition: border-color .2s, color .2s;
+}
+.btn-add-world:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ══════════════════════════════
+   MAIN CONTENT
+══════════════════════════════ */
+.main-content { flex: 1; overflow-y: auto; background: var(--cream); }
+.main-content::-webkit-scrollbar { width: 4px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* WORLD HEADER */
+.world-header {
+  padding: 40px 48px 32px;
+  border-bottom: 1px solid var(--border);
+  background: var(--warm-white);
+  position: relative; overflow: hidden;
+  animation: fadeSlide .4s ease;
+}
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.world-header::before {
+  content: '';
+  position: absolute; top: -80px; right: -80px;
+  width: 320px; height: 320px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(184,151,90,.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+.world-header-eyebrow {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.eyebrow-line { width: 28px; height: 1px; background: var(--gold); }
+.eyebrow-text { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+
+.world-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.world-title-wrap { flex: 1; }
+
+.world-title-display {
+  font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 400;
+  color: var(--ink); letter-spacing: -.01em; line-height: 1.1; margin-bottom: 8px;
+  cursor: text; border-bottom: 1px solid transparent; transition: border-color .2s;
+  display: inline-block;
+}
+.world-title-display:hover { border-color: var(--gold-light); }
+.world-title-display[contenteditable="true"] {
+  outline: none; border-color: var(--gold); background: rgba(184,151,90,.04);
+  padding: 2px 6px; border-radius: 0;
+}
+
+.world-subtitle-display {
+  font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic;
+  color: var(--ink-faint); cursor: text; border-bottom: 1px solid transparent;
+  transition: border-color .2s; display: inline-block; letter-spacing: .02em;
+}
+.world-subtitle-display:hover { border-color: var(--gold-light); }
+.world-subtitle-display[contenteditable="true"] { outline: none; border-color: var(--gold); background: rgba(184,151,90,.04); padding: 2px 6px; }
+
+.edit-hint {
+  font-size: 10.5px; color: var(--border-strong); letter-spacing: .04em;
+  margin-top: 10px; display: flex; align-items: center; gap: 6px;
+}
+.edit-hint::before { content: '✦'; color: var(--gold); font-size: 8px; }
+
+.world-tags { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.tag {
+  font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 4px 10px; border: 1px solid var(--border);
+  color: var(--ink-faint); background: var(--cream); cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.tag:hover, .tag.active { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+
+/* TAB NAV */
+.tab-nav {
+  display: flex; padding: 0 48px;
+  border-bottom: 1px solid var(--border);
+  background: var(--warm-white); gap: 0;
+}
+.tab-btn {
+  padding: 14px 0; margin-right: 32px;
+  background: none; border: none; cursor: pointer;
+  font-family: 'Jost', sans-serif; font-size: 11.5px; font-weight: 400;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint);
+  position: relative; transition: color .2s;
+}
+.tab-btn.active { color: var(--ink); }
+.tab-btn::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 1.5px; background: var(--gold);
+  transform: scaleX(0); transition: transform .3s ease;
+}
+.tab-btn.active::after { transform: scaleX(1); }
+
+/* PANELS */
+.panels { padding: 40px 48px; }
+.panel { display: none; animation: fadeSlide .35s ease; }
+.panel.active { display: block; }
+
+/* ── SECTION CARD ── */
+.section-card {
+  background: var(--warm-white); border: 1px solid var(--border);
+  margin-bottom: 24px; overflow: hidden;
+}
+.section-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.section-card-header:hover { background: rgba(184,151,90,.03); }
+.section-card-title-row { display: flex; align-items: center; gap: 12px; }
+.section-icon { font-size: 18px; }
+.section-card-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 500;
+  color: var(--ink); letter-spacing: .02em;
+}
+.section-toggle { font-size: 12px; color: var(--ink-faint); transition: transform .3s; }
+.section-card.collapsed .section-toggle { transform: rotate(-90deg); }
+.section-card-body { padding: 28px 24px; }
+.section-card.collapsed .section-card-body { display: none; }
+
+/* ── FIELDS ── */
+.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.fields-grid.single { grid-template-columns: 1fr; }
+.field-block { }
+.field-label {
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+}
+.field-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.editable-text {
+  font-size: 14px; font-weight: 300; color: var(--ink); line-height: 1.8;
+  letter-spacing: .02em; min-height: 24px;
+  border-bottom: 1px solid transparent; padding-bottom: 2px;
+  cursor: text; transition: border-color .2s; outline: none;
+}
+.editable-text:hover { border-color: var(--gold-light); }
+.editable-text:focus { border-color: var(--gold); }
+.editable-text[data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--border-strong); font-style: italic; font-family: 'Cormorant Garamond', serif;
+  pointer-events: none;
+}
+.editable-text.large { min-height: 80px; }
+
+/* CARTE UPLOAD */
+.map-upload {
+  border: 1.5px dashed var(--border-strong); padding: 40px 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; cursor: pointer; transition: border-color .3s, background .3s;
+  position: relative; overflow: hidden;
+}
+.map-upload:hover { border-color: var(--gold); background: var(--gold-pale); }
+.map-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.map-icon { font-size: 32px; opacity: .5; }
+.map-upload-text { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic; color: var(--ink-faint); }
+.map-upload-hint { font-size: 11px; letter-spacing: .06em; color: var(--border-strong); }
+.map-preview { display: none; width: 100%; max-height: 340px; object-fit: cover; }
+
+/* BIOMES PILLS */
+.pills-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.pill {
+  padding: 5px 12px; border: 1px solid var(--border); font-size: 12px;
+  font-weight: 300; color: var(--ink-light); cursor: pointer;
+  transition: all .2s; letter-spacing: .02em;
+}
+.pill.active { background: var(--gold-pale); border-color: var(--gold-light); color: var(--gold); }
+.pill-add {
+  padding: 5px 12px; border: 1px dashed var(--border-strong); font-size: 12px;
+  color: var(--ink-faint); cursor: pointer; transition: border-color .2s, color .2s;
+  background: none;
+}
+.pill-add:hover { border-color: var(--gold); color: var(--gold); }
+
+/* LIEUX TABLE */
+.lieux-table { width: 100%; border-collapse: collapse; }
+.lieux-table th {
+  text-align: left; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-faint); font-weight: 400; padding: 8px 12px; border-bottom: 1px solid var(--border);
+}
+.lieux-table td {
+  padding: 12px 12px; border-bottom: 1px solid var(--border);
+  font-size: 13.5px; font-weight: 300; color: var(--ink); vertical-align: top;
+}
+.lieux-table tr:last-child td { border-bottom: none; }
+.lieux-table tr:hover td { background: var(--gold-pale); }
+.td-name { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 400; }
+.td-type { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.td-edit {
+  background: none; border: none; cursor: pointer; font-size: 13px;
+  color: var(--border-strong); transition: color .2s; padding: 0;
+}
+.td-edit:hover { color: var(--gold); }
+.add-row-btn {
+  width: 100%; padding: 10px; margin-top: 12px; background: none;
+  border: 1px dashed var(--border-strong); font-family: 'Jost', sans-serif;
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-faint); cursor: pointer; transition: border-color .2s, color .2s;
+}
+.add-row-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* FACTIONS */
+.factions-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.faction-card {
+  border: 1px solid var(--border); background: var(--cream); padding: 20px;
+  position: relative; cursor: pointer; transition: border-color .25s, transform .25s;
+}
+.faction-card:hover { border-color: var(--gold-light); transform: translateY(-2px); }
+.faction-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  background: var(--faction-color, var(--gold)); opacity: .5;
+}
+.faction-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.faction-symbol { font-size: 26px; line-height: 1; }
+.faction-color-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--faction-color, var(--gold)); flex-shrink: 0; margin-top: 4px; }
+.faction-name { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+.faction-type { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 10px; }
+.faction-field { margin-bottom: 10px; }
+.faction-field-label { font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+.faction-field-val { font-size: 12.5px; font-weight: 300; color: var(--ink-light); line-height: 1.6; }
+.faction-relations { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.rel-tag {
+  font-size: 10px; padding: 2px 8px; letter-spacing: .06em;
+}
+.rel-tag.ally { border: 1px solid #6a9e6a; color: #4a7e4a; background: rgba(106,158,106,.08); }
+.rel-tag.enemy { border: 1px solid #9e6a6a; color: #7e4a4a; background: rgba(158,106,106,.08); }
+.rel-tag.neutral { border: 1px solid var(--border); color: var(--ink-faint); }
+.faction-add {
+  border: 1.5px dashed var(--border-strong); display: flex;
+  align-items: center; justify-content: center; gap: 8px;
+  padding: 32px; cursor: pointer; transition: border-color .2s, color .2s;
+  font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-faint); background: none;
+}
+.faction-add:hover { border-color: var(--gold); color: var(--gold); }
+
+/* MAGIE */
+.magie-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.magie-block {
+  background: var(--cream); border: 1px solid var(--border); padding: 20px;
+  position: relative;
+}
+.magie-block::before {
+  content: attr(data-label);
+  font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold); position: absolute; top: -7px; left: 14px;
+  background: var(--cream); padding: 0 6px;
+}
+.magie-block.full { grid-column: span 2; }
+
+/* RESSOURCES */
+.ressources-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.ressource-item {
+  padding: 16px 14px; border: 1px solid var(--border);
+  background: var(--cream); text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.ressource-item:hover { border-color: var(--gold-light); background: var(--gold-pale); }
+.ressource-emoji { font-size: 22px; display: block; margin-bottom: 8px; }
+.ressource-name { font-size: 12px; font-weight: 300; color: var(--ink-light); letter-spacing: .03em; }
+.ressource-note { font-size: 10.5px; color: var(--ink-faint); margin-top: 3px; font-style: italic; }
+
+/* SAVE TOAST */
+.save-toast {
+  position: fixed; bottom: 28px; right: 28px;
+  background: var(--ink); color: var(--cream);
+  padding: 12px 20px; font-size: 12px; letter-spacing: .06em;
+  display: flex; align-items: center; gap: 8px;
+  transform: translateY(60px); opacity: 0;
+  transition: transform .3s ease, opacity .3s ease;
+  z-index: 999;
+}
+.save-toast.show { transform: translateY(0); opacity: 1; }
+.save-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; }
+
+/* MODAL FACTION */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(26,23,20,.5);
+  backdrop-filter: blur(4px); z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--warm-white); border: 1px solid var(--border);
+  width: 560px; max-height: 90vh; overflow-y: auto;
+  transform: translateY(16px); transition: transform .3s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header {
+  padding: 24px 28px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: var(--ink); }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--ink-faint); transition: color .2s; line-height: 1; }
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 28px; display: grid; gap: 18px; }
+.modal-field label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 7px; }
+.modal-field input, .modal-field textarea, .modal-field select {
+  width: 100%; padding: 10px 14px; background: var(--cream); border: 1px solid var(--border);
+  font-family: 'Jost', sans-serif; font-size: 13.5px; font-weight: 300;
+  color: var(--ink); outline: none; transition: border-color .2s; resize: vertical;
+  -webkit-appearance: none;
+}
+.modal-field input:focus, .modal-field textarea:focus, .modal-field select:focus { border-color: var(--gold); }
+.modal-footer { padding: 20px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+.btn-cancel { padding: 9px 18px; background: none; border: 1px solid var(--border); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); transition: border-color .2s; }
+.btn-cancel:hover { border-color: var(--border-strong); }
+.btn-save { padding: 9px 20px; background: var(--ink); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); transition: background .2s; }
+.btn-save:hover { background: var(--gold); }
+
+/* COLOR SWATCHES */
+.color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .15s, border-color .15s; }
+.swatch:hover, .swatch.selected { transform: scale(1.2); border-color: var(--ink); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .panels { padding: 24px; }
+  .world-header { padding: 28px 24px; }
+  .tab-nav { padding: 0 24px; }
+  .factions-grid { grid-template-columns: 1fr; }
+  .magie-layout { grid-template-columns: 1fr; }
+  .magie-block.full { grid-column: span 1; }
+  .ressources-grid { grid-template-columns: repeat(2, 1fr); }
+  .fields-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <a class="back-btn" href="atlas-hub.html">← Retour</a>
+    <div class="header-divider"></div>
+    <div class="header-logo"><span>𝒜</span>Worldbuilding</div>
+  </div>
+  <div class="header-right">
+    <button class="btn-new" onclick="openFactionModal()">+ Nouvelle faction</button>
+  </div>
+</header>
+
+<div class="body">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">Mes Mondes</div>
+    <div class="search-box">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Rechercher…" oninput="filterWorlds(this.value)">
+    </div>
+  </div>
+
+  <div class="sidebar-list" id="worldList">
+    <div class="world-item active" onclick="selectWorld(this, 0)">
+      <div class="world-name">Le Royaume d'Ael'thar</div>
+      <div class="world-meta">3 factions · Magie du sang</div>
+      <div class="world-dot"></div>
+    </div>
+    <div class="world-item" onclick="selectWorld(this, 1)">
+      <div class="world-name">Les Terres de Kervash</div>
+      <div class="world-meta">5 factions · Technologie arcane</div>
+      <div class="world-dot"></div>
+    </div>
+    <div class="world-item" onclick="selectWorld(this, 2)">
+      <div class="world-name">L'Archipel du Vide</div>
+      <div class="world-meta">2 factions · Sans magie</div>
+      <div class="world-dot"></div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="btn-add-world" onclick="addNewWorld()">+ Nouveau monde</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- WORLD HEADER -->
+  <div class="world-header" id="worldHeader">
+    <div class="world-header-eyebrow">
+      <div class="eyebrow-line"></div>
+      <span class="eyebrow-text">Fiche de monde</span>
+    </div>
+    <div class="world-header-top">
+      <div class="world-title-wrap">
+        <div class="world-title-display" id="worldTitle" contenteditable="false"
+             onclick="makeEditable(this)" onblur="saveEditable(this, 'title')"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
+          Le Royaume d'Ael'thar
+        </div><br>
+        <div class="world-subtitle-display" id="worldSubtitle" contenteditable="false"
+             onclick="makeEditable(this)" onblur="saveEditable(this, 'subtitle')"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
+          Un empire millénaire bâti sur les cendres des dieux anciens
+        </div>
+        <div class="edit-hint">Cliquez sur le titre ou le sous-titre pour modifier</div>
+      </div>
+    </div>
+    <div class="world-tags">
+      <span class="tag active">Fantasy</span>
+      <span class="tag active">Magie</span>
+      <span class="tag">Guerre</span>
+      <span class="tag">Politique</span>
+      <span class="tag active">Médiéval</span>
+      <span class="tag" onclick="addTag()">+ Ajouter</span>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('geo', this)">Géographie</button>
+    <button class="tab-btn" onclick="switchTab('factions', this)">Factions & Peuples</button>
+    <button class="tab-btn" onclick="switchTab('magie', this)">Magie & Technologie</button>
+  </nav>
+
+  <!-- PANELS -->
+  <div class="panels">
+
+    <!-- ══════ GÉO ══════ -->
+    <div class="panel active" id="panel-geo">
+
+      <!-- Carte -->
+      <div class="section-card" id="card-carte">
+        <div class="section-card-header" onclick="toggleCard('carte')">
+          <div class="section-card-title-row">
+            <span class="section-icon">🗺</span>
+            <span class="section-card-title">Carte du monde</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <div class="map-upload" id="mapUpload" onclick="document.getElementById('mapInput').click()">
+            <input type="file" id="mapInput" accept="image/*" onchange="loadMap(event)" onclick="event.stopPropagation()">
+            <span class="map-icon">🗾</span>
+            <span class="map-upload-text">Déposez votre carte ici</span>
+            <span class="map-upload-hint">PNG, JPG, WEBP — Taille libre</span>
+          </div>
+          <img class="map-preview" id="mapPreview" alt="Carte du monde">
+          <div class="field-label" style="margin-top:16px">Légende & notes cartographiques</div>
+          <div class="editable-text" contenteditable="true"
+               data-placeholder="Décrivez les zones importantes, les frontières naturelles, les routes commerciales…">
+          </div>
+        </div>
+      </div>
+
+      <!-- Climat & Biomes -->
+      <div class="section-card" id="card-climat">
+        <div class="section-card-header" onclick="toggleCard('climat')">
+          <div class="section-card-title-row">
+            <span class="section-icon">🌿</span>
+            <span class="section-card-title">Climat & Biomes</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <div class="field-label">Biomes présents</div>
+          <div class="pills-wrap" id="biomesPills">
+            <span class="pill active" onclick="togglePill(this)">Forêt ancienne</span>
+            <span class="pill active" onclick="togglePill(this)">Montagnes glacées</span>
+            <span class="pill" onclick="togglePill(this)">Désert de cendres</span>
+            <span class="pill" onclick="togglePill(this)">Plaines dorées</span>
+            <span class="pill" onclick="togglePill(this)">Marécages obscurs</span>
+            <span class="pill" onclick="togglePill(this)">Côtes tempérées</span>
+            <span class="pill" onclick="togglePill(this)">Toundra</span>
+            <span class="pill" onclick="togglePill(this)">Volcans</span>
+            <button class="pill-add" onclick="addBiome()">+ Autre</button>
+          </div>
+          <div style="margin-top:20px" class="fields-grid">
+            <div class="field-block">
+              <div class="field-label">Climat dominant</div>
+              <div class="editable-text" contenteditable="true" data-placeholder="Ex : Tempéré humide, continental…"></div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Phénomènes particuliers</div>
+              <div class="editable-text" contenteditable="true" data-placeholder="Tempêtes de mana, éclipses permanentes…"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frontières & Territoires -->
+      <div class="section-card" id="card-frontieres">
+        <div class="section-card-header" onclick="toggleCard('frontieres')">
+          <div class="section-card-title-row">
+            <span class="section-icon">⚑</span>
+            <span class="section-card-title">Frontières & Territoires</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <div class="fields-grid">
+            <div class="field-block">
+              <div class="field-label">Frontières naturelles</div>
+              <div class="editable-text large" contenteditable="true" data-placeholder="Chaînes de montagnes, fleuves, mers qui délimitent le territoire…"></div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Frontières politiques</div>
+              <div class="editable-text large" contenteditable="true" data-placeholder="Traités, murs, zones contestées, pays voisins…"></div>
+            </div>
+          </div>
+          <div class="field-label" style="margin-top:20px">Zones de tension / conflits actifs</div>
+          <div class="editable-text" contenteditable="true" data-placeholder="Régions disputées, points chauds, frontières instables…"></div>
+        </div>
+      </div>
+
+      <!-- Lieux importants -->
+      <div class="section-card" id="card-lieux">
+        <div class="section-card-header" onclick="toggleCard('lieux')">
+          <div class="section-card-title-row">
+            <span class="section-icon">🏛</span>
+            <span class="section-card-title">Villes & Lieux importants</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <table class="lieux-table" id="lieuxTable">
+            <thead>
+              <tr>
+                <th>Lieu</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="lieuxBody">
+              <tr>
+                <td><div class="td-name">Ael'thar-Citadelle</div></td>
+                <td><div class="td-type">Capitale</div></td>
+                <td>Cœur de l'empire, siège du Trône de Cendres et de l'Académie des Liants.</td>
+                <td><button class="td-edit" onclick="editLieu(this)">✎</button></td>
+              </tr>
+              <tr>
+                <td><div class="td-name">Les Forges d'Ul'mara</div></td>
+                <td><div class="td-type">Forteresse</div></td>
+                <td>Complex industriel souterrain où sont forgées les armes runiques.</td>
+                <td><button class="td-edit" onclick="editLieu(this)">✎</button></td>
+              </tr>
+              <tr>
+                <td><div class="td-name">La Mer des Songes</div></td>
+                <td><div class="td-type">Lieu mystique</div></td>
+                <td>Lac magique à la surface argentée où les morts peuvent être consultés.</td>
+                <td><button class="td-edit" onclick="editLieu(this)">✎</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="add-row-btn" onclick="addLieu()">+ Ajouter un lieu</button>
+        </div>
+      </div>
+
+      <!-- Ressources -->
+      <div class="section-card" id="card-ressources">
+        <div class="section-card-header" onclick="toggleCard('ressources')">
+          <div class="section-card-title-row">
+            <span class="section-icon">💎</span>
+            <span class="section-card-title">Ressources naturelles</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <div class="ressources-grid" id="ressourcesGrid">
+            <div class="ressource-item">
+              <span class="ressource-emoji">🌑</span>
+              <div class="ressource-name">Obsidienne de mana</div>
+              <div class="ressource-note">Très rare — Nord</div>
+            </div>
+            <div class="ressource-item">
+              <span class="ressource-emoji">🌲</span>
+              <div class="ressource-name">Bois de Cèdre-âme</div>
+              <div class="ressource-note">Commun — Forêts</div>
+            </div>
+            <div class="ressource-item">
+              <span class="ressource-emoji">⚗️</span>
+              <div class="ressource-name">Sel d'éther</div>
+              <div class="ressource-note">Rare — Côtes</div>
+            </div>
+            <div class="ressource-item" onclick="addRessource()" style="border-style:dashed; color:var(--ink-faint); display:flex; flex-direction:column; align-items:center; justify-content:center;">
+              <span style="font-size:22px">+</span>
+              <div style="font-size:11px; margin-top:6px; letter-spacing:.06em; text-transform:uppercase;">Ajouter</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panel-geo -->
+
+    <!-- ══════ FACTIONS ══════ -->
+    <div class="panel" id="panel-factions">
+      <div class="factions-grid" id="factionsGrid">
+
+        <div class="faction-card" style="--faction-color:#b8975a" onclick="openEditFaction(0)"><button onclick="event.stopPropagation();askDelete('Supprimer cette faction ?','Cette action est irréversible.',function(){this.closest('.faction-card').remove()}.bind(this))" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--border-strong);transition:color .2s;opacity:0;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">✕</button>
+          <div class="faction-card-header">
+            <div>
+              <div class="faction-symbol">⚔</div>
+            </div>
+            <div class="faction-color-dot"></div>
+          </div>
+          <div class="faction-name">L'Ordre des Liants</div>
+          <div class="faction-type">Ordre militaire & religieux</div>
+          <div class="faction-field">
+            <div class="faction-field-label">Dirigeant</div>
+            <div class="faction-field-val">Grand Liant Seraphel Vorn</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Territoire</div>
+            <div class="faction-field-val">Ael'thar-Citadelle & les marches du Nord</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Idéologie</div>
+            <div class="faction-field-val">Ordre, sacrifice, supériorité du lien magique sur le sang.</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Relations</div>
+            <div class="faction-relations">
+              <span class="rel-tag ally">★ Marchands</span>
+              <span class="rel-tag enemy">✗ Les Séparés</span>
+              <span class="rel-tag neutral">~ Nomades</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="faction-card" style="--faction-color:#7a5a9e" onclick="openEditFaction(1)">
+          <div class="faction-card-header">
+            <div><div class="faction-symbol">🌑</div></div>
+            <div class="faction-color-dot"></div>
+          </div>
+          <div class="faction-name">Les Séparés</div>
+          <div class="faction-type">Mouvement souterrain</div>
+          <div class="faction-field">
+            <div class="faction-field-label">Dirigeant</div>
+            <div class="faction-field-val">La Mère-Sans-Nom (identité inconnue)</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Territoire</div>
+            <div class="faction-field-val">Réseau de catacombes sous la Citadelle</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Idéologie</div>
+            <div class="faction-field-val">Libération du lien forcé. Refus de la magie institutionnelle.</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Relations</div>
+            <div class="faction-relations">
+              <span class="rel-tag enemy">✗ L'Ordre</span>
+              <span class="rel-tag ally">★ Nomades</span>
+              <span class="rel-tag neutral">~ Marchands</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="faction-card" style="--faction-color:#5a8e6a" onclick="openEditFaction(2)">
+          <div class="faction-card-header">
+            <div><div class="faction-symbol">🌿</div></div>
+            <div class="faction-color-dot"></div>
+          </div>
+          <div class="faction-name">Les Nomades du Flux</div>
+          <div class="faction-type">Peuple nomade</div>
+          <div class="faction-field">
+            <div class="faction-field-label">Dirigeant</div>
+            <div class="faction-field-val">Conseil des Voix — 7 Anciens</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Territoire</div>
+            <div class="faction-field-val">Plaines dorées & routes commerciales</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Idéologie</div>
+            <div class="faction-field-val">Neutralité sacrée. Le mouvement comme acte de foi.</div>
+          </div>
+          <div class="faction-field">
+            <div class="faction-field-label">Relations</div>
+            <div class="faction-relations">
+              <span class="rel-tag neutral">~ L'Ordre</span>
+              <span class="rel-tag ally">★ Les Séparés</span>
+              <span class="rel-tag ally">★ Marchands</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="faction-add" onclick="openFactionModal()">
+          <span style="font-size:20px">+</span>
+          <span>Nouvelle faction</span>
+        </button>
+
+      </div>
+    </div><!-- /panel-factions -->
+
+    <!-- ══════ MAGIE ══════ -->
+    <div class="panel" id="panel-magie">
+
+      <div class="section-card" id="card-magie-origine">
+        <div class="section-card-header" onclick="toggleCard('magie-origine')">
+          <div class="section-card-title-row">
+            <span class="section-icon">✦</span>
+            <span class="section-card-title">Origine & Histoire du système</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <div class="fields-grid single">
+            <div class="field-block">
+              <div class="field-label">Nom du système</div>
+              <div class="editable-text" contenteditable="true" data-placeholder="Ex : La Liaison, l'Éveil, le Tissage…">La Liaison du Sang</div>
+            </div>
+          </div>
+          <div class="field-label" style="margin-top:18px">Origine mythologique / historique</div>
+          <div class="editable-text large" contenteditable="true"
+               data-placeholder="Comment ce système est-il né ? Qui l'a découvert ou créé ? Quelle est son histoire ?">
+            À l'aube des temps, les dieux anciens ont tissé leur essence dans la terre d'Ael'thar avant de périr. Ce résidu divin, appelé le Flux, se manifeste dans le sang de certains mortels. La Liaison est l'art de canaliser et de lier ce Flux à la volonté du pratiquant.
+          </div>
+          <div class="field-label" style="margin-top:18px">Évolution à travers les âges</div>
+          <div class="editable-text" contenteditable="true" data-placeholder="Comment la magie a-t-elle changé, évolué, été codifiée ?"></div>
+        </div>
+      </div>
+
+      <div class="section-card" id="card-magie-regles">
+        <div class="section-card-header" onclick="toggleCard('magie-regles')">
+          <div class="section-card-title-row">
+            <span class="section-icon">⚖</span>
+            <span class="section-card-title">Règles & Limites</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <div class="magie-layout">
+            <div class="magie-block" data-label="Ce que la magie PEUT faire">
+              <div class="editable-text large" contenteditable="true" data-placeholder="Lister les capacités possibles…">
+                Lier deux êtres (partage de sensations, force, mémoire). Invoquer des entités du Flux. Renforcer le corps ou l'esprit. Lire les empreintes magiques laissées sur les objets.
+              </div>
+            </div>
+            <div class="magie-block" data-label="Ce que la magie NE PEUT PAS faire">
+              <div class="editable-text large" contenteditable="true" data-placeholder="Les limites absolues, les interdits…">
+                Ressusciter les morts. Voyager dans le temps. Créer de la matière ex nihilo. Lier quelqu'un contre sa volonté sans rituel prolongé.
+              </div>
+            </div>
+            <div class="magie-block full" data-label="Coûts & Conséquences">
+              <div class="editable-text" contenteditable="true" data-placeholder="Qu'est-ce que la magie coûte à celui qui l'utilise ? Fatigue, vie, santé mentale, sacrifice…">
+                Chaque Liaison consume une part du Flux intérieur du pratiquant. Un usage excessif provoque le Délitement — perte progressive de la mémoire, puis de l'identité.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card" id="card-magie-utilisateurs">
+        <div class="section-card-header" onclick="toggleCard('magie-utilisateurs')">
+          <div class="section-card-title-row">
+            <span class="section-icon">👁</span>
+            <span class="section-card-title">Utilisateurs — Qui peut l'utiliser ?</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <div class="fields-grid">
+            <div class="field-block">
+              <div class="field-label">Condition d'accès</div>
+              <div class="editable-text large" contenteditable="true"
+                   data-placeholder="Naissance, apprentissage, rituel, race…">
+                Naître avec du Flux dans le sang (environ 1 personne sur 40). Certains peuvent l'éveiller tardivement via un rituel douloureux.
+              </div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Niveaux de maîtrise</div>
+              <div class="editable-text large" contenteditable="true"
+                   data-placeholder="Débutant, maître, légende… Décrivez les niveaux.">
+                Liant-naissant → Liant-confirmé → Grand Liant → Tisserand (légendaire, moins de 10 connus).
+              </div>
+            </div>
+          </div>
+          <div class="field-label" style="margin-top:20px">Groupes / institutions qui encadrent la magie</div>
+          <div class="editable-text" contenteditable="true" data-placeholder="Académies, guildes, ordres religieux, États…">
+            L'Académie des Liants (éducation officielle), L'Ordre des Liants (usage militaire), Les Séparés (pratique illégale et libre).
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card" id="card-magie-effets">
+        <div class="section-card-header" onclick="toggleCard('magie-effets')">
+          <div class="section-card-title-row">
+            <span class="section-icon">🌟</span>
+            <span class="section-card-title">Effets visuels & Manifestations</span>
+          </div>
+          <span class="section-toggle">▾</span>
+        </div>
+        <div class="section-card-body">
+          <div class="fields-grid">
+            <div class="field-block">
+              <div class="field-label">Apparence visuelle</div>
+              <div class="editable-text large" contenteditable="true"
+                   data-placeholder="Couleurs, lumières, textures, sons que produit la magie…">
+                Filaments dorés à l'incandescence pourpre. Les yeux du pratiquant brillent d'un éclat ambre. Un léger parfum de métal chaud se dégage.
+              </div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Signes de surcharge / danger</div>
+              <div class="editable-text large" contenteditable="true"
+                   data-placeholder="Comment reconnaît-on qu'un pratiquant dépasse ses limites ?">
+                Les filaments deviennent noirs et effilochés. Saignements des yeux. Tremblements. Peau qui se craquelle comme de la porcelaine brûlée.
+              </div>
+            </div>
+          </div>
+          <div class="field-label" style="margin-top:20px">Traces laissées sur l'environnement</div>
+          <div class="editable-text" contenteditable="true" data-placeholder="Cicatrices dans le paysage, zones mortes, lieux enchantés…">
+            Les lieux de grande magie conservent des réseaux de veines dorées dans la pierre. Certaines ruines antiques pulsent encore faiblement des millénaires plus tard.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /panel-magie -->
+
+  </div><!-- /panels -->
+</div><!-- /main-content -->
+</div><!-- /body -->
+</div><!-- /app -->
+
+<!-- MODAL NOUVELLE FACTION -->
+<div class="modal-overlay" id="factionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nouvelle faction</div>
+      <button class="modal-close" onclick="closeFactionModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label>Nom de la faction</label>
+        <input type="text" id="f-name" placeholder="Ex : La Confrérie des Ombres">
+      </div>
+      <div class="modal-field">
+        <label>Type</label>
+        <input type="text" id="f-type" placeholder="Ex : Ordre religieux, Guilde marchande, Peuple nomade…">
+      </div>
+      <div class="modal-field">
+        <label>Symbole (emoji)</label>
+        <input type="text" id="f-symbol" placeholder="🌑 ⚔ 🌿 🔥 👁 …" maxlength="4">
+      </div>
+      <div class="modal-field">
+        <label>Couleur</label>
+        <div class="color-swatches" id="colorSwatches">
+          <div class="swatch selected" style="background:#b8975a" data-color="#b8975a" onclick="selectSwatch(this)"></div>
+          <div class="swatch" style="background:#7a5a9e" data-color="#7a5a9e" onclick="selectSwatch(this)"></div>
+          <div class="swatch" style="background:#5a8e6a" data-color="#5a8e6a" onclick="selectSwatch(this)"></div>
+          <div class="swatch" style="background:#9e5a5a" data-color="#9e5a5a" onclick="selectSwatch(this)"></div>
+          <div class="swatch" style="background:#5a7a9e" data-color="#5a7a9e" onclick="selectSwatch(this)"></div>
+          <div class="swatch" style="background:#8e8e5a" data-color="#8e8e5a" onclick="selectSwatch(this)"></div>
+          <div class="swatch" style="background:#3d3830" data-color="#3d3830" onclick="selectSwatch(this)"></div>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Dirigeant(s)</label>
+        <input type="text" id="f-leader" placeholder="Nom et titre">
+      </div>
+      <div class="modal-field">
+        <label>Territoire contrôlé</label>
+        <input type="text" id="f-territory" placeholder="Régions, villes, zones d'influence">
+      </div>
+      <div class="modal-field">
+        <label>Idéologie & valeurs</label>
+        <textarea id="f-ideology" rows="3" placeholder="Ce en quoi croit cette faction, ses objectifs, sa philosophie…"></textarea>
+      </div>
+      <div class="modal-field">
+        <label>Relations avec les autres factions</label>
+        <textarea id="f-relations" rows="2" placeholder="Ex : Alliés avec X, en guerre avec Y, neutre envers Z…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeFactionModal()">Annuler</button>
+      <button class="btn-save" onclick="saveFaction()">Créer la faction</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAVE TOAST -->
+<div class="save-toast" id="saveToast">
+  <div class="save-dot"></div>
+  Modifications enregistrées
+</div>
+
+<script>
+// ── TAB SWITCH
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── SECTION COLLAPSE
+function toggleCard(id) {
+  document.getElementById('card-' + id).classList.toggle('collapsed');
+}
+
+// ── EDITABLE FIELDS
+function makeEditable(el) {
+  el.contentEditable = 'true';
+  el.focus();
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+function saveEditable(el, key) {
+  el.contentEditable = 'false';
+  showSaveToast();
+}
+
+// ── WORLD SELECT
+function selectWorld(el, idx) {
+  document.querySelectorAll('.world-item').forEach(w => w.classList.remove('active'));
+  el.classList.add('active');
+  const names = ["Le Royaume d'Ael'thar", "Les Terres de Kervash", "L'Archipel du Vide"];
+  const subs  = ["Un empire millénaire bâti sur les cendres des dieux anciens",
+                 "Là où la magie et l'acier se forgent ensemble",
+                 "Des îles flottantes suspendues au-dessus du néant"];
+  document.getElementById('worldTitle').textContent = names[idx];
+  document.getElementById('worldSubtitle').textContent = subs[idx];
+  showSaveToast();
+}
+
+function filterWorlds(q) {
+  document.querySelectorAll('.world-item').forEach(item => {
+    const name = item.querySelector('.world-name').textContent.toLowerCase();
+    item.style.display = name.includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function addNewWorld() {
+  const name = prompt('Nom du nouveau monde :');
+  if (!name) return;
+  const list = document.getElementById('worldList');
+  const div = document.createElement('div');
+  div.className = 'world-item';
+  div.innerHTML = `<div class="world-name">${name}</div><div class="world-meta">Nouveau monde</div><div class="world-dot"></div>`;
+  div.onclick = function() { selectWorld(this, -1); document.getElementById('worldTitle').textContent = name; };
+  list.appendChild(div);
+  showSaveToast();
+}
+
+// ── PILLS
+function togglePill(el) { el.classList.toggle('active'); showSaveToast(); }
+
+function addBiome() {
+  const name = prompt('Nouveau biome :');
+  if (!name) return;
+  const wrap = document.getElementById('biomesPills');
+  const btn = wrap.querySelector('.pill-add');
+  const pill = document.createElement('span');
+  pill.className = 'pill active';
+  pill.textContent = name;
+  pill.onclick = function() { togglePill(this); };
+  wrap.insertBefore(pill, btn);
+}
+
+// ── LIEUX
+function addLieu() {
+  const name = prompt('Nom du lieu :'); if (!name) return;
+  const type = prompt('Type (capitale, village, ruine…) :') || 'Lieu';
+  const desc = prompt('Description courte :') || '';
+  const tbody = document.getElementById('lieuxBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><div class="td-name">${name}</div></td><td><div class="td-type">${type}</div></td><td>${desc}</td><td><button class="td-edit" onclick="editLieu(this)">✎</button></td>`;
+  tbody.appendChild(tr);
+  showSaveToast();
+}
+
+function editLieu(btn) {
+  const row = btn.closest('tr');
+  const nameEl = row.cells[0].querySelector('.td-name');
+  const descEl = row.cells[2];
+  const newName = prompt('Modifier le nom :', nameEl.textContent);
+  if (newName !== null) nameEl.textContent = newName;
+  const newDesc = prompt('Modifier la description :', descEl.textContent);
+  if (newDesc !== null) descEl.textContent = newDesc;
+  showSaveToast();
+}
+
+// ── RESSOURCES
+function addRessource() {
+  const name = prompt('Nom de la ressource :'); if (!name) return;
+  const emoji = prompt('Emoji représentatif :') || '💠';
+  const note  = prompt('Note (Ex : rare, région…) :') || '';
+  const grid = document.getElementById('ressourcesGrid');
+  const addBtn = grid.lastElementChild;
+  const div = document.createElement('div');
+  div.className = 'ressource-item';
+  div.innerHTML = `<span class="ressource-emoji">${emoji}</span><div class="ressource-name">${name}</div><div class="ressource-note">${note}</div>`;
+  grid.insertBefore(div, addBtn);
+  showSaveToast();
+}
+
+// ── TAGS
+function addTag() {
+  const name = prompt('Nouveau tag :'); if (!name) return;
+  const wrap = document.querySelector('.world-tags');
+  const addBtn = wrap.lastElementChild;
+  const span = document.createElement('span');
+  span.className = 'tag active';
+  span.textContent = name;
+  span.onclick = function() { this.classList.toggle('active'); };
+  wrap.insertBefore(span, addBtn);
+}
+
+// ── MAP UPLOAD
+function loadMap(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const preview = document.getElementById('mapPreview');
+    const upload  = document.getElementById('mapUpload');
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    upload.style.display = 'none';
+    showSaveToast();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── FACTION MODAL
+let selectedColor = '#b8975a';
+
+function openFactionModal() {
+  document.getElementById('factionModal').classList.add('open');
+}
+function closeFactionModal() {
+  document.getElementById('factionModal').classList.remove('open');
+}
+function openEditFaction(idx) {
+  // Could load faction data — for now just open modal
+  openFactionModal();
+}
+function selectSwatch(el) {
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+function saveFaction() {
+  const name     = document.getElementById('f-name').value.trim(); if (!name) { alert('Entrez un nom.'); return; }
+  const type     = document.getElementById('f-type').value.trim() || 'Faction';
+  const symbol   = document.getElementById('f-symbol').value || '⚑';
+  const leader   = document.getElementById('f-leader').value.trim() || '—';
+  const territory= document.getElementById('f-territory').value.trim() || '—';
+  const ideology = document.getElementById('f-ideology').value.trim() || '—';
+  const relations= document.getElementById('f-relations').value.trim() || '—';
+
+  const grid = document.getElementById('factionsGrid');
+  const addBtn = grid.lastElementChild;
+  const card = document.createElement('div');
+  card.className = 'faction-card';
+  card.style.setProperty('--faction-color', selectedColor);
+  card.innerHTML = `
+    <div class="faction-card-header">
+      <div><div class="faction-symbol">${symbol}</div></div>
+      <div class="faction-color-dot"></div>
+    </div>
+    <div class="faction-name">${name}</div>
+    <div class="faction-type">${type}</div>
+    <div class="faction-field"><div class="faction-field-label">Dirigeant</div><div class="faction-field-val">${leader}</div></div>
+    <div class="faction-field"><div class="faction-field-label">Territoire</div><div class="faction-field-val">${territory}</div></div>
+    <div class="faction-field"><div class="faction-field-label">Idéologie</div><div class="faction-field-val">${ideology}</div></div>
+    <div class="faction-field"><div class="faction-field-label">Relations</div><div class="faction-field-val">${relations}</div></div>`;
+  grid.insertBefore(card, addBtn);
+  closeFactionModal();
+  // clear fields
+  ['f-name','f-type','f-symbol','f-leader','f-territory','f-ideology','f-relations'].forEach(id => document.getElementById(id).value = '');
+  showSaveToast();
+}
+
+// close modal on overlay click
+document.getElementById('factionModal').addEventListener('click', function(e) {
+  if (e.target === this) closeFactionModal();
+});
+
+// ── SAVE TOAST
+let toastTimer;
+function showSaveToast() {
+  const t = document.getElementById('saveToast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── AUTO-SAVE on all contenteditable changes
+document.addEventListener('input', function(e) {
+  if (e.target.contentEditable === 'true') showSaveToast();
+});
+</script>
+
+<!-- DELETE CONFIRM OVERLAY -->
+<div id="deleteOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fdfbf7;border:1px solid #e4ddd3;padding:32px 36px;max-width:380px;width:90%;text-align:center;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#1a1714;margin-bottom:10px" id="deleteOverlayTitle">Supprimer cet élément ?</div>
+    <div style="font-size:13px;font-weight:300;color:#8a8278;line-height:1.7;margin-bottom:24px" id="deleteOverlayMsg">Cette action est irréversible.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="cancelDelete()" style="padding:9px 20px;background:none;border:1px solid #e4ddd3;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8a8278;transition:border-color .2s;">Annuler</button>
+      <button onclick="confirmDelete()" style="padding:9px 20px;background:#9e5a5a;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fdfbf7;transition:background .2s;">Supprimer</button>
+    </div>
+  </div>
+</div>
+<script>
+// ── GLOBAL DELETE SYSTEM
+let _deleteCallback = null;
+function askDelete(title, msg, callback) {
+  document.getElementById('deleteOverlayTitle').textContent = title || 'Supprimer ?';
+  document.getElementById('deleteOverlayMsg').textContent = msg || 'Cette action est irréversible.';
+  _deleteCallback = callback;
+  const ov = document.getElementById('deleteOverlay');
+  ov.style.display = 'flex';
+}
+function confirmDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  if (_deleteCallback) { _deleteCallback(); _deleteCallback = null; }
+}
+function cancelDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  _deleteCallback = null;
+}
+</script>
+
+</body>
+</html>

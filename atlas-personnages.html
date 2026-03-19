@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Atlas de la Création — Personnages</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #f9f6f0;
+  --warm-white: #fdfbf7;
+  --ink: #1a1714;
+  --ink-light: #3d3830;
+  --ink-faint: #8a8278;
+  --gold: #b8975a;
+  --gold-light: #d4b07a;
+  --gold-pale: rgba(184,151,90,0.09);
+  --border: #e4ddd3;
+  --border-strong: #c8bfb3;
+  --sidebar-w: 260px;
+
+  /* Rôle colors */
+  --role-protagoniste: #5a7e9e;
+  --role-antagoniste:  #9e5a5a;
+  --role-secondaire:   #7a8e6a;
+  --role-dirigeant:    #b8975a;
+  --role-pnj:          #8a8278;
+  --role-dieu:         #7a5a9e;
+}
+
+html, body { height: 100%; background: var(--cream); color: var(--ink); font-family: 'Jost', sans-serif; font-weight: 300; }
+.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ══ HEADER ══ */
+header {
+  height: 60px; flex-shrink: 0;
+  background: rgba(249,246,240,0.96); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; z-index: 200;
+}
+.header-left { display: flex; align-items: center; gap: 20px; }
+.back-btn { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; text-decoration: none; transition: color .2s; }
+.back-btn:hover { color: var(--gold); }
+.header-divider { width: 1px; height: 18px; background: var(--border); }
+.header-logo { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; letter-spacing: .06em; color: var(--ink); }
+.header-logo span { font-style: italic; color: var(--gold); margin-right: 8px; font-size: 22px; }
+.btn-new { display: flex; align-items: center; gap: 8px; padding: 7px 16px; background: var(--ink); color: var(--cream); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; transition: background .2s, letter-spacing .2s; position: relative; overflow: hidden; }
+.btn-new:hover { background: var(--ink-light); letter-spacing: .15em; }
+.btn-new::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform .3s; }
+.btn-new:hover::after { transform: scaleX(1); }
+
+/* ══ BODY ══ */
+.body { display: flex; flex: 1; overflow: hidden; }
+
+/* ══ SIDEBAR ══ */
+.sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--warm-white); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.sidebar-header { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); }
+.sidebar-title { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 12px; }
+.search-box { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--cream); border: 1px solid var(--border); }
+.search-box input { flex: 1; background: none; border: none; outline: none; font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 300; color: var(--ink); letter-spacing: .02em; }
+.search-box input::placeholder { color: var(--border-strong); font-style: italic; font-family: 'Cormorant Garamond', serif; }
+
+/* Role filter pills */
+.role-filters { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 6px; }
+.rf { font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 8px; border: 1px solid var(--border); color: var(--ink-faint); cursor: pointer; transition: all .2s; background: none; }
+.rf.active { background: var(--gold-pale); border-color: var(--gold-light); color: var(--gold); }
+
+.sidebar-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+.sidebar-list::-webkit-scrollbar { width: 3px; }
+.sidebar-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+.char-item { padding: 11px 16px; cursor: pointer; border-left: 2px solid transparent; transition: background .2s, border-color .2s; display: flex; align-items: center; gap: 12px; }
+.char-item:hover { background: var(--cream); }
+.char-item.active { background: var(--gold-pale); border-left-color: var(--gold); }
+
+.char-thumb { width: 36px; height: 36px; flex-shrink: 0; overflow: hidden; background: var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic; color: var(--ink-faint); }
+.char-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.char-item-info { flex: 1; min-width: 0; }
+.char-item-name { font-family: 'Cormorant Garamond', serif; font-size: 14.5px; font-weight: 400; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.char-item-role { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+
+.sidebar-footer { padding: 14px 16px; border-top: 1px solid var(--border); }
+.btn-add-char { width: 100%; padding: 9px; background: none; border: 1px dashed var(--border-strong); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; color: var(--ink-faint); letter-spacing: .1em; text-transform: uppercase; transition: border-color .2s, color .2s; }
+.btn-add-char:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ══ MAIN ══ */
+.main-content { flex: 1; overflow-y: auto; background: var(--cream); }
+.main-content::-webkit-scrollbar { width: 4px; }
+.main-content::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* ── CHARACTER HEADER ── */
+.char-header { background: var(--warm-white); border-bottom: 1px solid var(--border); padding: 36px 48px 0; position: relative; overflow: hidden; animation: fadeUp .4s ease; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.char-header::before { content: ''; position: absolute; top: -100px; right: -100px; width: 360px; height: 360px; border-radius: 50%; background: radial-gradient(ellipse, rgba(184,151,90,.06) 0%, transparent 70%); pointer-events: none; }
+
+.char-header-inner { display: flex; gap: 36px; align-items: flex-start; position: relative; }
+
+/* Portrait */
+.portrait-wrap { flex-shrink: 0; position: relative; }
+.portrait-box { width: 120px; height: 150px; background: var(--border); overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border-strong); transition: border-color .2s; }
+.portrait-box:hover { border-color: var(--gold); }
+.portrait-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.portrait-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.portrait-initial { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-style: italic; font-weight: 300; color: var(--border-strong); }
+.portrait-hint { font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--border-strong); }
+.portrait-overlay { position: absolute; inset: 0; background: rgba(26,23,20,.45); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s; }
+.portrait-box:hover .portrait-overlay { opacity: 1; }
+.portrait-overlay-txt { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: white; }
+.portrait-input { display: none; }
+
+.role-badge { display: inline-block; margin-top: 8px; padding: 4px 10px; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; border: 1px solid; cursor: pointer; transition: opacity .2s; }
+.role-badge:hover { opacity: .75; }
+
+/* Header info */
+.char-header-info { flex: 1; padding-bottom: 0; }
+.char-name-display { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 400; color: var(--ink); letter-spacing: -.01em; line-height: 1.1; cursor: text; border-bottom: 1px solid transparent; display: inline-block; transition: border-color .2s; }
+.char-name-display:hover { border-color: var(--gold-light); }
+.char-name-display[contenteditable="true"] { outline: none; border-color: var(--gold); background: var(--gold-pale); padding: 0 6px; }
+
+.char-epithet { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic; color: var(--ink-faint); cursor: text; border-bottom: 1px solid transparent; display: inline-block; transition: border-color .2s; margin-top: 4px; letter-spacing: .02em; }
+.char-epithet:hover { border-color: var(--gold-light); }
+.char-epithet[contenteditable="true"] { outline: none; border-color: var(--gold); background: var(--gold-pale); padding: 0 6px; }
+
+.identity-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.id-pill { font-size: 12px; font-weight: 300; padding: 5px 12px; border: 1px solid var(--border); color: var(--ink-light); letter-spacing: .02em; display: flex; align-items: center; gap: 6px; }
+.id-pill span { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+
+.edit-hint { font-size: 10.5px; color: var(--border-strong); letter-spacing: .04em; margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+.edit-hint::before { content: '✦'; color: var(--gold); font-size: 8px; }
+
+/* Tabs */
+.tab-nav { display: flex; padding: 0 48px; border-bottom: 1px solid var(--border); background: var(--warm-white); gap: 0; margin-top: 28px; }
+.tab-btn { padding: 14px 0; margin-right: 28px; background: none; border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11.5px; font-weight: 400; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); position: relative; transition: color .2s; }
+.tab-btn.active { color: var(--ink); }
+.tab-btn::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1.5px; background: var(--gold); transform: scaleX(0); transition: transform .3s; }
+.tab-btn.active::after { transform: scaleX(1); }
+
+/* ══ PANELS ══ */
+.panels { padding: 36px 48px; }
+.panel { display: none; animation: fadeUp .35s ease; }
+.panel.active { display: block; }
+
+/* Section card */
+.sc { background: var(--warm-white); border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+.sc-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 22px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.sc-header:hover { background: rgba(184,151,90,.03); }
+.sc-title-row { display: flex; align-items: center; gap: 10px; }
+.sc-icon { font-size: 17px; }
+.sc-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; color: var(--ink); }
+.sc-toggle { font-size: 12px; color: var(--ink-faint); transition: transform .3s; }
+.sc.collapsed .sc-toggle { transform: rotate(-90deg); }
+.sc-body { padding: 26px 22px; }
+.sc.collapsed .sc-body { display: none; }
+
+/* Field */
+.fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.fields-grid.single { grid-template-columns: 1fr; }
+.fields-grid.tri { grid-template-columns: 1fr 1fr 1fr; }
+.field-block {}
+.field-label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin-bottom: 7px; display: flex; align-items: center; gap: 8px; }
+.field-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.et { font-size: 14px; font-weight: 300; color: var(--ink); line-height: 1.8; letter-spacing: .02em; min-height: 22px; border-bottom: 1px solid transparent; padding-bottom: 2px; cursor: text; transition: border-color .2s; outline: none; }
+.et:hover { border-color: var(--gold-light); }
+.et:focus { border-color: var(--gold); }
+.et[data-ph]:empty::before { content: attr(data-ph); color: var(--border-strong); font-style: italic; font-family: 'Cormorant Garamond', serif; pointer-events: none; }
+.et.lg { min-height: 72px; }
+
+/* ── TRAITS DE CARACTÈRE ── */
+.traits-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+.trait { padding: 5px 13px; border: 1px solid var(--border); font-size: 12.5px; font-weight: 300; color: var(--ink-light); cursor: pointer; transition: all .2s; }
+.trait.active { background: var(--gold-pale); border-color: var(--gold-light); color: var(--gold); }
+.trait-add { padding: 5px 13px; border: 1px dashed var(--border-strong); font-size: 12px; color: var(--ink-faint); cursor: pointer; background: none; transition: border-color .2s, color .2s; }
+.trait-add:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── COMPÉTENCES / BARRES ── */
+.skills-list { display: flex; flex-direction: column; gap: 14px; }
+.skill-row { display: flex; align-items: center; gap: 14px; }
+.skill-name { font-size: 13px; font-weight: 300; color: var(--ink-light); width: 160px; flex-shrink: 0; letter-spacing: .02em; cursor: text; outline: none; border-bottom: 1px solid transparent; transition: border-color .2s; }
+.skill-name:hover { border-color: var(--gold-light); }
+.skill-name:focus { border-color: var(--gold); }
+.skill-track { flex: 1; height: 4px; background: var(--border); position: relative; cursor: pointer; }
+.skill-fill { height: 100%; background: linear-gradient(to right, var(--gold), var(--gold-light)); transition: width .4s ease; pointer-events: none; }
+.skill-val { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 300; color: var(--ink-faint); width: 36px; text-align: right; flex-shrink: 0; }
+.skill-del { background: none; border: none; cursor: pointer; color: var(--border-strong); font-size: 13px; transition: color .2s; flex-shrink: 0; }
+.skill-del:hover { color: #9e5a5a; }
+.add-skill-btn { width: 100%; padding: 9px; margin-top: 10px; background: none; border: 1px dashed var(--border-strong); font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; transition: border-color .2s, color .2s; }
+.add-skill-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── POUVOIRS ── */
+.pouvoir-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.pouvoir-card { border: 1px solid var(--border); padding: 16px 18px; background: var(--cream); cursor: pointer; transition: border-color .25s; position: relative; }
+.pouvoir-card:hover { border-color: var(--gold-light); }
+.pouvoir-card::before { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; background: var(--gold); opacity: .4; }
+.pouvoir-name { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 500; color: var(--ink); margin-bottom: 5px; }
+.pouvoir-desc { font-size: 12.5px; font-weight: 300; color: var(--ink-faint); line-height: 1.6; }
+.pouvoir-add { border: 1.5px dashed var(--border-strong); display: flex; align-items: center; justify-content: center; gap: 8px; padding: 24px; cursor: pointer; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); background: none; transition: border-color .2s, color .2s; }
+.pouvoir-add:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── RELATIONS ── */
+.relations-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* Graph canvas */
+.graph-wrap { border: 1px solid var(--border); background: var(--cream); overflow: hidden; }
+.graph-title { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+canvas#relGraph { display: block; }
+
+/* Relations list */
+.rel-list { display: flex; flex-direction: column; gap: 0; }
+.rel-item { padding: 14px 0; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 14px; }
+.rel-item:last-child { border-bottom: none; }
+.rel-avatar { width: 34px; height: 34px; background: var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 15px; font-style: italic; color: var(--ink-faint); overflow: hidden; }
+.rel-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.rel-info { flex: 1; }
+.rel-name { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 400; color: var(--ink); }
+.rel-type-tag { display: inline-block; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border: 1px solid; margin: 3px 0 5px; }
+.rel-type-tag.ami   { border-color: #6a9e6a; color: #4a7e4a; background: rgba(106,158,106,.07); }
+.rel-type-tag.ennemi{ border-color: #9e6a6a; color: #7e4a4a; background: rgba(158,106,106,.07); }
+.rel-type-tag.famille{ border-color: #7a5a9e; color: #5a3a7e; background: rgba(122,90,158,.07); }
+.rel-type-tag.rival  { border-color: #b8975a; color: #8a6a2a; background: rgba(184,151,90,.07); }
+.rel-type-tag.neutre { border-color: var(--border); color: var(--ink-faint); }
+.rel-desc { font-size: 12.5px; font-weight: 300; color: var(--ink-faint); line-height: 1.6; }
+.add-rel-btn { width: 100%; padding: 10px; margin-top: 12px; background: none; border: 1px dashed var(--border-strong); font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; transition: border-color .2s, color .2s; }
+.add-rel-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── ARC NARRATIF ── */
+.arc-steps { display: flex; gap: 0; position: relative; margin: 8px 0 28px; }
+.arc-steps::before { content: ''; position: absolute; top: 18px; left: 0; right: 0; height: 1px; background: var(--border); z-index: 0; }
+.arc-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; z-index: 1; cursor: pointer; }
+.arc-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); border: 2px solid var(--border-strong); transition: all .2s; flex-shrink: 0; }
+.arc-step.done .arc-dot { background: var(--gold); border-color: var(--gold); }
+.arc-step.current .arc-dot { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px var(--gold-pale); }
+.arc-step-label { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); text-align: center; transition: color .2s; }
+.arc-step.done .arc-step-label, .arc-step.current .arc-step-label { color: var(--gold); }
+
+/* SAVE TOAST */
+.save-toast { position: fixed; bottom: 28px; right: 28px; background: var(--ink); color: var(--cream); padding: 12px 20px; font-size: 12px; letter-spacing: .06em; display: flex; align-items: center; gap: 8px; transform: translateY(60px); opacity: 0; transition: transform .3s, opacity .3s; z-index: 999; }
+.save-toast.show { transform: translateY(0); opacity: 1; }
+.save-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,23,20,.5); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--warm-white); border: 1px solid var(--border); width: 500px; max-height: 88vh; overflow-y: auto; transform: translateY(14px); transition: transform .3s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { padding: 22px 26px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 400; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 19px; color: var(--ink-faint); transition: color .2s; }
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 24px 26px; display: grid; gap: 16px; }
+.mf label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 6px; }
+.mf input, .mf textarea, .mf select { width: 100%; padding: 9px 13px; background: var(--cream); border: 1px solid var(--border); font-family: 'Jost', sans-serif; font-size: 13.5px; font-weight: 300; color: var(--ink); outline: none; transition: border-color .2s; resize: vertical; -webkit-appearance: none; }
+.mf input:focus, .mf textarea:focus, .mf select:focus { border-color: var(--gold); }
+.modal-footer { padding: 18px 26px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+.btn-cancel { padding: 9px 18px; background: none; border: 1px solid var(--border); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); transition: border-color .2s; }
+.btn-cancel:hover { border-color: var(--border-strong); }
+.btn-save { padding: 9px 20px; background: var(--ink); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); transition: background .2s; }
+.btn-save:hover { background: var(--gold); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .char-header { padding: 24px 20px 0; }
+  .tab-nav, .panels { padding-left: 20px; padding-right: 20px; }
+  .fields-grid { grid-template-columns: 1fr; }
+  .fields-grid.tri { grid-template-columns: 1fr 1fr; }
+  .relations-layout { grid-template-columns: 1fr; }
+  .pouvoir-cards { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <a class="back-btn" href="atlas-hub.html">← Retour</a>
+    <div class="header-divider"></div>
+    <div class="header-logo"><span>𝒜</span>Personnages</div>
+  </div>
+  <button class="btn-new" onclick="openNewCharModal()">+ Nouveau personnage</button>
+</header>
+
+<div class="body">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-title">Mes Personnages</div>
+    <div class="search-box">
+      <span style="font-size:12px;color:var(--border-strong)">⌕</span>
+      <input type="text" placeholder="Rechercher…" oninput="filterChars(this.value)">
+    </div>
+  </div>
+
+  <div class="role-filters">
+    <button class="rf active" onclick="toggleRoleFilter(this,'tous')">Tous</button>
+    <button class="rf" onclick="toggleRoleFilter(this,'protagoniste')">Protag.</button>
+    <button class="rf" onclick="toggleRoleFilter(this,'antagoniste')">Antag.</button>
+    <button class="rf" onclick="toggleRoleFilter(this,'dirigeant')">Dirig.</button>
+    <button class="rf" onclick="toggleRoleFilter(this,'dieu')">Dieux</button>
+    <button class="rf" onclick="toggleRoleFilter(this,'secondaire')">Second.</button>
+    <button class="rf" onclick="toggleRoleFilter(this,'pnj')">PNJ</button>
+  </div>
+
+  <div class="sidebar-list" id="charList">
+    <div class="char-item active" data-role="protagoniste" onclick="selectChar(this,0)">
+      <div class="char-thumb" id="thumb-0"><span>S</span></div>
+      <div class="char-item-info">
+        <div class="char-item-name">Seraphel Vorn</div>
+        <div class="char-item-role" style="color:var(--role-protagoniste)">Protagoniste</div>
+      </div>
+    </div>
+    <div class="char-item" data-role="antagoniste" onclick="selectChar(this,1)">
+      <div class="char-thumb" id="thumb-1"><span>M</span></div>
+      <div class="char-item-info">
+        <div class="char-item-name">La Mère-Sans-Nom</div>
+        <div class="char-item-role" style="color:var(--role-antagoniste)">Antagoniste</div>
+      </div>
+    </div>
+    <div class="char-item" data-role="dirigeant" onclick="selectChar(this,2)">
+      <div class="char-thumb" id="thumb-2"><span>A</span></div>
+      <div class="char-item-info">
+        <div class="char-item-name">Archon Vael</div>
+        <div class="char-item-role" style="color:var(--role-dirigeant)">Dirigeant</div>
+      </div>
+    </div>
+    <div class="char-item" data-role="dieu" onclick="selectChar(this,3)">
+      <div class="char-thumb" id="thumb-3"><span>E</span></div>
+      <div class="char-item-info">
+        <div class="char-item-name">Eil'thar l'Ancien</div>
+        <div class="char-item-role" style="color:var(--role-dieu)">Dieu</div>
+      </div>
+    </div>
+    <div class="char-item" data-role="secondaire" onclick="selectChar(this,4)">
+      <div class="char-thumb" id="thumb-4"><span>K</span></div>
+      <div class="char-item-info">
+        <div class="char-item-name">Kael</div>
+        <div class="char-item-role" style="color:var(--role-secondaire)">Secondaire</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <button class="btn-add-char" onclick="openNewCharModal()">+ Nouveau personnage</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- CHARACTER HEADER -->
+  <div class="char-header" id="charHeader">
+    <div class="char-header-inner">
+
+      <!-- Portrait -->
+      <div class="portrait-wrap">
+        <div class="portrait-box" onclick="document.getElementById('portraitInput').click()">
+          <div class="portrait-placeholder" id="portraitPlaceholder">
+            <div class="portrait-initial" id="portraitInitial">S</div>
+            <div class="portrait-hint">Ajouter portrait</div>
+          </div>
+          <img id="portraitImg" src="" alt="" style="display:none">
+          <div class="portrait-overlay"><span class="portrait-overlay-txt">Changer</span></div>
+        </div>
+        <input type="file" id="portraitInput" class="portrait-input" accept="image/*" onchange="loadPortrait(event)">
+        <div style="margin-top:8px">
+          <span class="role-badge" id="roleBadge" style="color:var(--role-protagoniste);border-color:var(--role-protagoniste)" onclick="cycleRole()">Protagoniste</span>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="char-header-info">
+        <div class="char-name-display" id="charName" contenteditable="false"
+             onclick="makeEd(this)" onblur="this.contentEditable='false';saveToast()"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
+          Seraphel Vorn
+        </div><br>
+        <div class="char-epithet" id="charEpithet" contenteditable="false"
+             onclick="makeEd(this)" onblur="this.contentEditable='false';saveToast()"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
+          Grand Liant de l'Ordre, Porteur du Flux Brisé
+        </div>
+
+        <div class="identity-pills" id="identityPills">
+          <div class="id-pill"><span>Âge</span> <span id="ip-age" contenteditable="true" onblur="saveToast()" style="outline:none;min-width:20px">34</span> ans</div>
+          <div class="id-pill"><span>Race</span> <span id="ip-race" contenteditable="true" onblur="saveToast()" style="outline:none;min-width:30px">Humain-Lié</span></div>
+          <div class="id-pill"><span>Origine</span> <span id="ip-origine" contenteditable="true" onblur="saveToast()" style="outline:none;min-width:60px">Ael'thar-Citadelle</span></div>
+          <div class="id-pill"><span>Monde</span> <span id="ip-monde" contenteditable="true" onblur="saveToast()" style="outline:none;min-width:60px">Le Royaume d'Ael'thar</span></div>
+        </div>
+        <div class="edit-hint">Cliquez sur n'importe quel champ pour modifier</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('apparence',this)">Apparence</button>
+      <button class="tab-btn" onclick="switchTab('perso',this)">Personnalité</button>
+      <button class="tab-btn" onclick="switchTab('histoire',this)">Histoire</button>
+      <button class="tab-btn" onclick="switchTab('competences',this)">Compétences</button>
+      <button class="tab-btn" onclick="switchTab('relations',this)">Relations</button>
+      <button class="tab-btn" onclick="switchTab('arc',this)">Arc narratif</button>
+    </nav>
+  </div>
+
+  <!-- PANELS -->
+  <div class="panels">
+
+    <!-- ── APPARENCE ── -->
+    <div class="panel active" id="panel-apparence">
+      <div class="sc">
+        <div class="sc-header" onclick="toggleSC(this)">
+          <div class="sc-title-row"><span class="sc-icon">🪞</span><span class="sc-title">Apparence physique</span></div>
+          <span class="sc-toggle">▾</span>
+        </div>
+        <div class="sc-body">
+          <div class="fields-grid tri" style="margin-bottom:18px">
+            <div class="field-block">
+              <div class="field-label">Taille & Morphologie</div>
+              <div class="et" contenteditable="true" data-ph="Ex : Grand, athlétique, svelte…">Grand, 1m89, carrure de soldat affinée par les années de Liaison.</div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Cheveux & Yeux</div>
+              <div class="et" contenteditable="true" data-ph="Couleur, texture, coupe…">Cheveux noirs coupés court, yeux ambre — qui brillent d'or en pleine Liaison.</div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Teint & Marques</div>
+              <div class="et" contenteditable="true" data-ph="Cicatrices, tatouages, marques de naissance…">Peau mate, cicatrice en spirale sur l'avant-bras gauche — trace d'une Liaison brisée.</div>
+            </div>
+          </div>
+          <div class="field-label">Description générale</div>
+          <div class="et lg" contenteditable="true" data-ph="Décrivez l'impression générale, la façon dont il/elle se tient, se déplace, ce qu'on remarque en premier…">
+            Seraphel dégage une autorité tranquille — la posture d'un homme habitué à être obéi sans avoir à élever la voix. Son regard pesant semble toujours évaluer ce qu'il voit, cherchant le Flux là où les autres ne voient que des visages.
+          </div>
+          <div class="field-label" style="margin-top:18px">Tenue & Style vestimentaire</div>
+          <div class="et" contenteditable="true" data-ph="Comment s'habille-t-il habituellement ? Tenue de combat, de cour, informelle ?">Manteau de l'Ordre en laine anthracite, gantelets de cuir brûlé aux poignets. Jamais de bijoux — sauf le sceau de Grand Liant, qu'il porte en permanence.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PERSONNALITÉ ── -->
+    <div class="panel" id="panel-perso">
+      <div class="sc">
+        <div class="sc-header" onclick="toggleSC(this)">
+          <div class="sc-title-row"><span class="sc-icon">🜂</span><span class="sc-title">Personnalité & Traits de caractère</span></div>
+          <span class="sc-toggle">▾</span>
+        </div>
+        <div class="sc-body">
+          <div class="field-label">Traits dominants</div>
+          <div class="traits-wrap" id="traitsWrap">
+            <span class="trait active" onclick="toggleTrait(this)">Déterminé</span>
+            <span class="trait active" onclick="toggleTrait(this)">Loyal</span>
+            <span class="trait active" onclick="toggleTrait(this)">Austère</span>
+            <span class="trait" onclick="toggleTrait(this)">Impulsif</span>
+            <span class="trait active" onclick="toggleTrait(this)">Protecteur</span>
+            <span class="trait" onclick="toggleTrait(this)">Méfiant</span>
+            <span class="trait" onclick="toggleTrait(this)">Ambitieux</span>
+            <span class="trait" onclick="toggleTrait(this)">Curieux</span>
+            <span class="trait" onclick="toggleTrait(this)">Solitaire</span>
+            <span class="trait" onclick="toggleTrait(this)">Empathique</span>
+            <span class="trait active" onclick="toggleTrait(this)">Pragmatique</span>
+            <span class="trait" onclick="toggleTrait(this)">Idéaliste</span>
+            <button class="trait-add" onclick="addTrait()">+ Ajouter</button>
+          </div>
+          <div class="fields-grid" style="margin-top:22px">
+            <div class="field-block">
+              <div class="field-label">Forces</div>
+              <div class="et lg" contenteditable="true" data-ph="Ce en quoi il excelle, ses qualités profondes…">Capacité à prendre des décisions difficiles sans flancher. Sens aigu du devoir. Maîtrise totale de la Liaison même sous pression.</div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Faiblesses</div>
+              <div class="et lg" contenteditable="true" data-ph="Ses défauts, ses angles morts, ce qui peut le perdre…">Incapacité à déléguer la confiance. Tendance à se sacrifier pour l'Ordre plutôt que pour les individus. Peur irrationnelle du Délitement.</div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Peurs profondes</div>
+              <div class="et" contenteditable="true" data-ph="Ce qui le terrifie vraiment…">Perdre son identité dans le Délitement. Trahir l'Ordre qu'il a consacré sa vie à servir.</div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Désirs & Motivations</div>
+              <div class="et" contenteditable="true" data-ph="Ce qu'il veut vraiment, ce qui le fait avancer…">Protéger le Flux des mains de ceux qui l'utilisent pour asservir. Trouver ce qui subsiste en lui au-delà du Grand Liant.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HISTOIRE ── -->
+    <div class="panel" id="panel-histoire">
+      <div class="sc">
+        <div class="sc-header" onclick="toggleSC(this)">
+          <div class="sc-title-row"><span class="sc-icon">📜</span><span class="sc-title">Histoire personnelle</span></div>
+          <span class="sc-toggle">▾</span>
+        </div>
+        <div class="sc-body">
+          <div class="fields-grid" style="margin-bottom:18px">
+            <div class="field-block">
+              <div class="field-label">Enfance & Origines</div>
+              <div class="et lg" contenteditable="true" data-ph="D'où vient-il ? Comment a-t-il grandi ?">Né dans les faubourgs de la Citadelle, fils d'un forgeron sans Flux. Découvert par l'Académie à 9 ans après avoir instinctivement Lié son père mourant, lui sauvant la vie au prix de trois jours de coma.</div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Événement fondateur</div>
+              <div class="et lg" contenteditable="true" data-ph="Le moment qui l'a changé à jamais…">À 22 ans, sa première mission de terrain. Il a regardé sa partenaire de Liaison se Déliter en temps réel pour le sauver. Il n'a jamais re-lié quelqu'un de façon permanente depuis.</div>
+            </div>
+          </div>
+          <div class="field-label">Backstory complète</div>
+          <div class="et lg" contenteditable="true" data-ph="Racontez son histoire en détail — les étapes clés, les rencontres déterminantes, ce qui l'a façonné…">
+            Après l'Académie, Seraphel a gravi les rangs de l'Ordre avec une rapidité troublante — non par ambition, mais parce que personne ne voulait prendre les missions qu'il acceptait sans sourciller. Sa réputation de Grand Liant s'est forgée dans les Marches du Nord, là où le Flux se manifeste de façon sauvage et imprévisible…
+          </div>
+          <div class="field-label" style="margin-top:18px">Secrets & Ce que personne ne sait</div>
+          <div class="et" contenteditable="true" data-ph="Les vérités cachées, les honte secrètes, les dettes oubliées…">Il sait depuis deux ans que le Flux dans son sang porte une empreinte inconnue — ni humaine ni divine. Il n'en a parlé à personne.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── COMPÉTENCES ── -->
+    <div class="panel" id="panel-competences">
+      <div class="sc">
+        <div class="sc-header" onclick="toggleSC(this)">
+          <div class="sc-title-row"><span class="sc-icon">⚔</span><span class="sc-title">Compétences & Niveaux</span></div>
+          <span class="sc-toggle">▾</span>
+        </div>
+        <div class="sc-body">
+          <div class="skills-list" id="skillsList">
+            <!-- skills rendered by JS -->
+          </div>
+          <button class="add-skill-btn" onclick="addSkill()">+ Ajouter une compétence</button>
+        </div>
+      </div>
+
+      <div class="sc" style="margin-top:20px">
+        <div class="sc-header" onclick="toggleSC(this)">
+          <div class="sc-title-row"><span class="sc-icon">✦</span><span class="sc-title">Pouvoirs & Capacités spéciales</span></div>
+          <span class="sc-toggle">▾</span>
+        </div>
+        <div class="sc-body">
+          <div class="pouvoir-cards" id="pouvoirCards">
+            <div class="pouvoir-card">
+              <div class="pouvoir-name">Liaison du Sang</div>
+              <div class="pouvoir-desc">Peut lier son Flux à celui d'un autre être, partageant force, sensation et mémoire partielle. Durée limitée sans conséquences.</div>
+            </div>
+            <div class="pouvoir-card">
+              <div class="pouvoir-name">Lecture des Empreintes</div>
+              <div class="pouvoir-desc">Perçoit les traces de Liaison laissées sur des objets ou lieux, jusqu'à plusieurs décennies. Exige concentration totale.</div>
+            </div>
+            <div class="pouvoir-card">
+              <div class="pouvoir-name">Brisure Contrôlée</div>
+              <div class="pouvoir-desc">Peut rompre une Liaison active à distance, libérant une onde de choc magique. Épuisant — usage unique par jour.</div>
+            </div>
+            <button class="pouvoir-add" onclick="addPouvoir()"><span style="font-size:18px">+</span><span>Nouveau pouvoir</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RELATIONS ── -->
+    <div class="panel" id="panel-relations">
+      <div class="relations-layout">
+        <!-- Graph -->
+        <div>
+          <div class="graph-wrap">
+            <div class="graph-title">Carte des relations</div>
+            <canvas id="relGraph" width="380" height="300"></canvas>
+          </div>
+        </div>
+
+        <!-- List -->
+        <div class="sc" style="margin-bottom:0">
+          <div class="sc-header" onclick="toggleSC(this)">
+            <div class="sc-title-row"><span class="sc-icon">🤝</span><span class="sc-title">Liste des relations</span></div>
+            <span class="sc-toggle">▾</span>
+          </div>
+          <div class="sc-body" style="padding-top:0">
+            <div class="rel-list" id="relList">
+              <div class="rel-item">
+                <div class="rel-avatar">M</div>
+                <div class="rel-info">
+                  <div class="rel-name">La Mère-Sans-Nom</div>
+                  <span class="rel-type-tag ennemi">Antagoniste</span>
+                  <div class="rel-desc">Ancienne mentor de Seraphel à l'Académie, avant sa disparition et sa reapparition comme chef des Séparés. Lien rompu — mais jamais oublié.</div>
+                </div>
+              </div>
+              <div class="rel-item">
+                <div class="rel-avatar">A</div>
+                <div class="rel-info">
+                  <div class="rel-name">Archon Vael</div>
+                  <span class="rel-type-tag rival">Rival & Supérieur</span>
+                  <div class="rel-desc">Chef politique de la Citadelle. Le respecte mais ne lui fait pas confiance. La tension entre eux structure l'Ordre depuis des années.</div>
+                </div>
+              </div>
+              <div class="rel-item">
+                <div class="rel-avatar">K</div>
+                <div class="rel-info">
+                  <div class="rel-name">Kael</div>
+                  <span class="rel-type-tag ami">Allié proche</span>
+                  <div class="rel-desc">Le seul Liant en qui Seraphel a une confiance inconditionnelle. Témoin de presque tout.</div>
+                </div>
+              </div>
+            </div>
+            <button class="add-rel-btn" onclick="openRelModal()">+ Ajouter une relation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ARC NARRATIF ── -->
+    <div class="panel" id="panel-arc">
+      <div class="sc">
+        <div class="sc-header" onclick="toggleSC(this)">
+          <div class="sc-title-row"><span class="sc-icon">🌀</span><span class="sc-title">Arc narratif & Évolution</span></div>
+          <span class="sc-toggle">▾</span>
+        </div>
+        <div class="sc-body">
+          <div class="field-label">Étapes de l'arc</div>
+          <div class="arc-steps" id="arcSteps">
+            <div class="arc-step done" onclick="toggleArcStep(this)">
+              <div class="arc-dot"></div>
+              <div class="arc-step-label">Statut quo</div>
+            </div>
+            <div class="arc-step done" onclick="toggleArcStep(this)">
+              <div class="arc-dot"></div>
+              <div class="arc-step-label">Élément déclencheur</div>
+            </div>
+            <div class="arc-step current" onclick="toggleArcStep(this)">
+              <div class="arc-dot"></div>
+              <div class="arc-step-label">Conflit central</div>
+            </div>
+            <div class="arc-step" onclick="toggleArcStep(this)">
+              <div class="arc-dot"></div>
+              <div class="arc-step-label">Point de bascule</div>
+            </div>
+            <div class="arc-step" onclick="toggleArcStep(this)">
+              <div class="arc-dot"></div>
+              <div class="arc-step-label">Résolution</div>
+            </div>
+          </div>
+
+          <div class="fields-grid">
+            <div class="field-block">
+              <div class="field-label">Qui est-il au début ?</div>
+              <div class="et lg" contenteditable="true" data-ph="Son état au début de l'histoire…">Un Grand Liant accompli, respecté, qui croit encore fermement en l'Ordre et sa mission. Efficace, froid, solide.</div>
+            </div>
+            <div class="field-block">
+              <div class="field-label">Qui devient-il à la fin ?</div>
+              <div class="et lg" contenteditable="true" data-ph="Sa transformation, ce qui a changé en lui…">Quelqu'un qui a choisi l'individu contre l'institution. Qui a appris à Lier sans perdre — ni l'autre, ni lui-même.</div>
+            </div>
+          </div>
+          <div class="field-label" style="margin-top:18px">Notes sur l'évolution</div>
+          <div class="et lg" contenteditable="true" data-ph="Idées, questions ouvertes, directions narratives envisagées…">
+            La question centrale : peut-on servir un système imparfait sans en devenir complice ? Seraphel devra choisir entre l'Ordre qui l'a fait et les individus que cet Ordre sacrifie.
+          </div>
+          <div class="field-label" style="margin-top:18px">Thèmes personnels</div>
+          <div class="et" contenteditable="true" data-ph="Les grandes thématiques incarnées par ce personnage…">Loyauté vs Conscience morale. Identité forgée par les autres vs identité choisie. Le coût du pouvoir.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panels -->
+</div><!-- /main-content -->
+</div><!-- /body -->
+</div><!-- /app -->
+
+<!-- MODAL NOUVEAU PERSONNAGE -->
+<div class="modal-overlay" id="newCharModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nouveau personnage</div>
+      <button class="modal-close" onclick="closeModal('newCharModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf"><label>Nom complet</label><input type="text" id="nc-name" placeholder="Prénom Nom / Pseudonyme"></div>
+      <div class="mf"><label>Épithète / Surnom</label><input type="text" id="nc-epithet" placeholder="Ex : La Voix du Vide, Le Liant Brisé…"></div>
+      <div class="mf"><label>Rôle</label>
+        <select id="nc-role">
+          <option value="protagoniste">Protagoniste</option>
+          <option value="antagoniste">Antagoniste</option>
+          <option value="secondaire">Personnage secondaire</option>
+          <option value="dirigeant">Dirigeant</option>
+          <option value="pnj">PNJ</option>
+          <option value="dieu">Dieu</option>
+        </select>
+      </div>
+      <div class="mf"><label>Âge</label><input type="text" id="nc-age" placeholder="Ex : 34, Immortel, Inconnu…"></div>
+      <div class="mf"><label>Race / Espèce</label><input type="text" id="nc-race" placeholder="Ex : Humain, Elfe, Semi-dieu…"></div>
+      <div class="mf"><label>Origine / Lieu de naissance</label><input type="text" id="nc-origine" placeholder="Ex : Ael'thar-Citadelle…"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('newCharModal')">Annuler</button>
+      <button class="btn-save" onclick="createChar()">Créer le personnage</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RELATION -->
+<div class="modal-overlay" id="relModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Ajouter une relation</div>
+      <button class="modal-close" onclick="closeModal('relModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf"><label>Nom du personnage lié</label><input type="text" id="rl-name" placeholder="Nom du personnage"></div>
+      <div class="mf"><label>Type de relation</label>
+        <select id="rl-type">
+          <option value="ami">Ami / Allié</option>
+          <option value="ennemi">Ennemi / Antagoniste</option>
+          <option value="famille">Famille</option>
+          <option value="rival">Rival</option>
+          <option value="neutre">Neutre / Connaissance</option>
+        </select>
+      </div>
+      <div class="mf"><label>Description de la relation</label><textarea id="rl-desc" rows="3" placeholder="Comment se connaissent-ils ? Quelle est la nature de leur lien ?"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('relModal')">Annuler</button>
+      <button class="btn-save" onclick="saveRelation()">Ajouter</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAVE TOAST -->
+<div class="save-toast" id="saveToastEl"><div class="save-dot"></div>Modifications enregistrées</div>
+
+<script>
+// ── DATA
+const ROLES = ['protagoniste','antagoniste','secondaire','dirigeant','pnj','dieu'];
+const ROLE_COLORS = {
+  protagoniste: 'var(--role-protagoniste)', antagoniste: 'var(--role-antagoniste)',
+  secondaire: 'var(--role-secondaire)', dirigeant: 'var(--role-dirigeant)',
+  pnj: 'var(--role-pnj)', dieu: 'var(--role-dieu)'
+};
+let currentRoleIdx = 0;
+const ROLES_LIST = ['protagoniste','antagoniste','dirigeant','dieu','secondaire','pnj'];
+
+// ── TABS
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'relations') setTimeout(drawGraph, 50);
+  if (name === 'competences') renderSkills();
+}
+
+// ── SECTION COLLAPSE
+function toggleSC(header) {
+  header.closest('.sc').classList.toggle('collapsed');
+  const toggle = header.querySelector('.sc-toggle');
+  toggle.style.transform = header.closest('.sc').classList.contains('collapsed') ? 'rotate(-90deg)' : '';
+}
+
+// ── EDITABLE
+function makeEd(el) {
+  el.contentEditable = 'true'; el.focus();
+  const r = document.createRange(); r.selectNodeContents(el);
+  const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+}
+document.addEventListener('input', e => { if (e.target.contentEditable === 'true') saveToast(); });
+
+// ── PORTRAIT
+function loadPortrait(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = document.getElementById('portraitImg');
+    img.src = ev.target.result; img.style.display = 'block';
+    document.getElementById('portraitPlaceholder').style.display = 'none';
+    saveToast();
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── ROLE CYCLE
+const ROLE_LABELS = {
+  protagoniste: 'Protagoniste', antagoniste: 'Antagoniste',
+  secondaire: 'Secondaire', dirigeant: 'Dirigeant', pnj: 'PNJ', dieu: 'Dieu'
+};
+function cycleRole() {
+  currentRoleIdx = (currentRoleIdx + 1) % ROLES_LIST.length;
+  const role = ROLES_LIST[currentRoleIdx];
+  const badge = document.getElementById('roleBadge');
+  badge.textContent = ROLE_LABELS[role];
+  badge.style.color = `var(--role-${role})`;
+  badge.style.borderColor = `var(--role-${role})`;
+  saveToast();
+}
+
+// ── SIDEBAR CHARS
+const charData = [
+  { name: 'Seraphel Vorn', role: 'protagoniste', epithet: 'Grand Liant de l\'Ordre, Porteur du Flux Brisé' },
+  { name: 'La Mère-Sans-Nom', role: 'antagoniste', epithet: 'Fondatrice des Séparés, ancienne Tisserande' },
+  { name: 'Archon Vael', role: 'dirigeant', epithet: 'Seigneur de la Citadelle, Voix du Trône de Cendres' },
+  { name: 'Eil\'thar l\'Ancien', role: 'dieu', epithet: 'Dieu-Mort, Source du Flux, Père de la Liaison' },
+  { name: 'Kael', role: 'secondaire', epithet: 'Liant-confirmé, compagnon fidèle de Seraphel' },
+];
+
+function selectChar(el, idx) {
+  document.querySelectorAll('.char-item').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const d = charData[idx] || { name: el.querySelector('.char-item-name').textContent, role: 'secondaire', epithet: '' };
+  document.getElementById('charName').textContent = d.name;
+  document.getElementById('charEpithet').textContent = d.epithet;
+  document.getElementById('portraitInitial').textContent = d.name[0];
+  const roleIdx = ROLES_LIST.indexOf(d.role);
+  if (roleIdx >= 0) currentRoleIdx = roleIdx;
+  const badge = document.getElementById('roleBadge');
+  badge.textContent = ROLE_LABELS[d.role] || d.role;
+  badge.style.color = `var(--role-${d.role})`;
+  badge.style.borderColor = `var(--role-${d.role})`;
+  // reset portrait
+  document.getElementById('portraitImg').style.display = 'none';
+  document.getElementById('portraitPlaceholder').style.display = 'flex';
+  saveToast();
+}
+
+function filterChars(q) {
+  document.querySelectorAll('.char-item').forEach(item => {
+    const name = item.querySelector('.char-item-name').textContent.toLowerCase();
+    item.style.display = name.includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function toggleRoleFilter(btn, role) {
+  document.querySelectorAll('.rf').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.char-item').forEach(item => {
+    item.style.display = (role === 'tous' || item.dataset.role === role) ? '' : 'none';
+  });
+}
+
+// ── TRAITS
+function toggleTrait(el) { el.classList.toggle('active'); saveToast(); }
+function addTrait() {
+  const name = prompt('Nouveau trait :'); if (!name) return;
+  const wrap = document.getElementById('traitsWrap');
+  const btn = wrap.querySelector('.trait-add');
+  const span = document.createElement('span');
+  span.className = 'trait active'; span.textContent = name;
+  span.onclick = function() { toggleTrait(this); };
+  wrap.insertBefore(span, btn); saveToast();
+}
+
+// ── SKILLS
+let skills = [
+  { name: 'Liaison du Flux', val: 95 },
+  { name: 'Combat rapproché', val: 78 },
+  { name: 'Lecture d\'empreintes', val: 85 },
+  { name: 'Commandement', val: 70 },
+  { name: 'Diplomatie', val: 42 },
+  { name: 'Connaissance des Runes', val: 60 },
+];
+
+function renderSkills() {
+  const list = document.getElementById('skillsList');
+  list.innerHTML = '';
+  skills.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'skill-row';
+    row.innerHTML = `
+      <div class="skill-name" contenteditable="true" onblur="skills[${i}].name=this.textContent;saveToast()">${s.name}</div>
+      <div class="skill-track" onclick="setSkill(${i}, event)">
+        <div class="skill-fill" style="width:${s.val}%"></div>
+      </div>
+      <div class="skill-val" id="sv-${i}">${s.val}</div>
+      <button class="skill-del" onclick="deleteSkill(${i})">✕</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function setSkill(idx, e) {
+  const track = e.currentTarget;
+  const rect = track.getBoundingClientRect();
+  const pct = Math.round(Math.min(100, Math.max(0, (e.clientX - rect.left) / rect.width * 100)));
+  skills[idx].val = pct;
+  renderSkills(); saveToast();
+}
+
+function deleteSkill(idx) {
+  skills.splice(idx, 1); renderSkills(); saveToast();
+}
+
+function addSkill() {
+  const name = prompt('Nom de la compétence :'); if (!name) return;
+  skills.push({ name, val: 50 }); renderSkills(); saveToast();
+}
+
+// ── POUVOIRS
+function addPouvoir() {
+  const name = prompt('Nom du pouvoir :'); if (!name) return;
+  const desc = prompt('Description :') || '';
+  const grid = document.getElementById('pouvoirCards');
+  const addBtn = grid.querySelector('.pouvoir-add');
+  const card = document.createElement('div');
+  card.className = 'pouvoir-card';
+  card.innerHTML = `<div class="pouvoir-name">${name}</div><div class="pouvoir-desc">${desc}</div>`;
+  grid.insertBefore(card, addBtn); saveToast();
+}
+
+// ── RELATIONS GRAPH
+function drawGraph() {
+  const canvas = document.getElementById('relGraph');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const nodes = [
+    { label: 'Seraphel', x: W/2, y: H/2, color: '#b8975a', r: 22 },
+    { label: 'Mère-S-N', x: W/2-120, y: H/2-80, color: '#9e5a5a', r: 16 },
+    { label: 'Archon', x: W/2+120, y: H/2-80, color: '#b8975a', r: 16 },
+    { label: 'Kael', x: W/2-110, y: H/2+90, color: '#7a8e6a', r: 14 },
+    { label: 'Eil\'thar', x: W/2+100, y: H/2+90, color: '#7a5a9e', r: 14 },
+  ];
+  const edges = [
+    { from:0, to:1, type:'ennemi', label:'Rupture' },
+    { from:0, to:2, type:'rival',  label:'Tension' },
+    { from:0, to:3, type:'ami',    label:'Confiance' },
+    { from:0, to:4, type:'neutre', label:'Origine' },
+  ];
+  const edgeColors = { ami:'#6a9e6a', ennemi:'#9e6a6a', rival:'#b8975a', neutre:'#c8bfb3' };
+
+  // draw edges
+  edges.forEach(e => {
+    const a = nodes[e.from], b = nodes[e.to];
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+    ctx.strokeStyle = edgeColors[e.type] || '#c8bfb3';
+    ctx.lineWidth = 1.5; ctx.setLineDash([4,4]);
+    ctx.stroke(); ctx.setLineDash([]);
+    // label
+    const mx = (a.x+b.x)/2, my = (a.y+b.y)/2;
+    ctx.font = '9px Jost, sans-serif'; ctx.fillStyle = '#8a8278'; ctx.textAlign = 'center';
+    ctx.fillText(e.label, mx, my-4);
+  });
+
+  // draw nodes
+  nodes.forEach(n => {
+    ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+    ctx.fillStyle = n.color + '22'; ctx.fill();
+    ctx.strokeStyle = n.color; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.font = `${n === nodes[0] ? 11 : 10}px Jost, sans-serif`;
+    ctx.fillStyle = '#1a1714'; ctx.textAlign = 'center';
+    ctx.fillText(n.label, n.x, n.y + n.r + 13);
+  });
+}
+
+// ── ARC STEPS
+function toggleArcStep(el) {
+  const steps = Array.from(document.querySelectorAll('.arc-step'));
+  const idx = steps.indexOf(el);
+  steps.forEach((s, i) => {
+    s.classList.remove('done','current');
+    if (i < idx) s.classList.add('done');
+    else if (i === idx) s.classList.add('current');
+  });
+  saveToast();
+}
+
+// ── MODALS
+function openNewCharModal() { document.getElementById('newCharModal').classList.add('open'); }
+function openRelModal() { document.getElementById('relModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); }));
+
+function createChar() {
+  const name = document.getElementById('nc-name').value.trim(); if (!name) { alert('Entrez un nom.'); return; }
+  const role    = document.getElementById('nc-role').value;
+  const epithet = document.getElementById('nc-epithet').value.trim();
+  const age     = document.getElementById('nc-age').value.trim() || '?';
+  const race    = document.getElementById('nc-race').value.trim() || '?';
+  const origine = document.getElementById('nc-origine').value.trim() || '?';
+  const initial = name[0].toUpperCase();
+
+  charData.push({ name, role, epithet });
+  const list = document.getElementById('charList');
+  const div = document.createElement('div');
+  div.className = 'char-item'; div.dataset.role = role;
+  div.innerHTML = `
+    <div class="char-thumb"><span>${initial}</span></div>
+    <div class="char-item-info">
+      <div class="char-item-name">${name}</div>
+      <div class="char-item-role" style="color:var(--role-${role})">${ROLE_LABELS[role]}</div>
+    </div>`;
+  const idx = charData.length - 1;
+  div.onclick = function() { selectChar(this, idx); };
+  list.appendChild(div);
+  closeModal('newCharModal');
+  selectChar(div, idx);
+  ['nc-name','nc-epithet','nc-age','nc-race','nc-origine'].forEach(id => document.getElementById(id).value = '');
+  saveToast();
+}
+
+function saveRelation() {
+  const name = document.getElementById('rl-name').value.trim(); if (!name) return;
+  const type = document.getElementById('rl-type').value;
+  const desc = document.getElementById('rl-desc').value.trim() || '';
+  const list = document.getElementById('relList');
+  const item = document.createElement('div');
+  item.className = 'rel-item';
+  item.innerHTML = `
+    <div class="rel-avatar">${name[0]}</div>
+    <div class="rel-info">
+      <div class="rel-name">${name}</div>
+      <span class="rel-type-tag ${type}">${document.getElementById('rl-type').options[document.getElementById('rl-type').selectedIndex].text}</span>
+      <div class="rel-desc">${desc}</div>
+    </div>`;
+  list.appendChild(item);
+  closeModal('relModal');
+  ['rl-name','rl-desc'].forEach(id => document.getElementById(id).value='');
+  drawGraph(); saveToast();
+}
+
+// ── SAVE TOAST
+let toastTimer;
+function saveToast() {
+  const t = document.getElementById('saveToastEl');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── INIT
+renderSkills();
+</script>
+
+<!-- DELETE CONFIRM OVERLAY -->
+<div id="deleteOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fdfbf7;border:1px solid #e4ddd3;padding:32px 36px;max-width:380px;width:90%;text-align:center;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#1a1714;margin-bottom:10px" id="deleteOverlayTitle">Supprimer cet élément ?</div>
+    <div style="font-size:13px;font-weight:300;color:#8a8278;line-height:1.7;margin-bottom:24px" id="deleteOverlayMsg">Cette action est irréversible.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="cancelDelete()" style="padding:9px 20px;background:none;border:1px solid #e4ddd3;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8a8278;transition:border-color .2s;">Annuler</button>
+      <button onclick="confirmDelete()" style="padding:9px 20px;background:#9e5a5a;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fdfbf7;transition:background .2s;">Supprimer</button>
+    </div>
+  </div>
+</div>
+<script>
+// ── GLOBAL DELETE SYSTEM
+let _deleteCallback = null;
+function askDelete(title, msg, callback) {
+  document.getElementById('deleteOverlayTitle').textContent = title || 'Supprimer ?';
+  document.getElementById('deleteOverlayMsg').textContent = msg || 'Cette action est irréversible.';
+  _deleteCallback = callback;
+  const ov = document.getElementById('deleteOverlay');
+  ov.style.display = 'flex';
+}
+function confirmDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  if (_deleteCallback) { _deleteCallback(); _deleteCallback = null; }
+}
+function cancelDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  _deleteCallback = null;
+}
+</script>
+
+</body>
+</html>

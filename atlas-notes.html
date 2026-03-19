@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Atlas de la Création — Notes de création</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #f9f6f0;
+  --warm-white: #fdfbf7;
+  --ink: #1a1714;
+  --ink-light: #3d3830;
+  --ink-faint: #8a8278;
+  --gold: #b8975a;
+  --gold-light: #d4b07a;
+  --gold-pale: rgba(184,151,90,0.09);
+  --border: #e4ddd3;
+  --border-strong: #c8bfb3;
+
+  --cat-idee:     #5a7e9e;
+  --cat-question: #9e7a5a;
+  --cat-citation: #7a5a9e;
+  --cat-liste:    #5a8e6a;
+}
+
+html, body { height: 100%; background: var(--cream); color: var(--ink); font-family: 'Jost', sans-serif; font-weight: 300; }
+.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* ══ HEADER ══ */
+header {
+  height: 60px; flex-shrink: 0;
+  background: rgba(249,246,240,0.96); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; z-index: 200;
+}
+.header-left { display: flex; align-items: center; gap: 20px; }
+.back-btn { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; text-decoration: none; transition: color .2s; }
+.back-btn:hover { color: var(--gold); }
+.hdiv { width: 1px; height: 18px; background: var(--border); }
+.header-logo { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 500; letter-spacing: .06em; color: var(--ink); }
+.header-logo span { font-style: italic; color: var(--gold); margin-right: 8px; font-size: 22px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+
+.btn-view { padding: 6px 14px; background: none; border: 1px solid var(--border); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); transition: all .2s; }
+.btn-view.active, .btn-view:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-pale); }
+.btn-new { padding: 7px 16px; background: var(--ink); color: var(--cream); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; transition: background .2s, letter-spacing .2s; position: relative; overflow: hidden; }
+.btn-new:hover { background: var(--ink-light); letter-spacing: .15em; }
+.btn-new::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform .3s; }
+.btn-new:hover::after { transform: scaleX(1); }
+
+/* ══ TOOLBAR ══ */
+.toolbar {
+  background: var(--warm-white); border-bottom: 1px solid var(--border);
+  padding: 12px 28px; display: flex; align-items: center; gap: 0; flex-wrap: wrap; gap: 8px;
+}
+.cat-filter { display: flex; gap: 6px; align-items: center; }
+.cf-btn { padding: 5px 14px; border: 1px solid var(--border); background: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); transition: all .2s; display: flex; align-items: center; gap: 6px; }
+.cf-btn .cf-dot { width: 6px; height: 6px; border-radius: 50%; }
+.cf-btn.active, .cf-btn:hover { border-color: var(--cf-color, var(--gold)); color: var(--cf-color, var(--gold)); background: color-mix(in srgb, var(--cf-color, var(--gold)) 8%, transparent); }
+
+.toolbar-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+.search-box { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--cream); border: 1px solid var(--border); min-width: 180px; }
+.search-box input { background: none; border: none; outline: none; font-family: 'Jost', sans-serif; font-size: 12.5px; font-weight: 300; color: var(--ink); width: 100%; }
+.search-box input::placeholder { color: var(--border-strong); font-style: italic; font-family: 'Cormorant Garamond', serif; }
+
+.tag-filters { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tag-pill { padding: 4px 10px; border: 1px solid var(--border); font-size: 10.5px; letter-spacing: .06em; color: var(--ink-faint); cursor: pointer; transition: all .2s; background: none; }
+.tag-pill.active { background: var(--gold-pale); border-color: var(--gold-light); color: var(--gold); }
+.tag-pill:hover { border-color: var(--gold); color: var(--gold); }
+.note-count { font-size: 11px; color: var(--ink-faint); letter-spacing: .04em; margin-left: auto; }
+
+/* ══ CONTENT ══ */
+.content { flex: 1; overflow-y: auto; padding: 32px 28px; }
+.content::-webkit-scrollbar { width: 4px; }
+.content::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* ══ GRID VIEW ══ */
+.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+.note-card {
+  background: var(--warm-white); border: 1px solid var(--border);
+  padding: 22px 20px; cursor: pointer; position: relative; overflow: hidden;
+  transition: border-color .25s, transform .2s, box-shadow .25s;
+  animation: cardIn .4s ease backwards;
+}
+.note-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(26,23,20,.05); }
+.note-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--nc, var(--gold)); }
+
+.note-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
+.note-cat-badge { font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; padding: 3px 8px; border: 1px solid; color: var(--nc, var(--gold)); border-color: var(--nc, var(--gold)); background: color-mix(in srgb, var(--nc, var(--gold)) 8%, transparent); flex-shrink: 0; }
+.note-actions { display: flex; gap: 6px; opacity: 0; transition: opacity .2s; }
+.note-card:hover .note-actions { opacity: 1; }
+.note-action-btn { background: none; border: none; cursor: pointer; font-size: 13px; color: var(--ink-faint); transition: color .2s; padding: 2px; }
+.note-action-btn:hover { color: var(--ink); }
+
+.note-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; color: var(--ink); margin-bottom: 8px; line-height: 1.3; }
+.note-preview { font-size: 13px; font-weight: 300; color: var(--ink-faint); line-height: 1.7; letter-spacing: .01em; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* liste spéciale */
+.note-list-preview { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.note-list-preview li { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; font-weight: 300; color: var(--ink-faint); line-height: 1.5; }
+.note-list-preview li::before { content: '—'; color: var(--gold); flex-shrink: 0; }
+
+/* citation spéciale */
+.note-citation-preview { border-left: 2px solid var(--gold-light); padding-left: 12px; font-family: 'Cormorant Garamond', serif; font-size: 15px; font-style: italic; color: var(--ink-light); line-height: 1.6; }
+
+.note-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+.note-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.note-tag { font-size: 10px; letter-spacing: .06em; padding: 2px 7px; background: var(--cream); border: 1px solid var(--border); color: var(--ink-faint); }
+.note-date { font-size: 10.5px; color: var(--border-strong); letter-spacing: .04em; white-space: nowrap; }
+
+@keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ADD CARD */
+.add-card { border: 1.5px dashed var(--border-strong); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px 20px; cursor: pointer; background: none; transition: border-color .25s, background .25s; min-height: 160px; }
+.add-card:hover { border-color: var(--gold); background: var(--gold-pale); }
+.add-card-icon { font-size: 26px; opacity: .4; }
+.add-card-text { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+
+/* ══ EDITOR VIEW ══ */
+.editor-layout { display: flex; gap: 0; height: 100%; }
+.notes-list-panel { width: 280px; flex-shrink: 0; border-right: 1px solid var(--border); overflow-y: auto; background: var(--warm-white); }
+.notes-list-panel::-webkit-scrollbar { width: 3px; }
+.notes-list-panel::-webkit-scrollbar-thumb { background: var(--border); }
+
+.nlist-item { padding: 14px 18px; border-bottom: 1px solid var(--border); cursor: pointer; border-left: 2px solid transparent; transition: background .2s, border-color .2s; }
+.nlist-item:hover { background: var(--cream); }
+.nlist-item.active { background: var(--gold-pale); border-left-color: var(--gold); }
+.nlist-item-cat { font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--nc, var(--gold)); margin-bottom: 3px; }
+.nlist-item-title { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 400; color: var(--ink); margin-bottom: 3px; }
+.nlist-item-date { font-size: 10px; color: var(--border-strong); }
+
+/* Editor pane */
+.editor-pane { flex: 1; overflow-y: auto; padding: 40px 52px; background: var(--cream); }
+.editor-pane::-webkit-scrollbar { width: 4px; }
+.editor-pane::-webkit-scrollbar-thumb { background: var(--border); }
+
+.editor-cat-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.editor-cat-select { background: none; border: 1px solid var(--border); padding: 5px 12px; font-family: 'Jost', sans-serif; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); outline: none; cursor: pointer; transition: border-color .2s; -webkit-appearance: none; }
+.editor-cat-select:focus { border-color: var(--gold); }
+
+.editor-title { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; color: var(--ink); width: 100%; background: none; border: none; outline: none; border-bottom: 1px solid transparent; padding-bottom: 4px; transition: border-color .2s; letter-spacing: -.01em; margin-bottom: 20px; }
+.editor-title:focus { border-color: var(--gold-light); }
+.editor-title::placeholder { color: var(--border-strong); font-style: italic; }
+
+/* Toolbar formatting */
+.fmt-bar { display: flex; gap: 2px; padding: 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
+.fmt-btn { padding: 5px 10px; background: none; border: 1px solid transparent; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 12px; color: var(--ink-faint); transition: all .2s; border-radius: 0; }
+.fmt-btn:hover { border-color: var(--border); color: var(--ink); background: var(--cream); }
+.fmt-btn.active { background: var(--gold-pale); border-color: var(--gold-light); color: var(--gold); }
+.fmt-sep { width: 1px; height: 24px; background: var(--border); margin: 4px 4px; align-self: center; }
+
+.editor-body { min-height: 300px; outline: none; font-size: 14.5px; font-weight: 300; line-height: 1.9; color: var(--ink); letter-spacing: .015em; }
+.editor-body:empty::before { content: attr(data-ph); color: var(--border-strong); font-style: italic; font-family: 'Cormorant Garamond', serif; font-size: 16px; pointer-events: none; }
+.editor-body b, .editor-body strong { font-weight: 500; }
+.editor-body i, .editor-body em { font-style: italic; font-family: 'Cormorant Garamond', serif; }
+.editor-body h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--ink); margin: 20px 0 8px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.editor-body h3 { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; font-style: italic; color: var(--ink-light); margin: 16px 0 6px; }
+.editor-body ul { padding-left: 0; list-style: none; }
+.editor-body ul li { padding: 3px 0 3px 20px; position: relative; }
+.editor-body ul li::before { content: '—'; position: absolute; left: 0; color: var(--gold); }
+.editor-body ol { padding-left: 20px; }
+.editor-body ol li { padding: 3px 0; }
+.editor-body blockquote { border-left: 2px solid var(--gold-light); padding-left: 16px; margin: 16px 0; font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic; color: var(--ink-light); }
+.editor-body hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+/* Tags editor */
+.editor-tags-row { display: flex; align-items: center; gap: 8px; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.editor-tag-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+.editor-tag { font-size: 10.5px; padding: 3px 9px; background: var(--cream); border: 1px solid var(--border); color: var(--ink-faint); cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 5px; }
+.editor-tag:hover { border-color: #9e5a5a; color: #9e5a5a; }
+.editor-tag-remove { font-size: 10px; opacity: .6; }
+.editor-tag-input { background: none; border: none; border-bottom: 1px solid var(--border); outline: none; font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 300; color: var(--ink); width: 80px; padding: 2px 4px; transition: border-color .2s; }
+.editor-tag-input:focus { border-color: var(--gold); }
+
+/* ══ QUESTION SPECIAL ══ */
+.q-status { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+.qs-btn { padding: 4px 12px; border: 1px solid var(--border); background: none; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; color: var(--ink-faint); transition: all .2s; }
+.qs-btn.active.ouverte  { border-color: #9e7a5a; color: #9e7a5a; background: rgba(158,122,90,.08); }
+.qs-btn.active.resolue  { border-color: #5a8e6a; color: #5a8e6a; background: rgba(90,142,106,.08); }
+.qs-btn.active.bloquee  { border-color: #9e5a5a; color: #9e5a5a; background: rgba(158,90,90,.08); }
+
+/* ══ MODAL ══ */
+.modal-overlay { position: fixed; inset: 0; background: rgba(26,23,20,.5); backdrop-filter: blur(4px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal { background: var(--warm-white); border: 1px solid var(--border); width: 480px; transform: translateY(14px); transition: transform .3s; }
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--ink-faint); }
+.modal-body { padding: 22px 24px; display: grid; gap: 16px; }
+.mf label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 6px; }
+.mf input, .mf select, .mf textarea { width: 100%; padding: 9px 13px; background: var(--cream); border: 1px solid var(--border); font-family: 'Jost', sans-serif; font-size: 13.5px; font-weight: 300; color: var(--ink); outline: none; transition: border-color .2s; -webkit-appearance: none; resize: vertical; }
+.mf input:focus, .mf select:focus, .mf textarea:focus { border-color: var(--gold); }
+.cat-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cat-option { padding: 12px; border: 1px solid var(--border); cursor: pointer; text-align: center; transition: all .2s; background: none; }
+.cat-option.selected { border-color: var(--co-color); background: color-mix(in srgb, var(--co-color) 8%, transparent); }
+.cat-option-icon { font-size: 20px; display: block; margin-bottom: 6px; }
+.cat-option-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+.cat-option.selected .cat-option-label { color: var(--co-color); }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+.btn-cancel { padding: 8px 16px; background: none; border: 1px solid var(--border); cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+.btn-save { padding: 8px 18px; background: var(--ink); border: none; cursor: pointer; font-family: 'Jost', sans-serif; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--cream); transition: background .2s; }
+.btn-save:hover { background: var(--gold); }
+
+/* TOAST */
+.save-toast { position: fixed; bottom: 28px; right: 28px; background: var(--ink); color: var(--cream); padding: 11px 18px; font-size: 12px; letter-spacing: .06em; display: flex; align-items: center; gap: 8px; transform: translateY(60px); opacity: 0; transition: transform .3s, opacity .3s; z-index: 999; }
+.save-toast.show { transform: translateY(0); opacity: 1; }
+.save-dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; }
+
+@media (max-width: 768px) {
+  .notes-grid { grid-template-columns: 1fr; }
+  .editor-layout { flex-direction: column; }
+  .notes-list-panel { width: 100%; height: 200px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <a class="back-btn" href="atlas-hub.html">← Retour</a>
+    <div class="hdiv"></div>
+    <div class="header-logo"><span>𝒜</span>Notes de création</div>
+  </div>
+  <div class="header-right">
+    <button class="btn-view active" id="btnGrid" onclick="setView('grid')">⊞ Grille</button>
+    <button class="btn-view" id="btnEditor" onclick="setView('editor')">≡ Éditeur</button>
+    <button class="btn-new" onclick="openNewNoteModal()">+ Nouvelle note</button>
+  </div>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="cat-filter">
+    <button class="cf-btn active" style="--cf-color:var(--ink-faint)" onclick="filterCat(this,'tous')"><span class="cf-dot" style="background:var(--ink-faint)"></span>Toutes</button>
+    <button class="cf-btn" style="--cf-color:var(--cat-idee)" onclick="filterCat(this,'idee')"><span class="cf-dot" style="background:var(--cat-idee)"></span>Idées</button>
+    <button class="cf-btn" style="--cf-color:var(--cat-question)" onclick="filterCat(this,'question')"><span class="cf-dot" style="background:var(--cat-question)"></span>Questions</button>
+    <button class="cf-btn" style="--cf-color:var(--cat-citation)" onclick="filterCat(this,'citation')"><span class="cf-dot" style="background:var(--cat-citation)"></span>Citations</button>
+    <button class="cf-btn" style="--cf-color:var(--cat-liste)" onclick="filterCat(this,'liste')"><span class="cf-dot" style="background:var(--cat-liste)"></span>Listes</button>
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <div class="search-box">
+    <span style="font-size:12px;color:var(--border-strong)">⌕</span>
+    <input type="text" placeholder="Rechercher dans les notes…" oninput="searchNotes(this.value)">
+  </div>
+
+  <div class="toolbar-sep"></div>
+
+  <div class="tag-filters" id="tagFilters">
+    <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)">Tags :</span>
+    <button class="tag-pill active" onclick="toggleTagFilter(this,'tous')">Tous</button>
+    <button class="tag-pill" onclick="toggleTagFilter(this,'magie')">magie</button>
+    <button class="tag-pill" onclick="toggleTagFilter(this,'factions')">factions</button>
+    <button class="tag-pill" onclick="toggleTagFilter(this,'narration')">narration</button>
+    <button class="tag-pill" onclick="toggleTagFilter(this,'seraphel')">seraphel</button>
+    <button class="tag-pill" onclick="toggleTagFilter(this,'worldbuilding')">worldbuilding</button>
+  </div>
+
+  <span class="note-count" id="noteCount">6 notes</span>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="mainContent">
+
+  <!-- GRID VIEW -->
+  <div id="gridView">
+    <div class="notes-grid" id="notesGrid">
+
+      <!-- IDÉE -->
+      <div class="note-card" data-cat="idee" data-tags="magie,seraphel" style="--nc:var(--cat-idee)" onclick="openNote(0)">
+        <div class="note-card-header">
+          <span class="note-cat-badge" style="--nc:var(--cat-idee)">Idée</span>
+          <div class="note-actions">
+            <button class="note-action-btn" onclick="event.stopPropagation();editNote(0)" title="Éditer">✎</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)" title="Supprimer">✕</button>
+          </div>
+        </div>
+        <div class="note-title">Le Flux peut-il être synthétisé ?</div>
+        <div class="note-preview">Et si une faction avait découvert comment créer artificiellement du Flux — un Flux sans empreinte divine ? Implications énormes sur l'économie de la Liaison et sur l'Ordre. Cela remettrait en question l'idée que le Flux est sacré par nature…</div>
+        <div class="note-footer">
+          <div class="note-tags"><span class="note-tag">magie</span><span class="note-tag">seraphel</span></div>
+          <span class="note-date">Aujourd'hui</span>
+        </div>
+      </div>
+
+      <!-- QUESTION -->
+      <div class="note-card" data-cat="question" data-tags="factions,narration" style="--nc:var(--cat-question)" onclick="openNote(1)">
+        <div class="note-card-header">
+          <span class="note-cat-badge" style="--nc:var(--cat-question)">❓ Question</span>
+          <div class="note-actions">
+            <button class="note-action-btn" onclick="event.stopPropagation();editNote(1)">✎</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+          </div>
+        </div>
+        <div class="note-title">Qui est vraiment la Mère-Sans-Nom ?</div>
+        <div style="margin-bottom:10px"><span style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border:1px solid #9e7a5a;color:#9e7a5a;background:rgba(158,122,90,.08)">Ouverte</span></div>
+        <div class="note-preview">Son passé à l'Académie est flou. Elle connaît Seraphel mieux que quiconque — comment ? A-t-elle été son mentor direct ou juste une influence indirecte ? Son identité est-elle liée à la Tisserande légendaire disparue il y a 40 ans ?</div>
+        <div class="note-footer">
+          <div class="note-tags"><span class="note-tag">factions</span><span class="note-tag">narration</span></div>
+          <span class="note-date">Hier</span>
+        </div>
+      </div>
+
+      <!-- CITATION -->
+      <div class="note-card" data-cat="citation" data-tags="narration" style="--nc:var(--cat-citation)" onclick="openNote(2)">
+        <div class="note-card-header">
+          <span class="note-cat-badge" style="--nc:var(--cat-citation)">" Citation</span>
+          <div class="note-actions">
+            <button class="note-action-btn" onclick="event.stopPropagation();editNote(2)">✎</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+          </div>
+        </div>
+        <div class="note-title">Phrase d'ouverture — Chapitre I</div>
+        <div class="note-citation-preview">On ne ressent pas le Flux comme une force. On le ressent comme un manque — la douleur d'un os qu'on n'a jamais eu, soudainement présent.</div>
+        <div class="note-footer">
+          <div class="note-tags"><span class="note-tag">narration</span></div>
+          <span class="note-date">Il y a 2 jours</span>
+        </div>
+      </div>
+
+      <!-- LISTE -->
+      <div class="note-card" data-cat="liste" data-tags="worldbuilding,magie" style="--nc:var(--cat-liste)" onclick="openNote(3)">
+        <div class="note-card-header">
+          <span class="note-cat-badge" style="--nc:var(--cat-liste)">☰ Liste</span>
+          <div class="note-actions">
+            <button class="note-action-btn" onclick="event.stopPropagation();editNote(3)">✎</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+          </div>
+        </div>
+        <div class="note-title">Noms à donner aux sorts de Liaison</div>
+        <ul class="note-list-preview">
+          <li>La Tresse — lien temporaire entre deux consciences</li>
+          <li>Le Sceau d'Ancrage — Liaison permanente rituelle</li>
+          <li>L'Effilochage — dissolution forcée d'un lien</li>
+          <li>La Marque Oubliée — empreinte laissée après rupture</li>
+        </ul>
+        <div class="note-footer">
+          <div class="note-tags"><span class="note-tag">magie</span><span class="note-tag">worldbuilding</span></div>
+          <span class="note-date">Il y a 3 jours</span>
+        </div>
+      </div>
+
+      <!-- IDÉE 2 -->
+      <div class="note-card" data-cat="idee" data-tags="narration,seraphel" style="--nc:var(--cat-idee)" onclick="openNote(4)">
+        <div class="note-card-header">
+          <span class="note-cat-badge" style="--nc:var(--cat-idee)">Idée</span>
+          <div class="note-actions">
+            <button class="note-action-btn" onclick="event.stopPropagation();editNote(4)">✎</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+          </div>
+        </div>
+        <div class="note-title">Scène : Seraphel et le miroir du Flux</div>
+        <div class="note-preview">Scène clé au milieu de l'acte 2 — Seraphel se retrouve face à une manifestation du Flux pur, qui prend la forme de quelqu'un qu'il a perdu. Comment réagit-il ? Est-ce une vision ou une entité réelle ? Peut être le tournant de son arc…</div>
+        <div class="note-footer">
+          <div class="note-tags"><span class="note-tag">narration</span><span class="note-tag">seraphel</span></div>
+          <span class="note-date">Il y a 4 jours</span>
+        </div>
+      </div>
+
+      <!-- QUESTION 2 -->
+      <div class="note-card" data-cat="question" data-tags="worldbuilding,factions" style="--nc:var(--cat-question)" onclick="openNote(5)">
+        <div class="note-card-header">
+          <span class="note-cat-badge" style="--nc:var(--cat-question)">❓ Question</span>
+          <div class="note-actions">
+            <button class="note-action-btn" onclick="event.stopPropagation();editNote(5)">✎</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+          </div>
+        </div>
+        <div class="note-title">Économie du Royaume — comment fonctionne-t-elle ?</div>
+        <div style="margin-bottom:10px"><span style="font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border:1px solid #5a8e6a;color:#5a8e6a;background:rgba(90,142,106,.08)">Résolue</span></div>
+        <div class="note-preview">Basée sur l'extraction et le commerce de l'obsidienne de mana. Les Liants servent aussi d'intermédiaires commerciaux — leur capacité à lire les empreintes sur les marchandises garantit leur authenticité.</div>
+        <div class="note-footer">
+          <div class="note-tags"><span class="note-tag">worldbuilding</span><span class="note-tag">factions</span></div>
+          <span class="note-date">Il y a 5 jours</span>
+        </div>
+      </div>
+
+      <!-- ADD CARD -->
+      <button class="add-card" onclick="openNewNoteModal()">
+        <span class="add-card-icon">✦</span>
+        <span class="add-card-text">Nouvelle note</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- EDITOR VIEW (hidden by default) -->
+  <div id="editorView" style="display:none;height:100%;margin:-32px -28px;padding:0">
+    <div class="editor-layout" style="height:calc(100vh - 60px - 57px)">
+
+      <!-- Notes list -->
+      <div class="notes-list-panel">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint)">Notes</div>
+        <div id="editorNotesList">
+          <div class="nlist-item active" style="--nc:var(--cat-idee)" onclick="loadEditorNote(0)">
+            <div class="nlist-item-cat" style="color:var(--cat-idee)">Idée</div>
+            <div class="nlist-item-title">Le Flux peut-il être synthétisé ?</div>
+            <div class="nlist-item-date">Aujourd'hui</div>
+          </div>
+          <div class="nlist-item" onclick="loadEditorNote(1)">
+            <div class="nlist-item-cat" style="color:var(--cat-question)">Question</div>
+            <div class="nlist-item-title">Qui est vraiment la Mère-Sans-Nom ?</div>
+            <div class="nlist-item-date">Hier</div>
+          </div>
+          <div class="nlist-item" onclick="loadEditorNote(2)">
+            <div class="nlist-item-cat" style="color:var(--cat-citation)">Citation</div>
+            <div class="nlist-item-title">Phrase d'ouverture — Chapitre I</div>
+            <div class="nlist-item-date">Il y a 2 jours</div>
+          </div>
+          <div class="nlist-item" onclick="loadEditorNote(3)">
+            <div class="nlist-item-cat" style="color:var(--cat-liste)">Liste</div>
+            <div class="nlist-item-title">Noms à donner aux sorts de Liaison</div>
+            <div class="nlist-item-date">Il y a 3 jours</div>
+          </div>
+          <div class="nlist-item" onclick="loadEditorNote(4)">
+            <div class="nlist-item-cat" style="color:var(--cat-idee)">Idée</div>
+            <div class="nlist-item-title">Scène : Seraphel et le miroir</div>
+            <div class="nlist-item-date">Il y a 4 jours</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor -->
+      <div class="editor-pane">
+        <div class="editor-cat-row">
+          <select class="editor-cat-select" id="editorCat" onchange="saveToast()">
+            <option value="idee">Idée</option>
+            <option value="question">Question</option>
+            <option value="citation">Citation</option>
+            <option value="liste">Liste</option>
+          </select>
+          <!-- Question status -->
+          <div class="q-status" id="qStatus" style="display:none">
+            <button class="qs-btn active ouverte" onclick="setQStatus(this,'ouverte')">Ouverte</button>
+            <button class="qs-btn resolue" onclick="setQStatus(this,'resolue')">Résolue</button>
+            <button class="qs-btn bloquee" onclick="setQStatus(this,'bloquee')">Bloquée</button>
+          </div>
+        </div>
+
+        <input type="text" class="editor-title" id="editorTitle" placeholder="Titre de la note…" oninput="saveToast()">
+
+        <!-- Formatting bar -->
+        <div class="fmt-bar">
+          <button class="fmt-btn" onclick="fmt('bold')" title="Gras"><b>G</b></button>
+          <button class="fmt-btn" onclick="fmt('italic')" title="Italique"><i>I</i></button>
+          <button class="fmt-btn" onclick="fmt('underline')" title="Souligné"><u>S</u></button>
+          <div class="fmt-sep"></div>
+          <button class="fmt-btn" onclick="fmtBlock('h2')">Titre</button>
+          <button class="fmt-btn" onclick="fmtBlock('h3')">Sous-titre</button>
+          <div class="fmt-sep"></div>
+          <button class="fmt-btn" onclick="fmtBlock('ul')">— Liste</button>
+          <button class="fmt-btn" onclick="fmtBlock('ol')">1. Numérotée</button>
+          <button class="fmt-btn" onclick="fmtBlock('blockquote')">" Citation</button>
+          <div class="fmt-sep"></div>
+          <button class="fmt-btn" onclick="fmtBlock('hr')">Séparateur</button>
+        </div>
+
+        <div class="editor-body" id="editorBody" contenteditable="true"
+             data-ph="Commencez à écrire votre note ici…"
+             oninput="saveToast()">
+          <p>Et si une faction avait découvert comment créer artificiellement du Flux — un Flux sans empreinte divine ? Les implications seraient énormes sur l'économie de la Liaison et sur la légitimité de l'Ordre.</p>
+          <h2>Pistes à explorer</h2>
+          <ul>
+            <li>Quel processus permettrait de synthétiser le Flux ?</li>
+            <li>Qui serait capable de le faire — les Séparés ? Un groupe encore inconnu ?</li>
+            <li>Comment l'Ordre réagirait-il à cette découverte ?</li>
+          </ul>
+          <h3>Lien avec l'arc de Seraphel</h3>
+          <p>Si le Flux peut être artificiel, cela remet en question toute la hiérarchie morale que Seraphel a intégrée. Son don ne serait plus divin — juste chimique. Cette révélation pourrait être le catalyseur de sa rupture avec l'Ordre.</p>
+        </div>
+
+        <div class="editor-tags-row">
+          <span class="editor-tag-label">Tags</span>
+          <span class="editor-tag" onclick="removeTag(this)">magie <span class="editor-tag-remove">✕</span></span>
+          <span class="editor-tag" onclick="removeTag(this)">seraphel <span class="editor-tag-remove">✕</span></span>
+          <input type="text" class="editor-tag-input" placeholder="+ tag" onkeydown="addTagFromInput(event)">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL NOUVELLE NOTE -->
+<div class="modal-overlay" id="newNoteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nouvelle note</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mf">
+        <label>Catégorie</label>
+        <div class="cat-options">
+          <button class="cat-option selected" style="--co-color:var(--cat-idee)" data-cat="idee" onclick="selectCat(this)">
+            <span class="cat-option-icon">💡</span>
+            <span class="cat-option-label">Idée libre</span>
+          </button>
+          <button class="cat-option" style="--co-color:var(--cat-question)" data-cat="question" onclick="selectCat(this)">
+            <span class="cat-option-icon">❓</span>
+            <span class="cat-option-label">Question</span>
+          </button>
+          <button class="cat-option" style="--co-color:var(--cat-citation)" data-cat="citation" onclick="selectCat(this)">
+            <span class="cat-option-icon">"</span>
+            <span class="cat-option-label">Citation</span>
+          </button>
+          <button class="cat-option" style="--co-color:var(--cat-liste)" data-cat="liste" onclick="selectCat(this)">
+            <span class="cat-option-icon">☰</span>
+            <span class="cat-option-label">Liste</span>
+          </button>
+        </div>
+      </div>
+      <div class="mf">
+        <label>Titre</label>
+        <input type="text" id="nn-title" placeholder="Titre de la note…">
+      </div>
+      <div class="mf">
+        <label>Tags (séparés par des virgules)</label>
+        <input type="text" id="nn-tags" placeholder="magie, narration, seraphel…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
+      <button class="btn-save" onclick="createNote()">Créer la note</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="save-toast" id="saveToastEl"><div class="save-dot"></div>Note sauvegardée</div>
+
+<script>
+// ── VIEW TOGGLE
+let currentView = 'grid';
+function setView(v) {
+  currentView = v;
+  document.getElementById('gridView').style.display = v === 'grid' ? 'block' : 'none';
+  document.getElementById('editorView').style.display = v === 'editor' ? 'block' : 'none';
+  document.getElementById('btnGrid').classList.toggle('active', v === 'grid');
+  document.getElementById('btnEditor').classList.toggle('active', v === 'editor');
+}
+
+// ── OPEN NOTE IN EDITOR
+function openNote(idx) { setView('editor'); loadEditorNote(idx); }
+function editNote(idx) { openNote(idx); }
+
+// ── LOAD NOTE INTO EDITOR
+const notesData = [
+  { title: 'Le Flux peut-il être synthétisé ?', cat: 'idee', tags: ['magie','seraphel'],
+    body: `<p>Et si une faction avait découvert comment créer artificiellement du Flux — un Flux sans empreinte divine ? Les implications seraient énormes sur l'économie de la Liaison et sur la légitimité de l'Ordre.</p><h2>Pistes à explorer</h2><ul><li>Quel processus permettrait de synthétiser le Flux ?</li><li>Qui serait capable — les Séparés ? Un groupe encore inconnu ?</li><li>Comment l'Ordre réagirait-il ?</li></ul><h3>Lien avec l'arc de Seraphel</h3><p>Si le Flux peut être artificiel, cela remet en question toute la hiérarchie morale que Seraphel a intégrée. Son don ne serait plus divin — juste chimique.</p>` },
+  { title: 'Qui est vraiment la Mère-Sans-Nom ?', cat: 'question', tags: ['factions','narration'],
+    body: `<p>Son passé à l'Académie est flou. Elle connaît Seraphel mieux que quiconque — comment ?</p><ul><li>A-t-elle été son mentor direct ou juste une influence indirecte ?</li><li>Son identité est-elle liée à la Tisserande légendaire disparue il y a 40 ans ?</li><li>Quelle est sa motivation réelle — libération ou vengeance ?</li></ul>` },
+  { title: 'Phrase d\'ouverture — Chapitre I', cat: 'citation', tags: ['narration'],
+    body: `<blockquote>On ne ressent pas le Flux comme une force. On le ressent comme un manque — la douleur d'un os qu'on n'a jamais eu, soudainement présent.</blockquote><p>Possibilité d'alterner avec une version plus sobre : <em>Le Flux n'arrive pas. Il se révèle.</em></p>` },
+  { title: 'Noms à donner aux sorts de Liaison', cat: 'liste', tags: ['magie','worldbuilding'],
+    body: `<ul><li>La Tresse — lien temporaire entre deux consciences</li><li>Le Sceau d'Ancrage — Liaison permanente rituelle</li><li>L'Effilochage — dissolution forcée d'un lien</li><li>La Marque Oubliée — empreinte laissée après rupture</li><li>Le Miroir Partagé — vision dans la mémoire de l'autre</li><li>La Coupure Blanche — rupture d'urgence, très douloureuse</li></ul>` },
+  { title: 'Scène : Seraphel et le miroir du Flux', cat: 'idee', tags: ['narration','seraphel'],
+    body: `<p>Scène clé au milieu de l'acte 2. Seraphel se retrouve face à une manifestation du Flux pur qui prend la forme de quelqu'un qu'il a perdu.</p><h2>Questions clés</h2><ul><li>Est-ce une vision ou une entité réelle issue du Flux ?</li><li>Que lui dit-elle ? Que lui révèle-t-elle ?</li><li>Comment cela change-t-il son rapport à la Liaison ?</li></ul>` },
+];
+
+function loadEditorNote(idx) {
+  const n = notesData[idx]; if (!n) return;
+  document.querySelectorAll('.nlist-item').forEach((el,i) => el.classList.toggle('active', i === idx));
+  document.getElementById('editorTitle').value = n.title;
+  document.getElementById('editorCat').value = n.cat;
+  document.getElementById('editorBody').innerHTML = n.body;
+  // tags
+  const tagsRow = document.querySelector('.editor-tags-row');
+  const input = tagsRow.querySelector('.editor-tag-input');
+  tagsRow.querySelectorAll('.editor-tag').forEach(t => t.remove());
+  n.tags.forEach(tag => {
+    const span = document.createElement('span');
+    span.className = 'editor-tag';
+    span.innerHTML = `${tag} <span class="editor-tag-remove">✕</span>`;
+    span.onclick = function() { removeTag(this); };
+    tagsRow.insertBefore(span, input);
+  });
+  // question status
+  const qStatus = document.getElementById('qStatus');
+  qStatus.style.display = n.cat === 'question' ? 'flex' : 'none';
+}
+
+// ── EDITOR CAT CHANGE
+document.getElementById('editorCat').addEventListener('change', function() {
+  document.getElementById('qStatus').style.display = this.value === 'question' ? 'flex' : 'none';
+});
+
+// ── FORMATTING
+function fmt(cmd) { document.execCommand(cmd, false, null); document.getElementById('editorBody').focus(); saveToast(); }
+function fmtBlock(tag) {
+  const body = document.getElementById('editorBody');
+  if (tag === 'hr') { document.execCommand('insertHTML', false, '<hr>'); saveToast(); return; }
+  if (tag === 'blockquote') { document.execCommand('formatBlock', false, 'blockquote'); saveToast(); return; }
+  if (tag === 'h2' || tag === 'h3') { document.execCommand('formatBlock', false, tag); saveToast(); return; }
+  if (tag === 'ul') { document.execCommand('insertUnorderedList', false, null); saveToast(); return; }
+  if (tag === 'ol') { document.execCommand('insertOrderedList', false, null); saveToast(); return; }
+}
+
+// ── QUESTION STATUS
+function setQStatus(btn, status) {
+  document.querySelectorAll('.qs-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  saveToast();
+}
+
+// ── TAGS
+function removeTag(el) { el.remove(); saveToast(); }
+function addTagFromInput(e) {
+  if (e.key !== 'Enter' && e.key !== ',') return;
+  e.preventDefault();
+  const val = e.target.value.trim().replace(/,/g,'');
+  if (!val) return;
+  const tagsRow = document.querySelector('.editor-tags-row');
+  const span = document.createElement('span');
+  span.className = 'editor-tag';
+  span.innerHTML = `${val} <span class="editor-tag-remove">✕</span>`;
+  span.onclick = function() { removeTag(this); };
+  tagsRow.insertBefore(span, e.target);
+  e.target.value = '';
+  // add to global tag filters
+  addGlobalTag(val);
+  saveToast();
+}
+
+function addGlobalTag(tag) {
+  const filters = document.getElementById('tagFilters');
+  const existing = Array.from(filters.querySelectorAll('.tag-pill')).map(t => t.textContent.trim());
+  if (existing.includes(tag)) return;
+  const btn = document.createElement('button');
+  btn.className = 'tag-pill';
+  btn.textContent = tag;
+  btn.onclick = function() { toggleTagFilter(this, tag); };
+  filters.appendChild(btn);
+}
+
+// ── FILTERS
+let activeCat = 'tous', activeTag = 'tous';
+
+function filterCat(btn, cat) {
+  document.querySelectorAll('.cf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat = cat;
+  applyFilters();
+}
+
+function toggleTagFilter(btn, tag) {
+  document.querySelectorAll('.tag-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeTag = tag;
+  applyFilters();
+}
+
+function applyFilters() {
+  const cards = document.querySelectorAll('.note-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const catOk = activeCat === 'tous' || card.dataset.cat === activeCat;
+    const tags = (card.dataset.tags || '').split(',');
+    const tagOk = activeTag === 'tous' || tags.includes(activeTag);
+    const show = catOk && tagOk;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('noteCount').textContent = `${visible} note${visible > 1 ? 's' : ''}`;
+}
+
+function searchNotes(q) {
+  const cards = document.querySelectorAll('.note-card');
+  let visible = 0;
+  const lq = q.toLowerCase();
+  cards.forEach(card => {
+    const title = card.querySelector('.note-title')?.textContent.toLowerCase() || '';
+    const preview = card.querySelector('.note-preview, .note-citation-preview')?.textContent.toLowerCase() || '';
+    const show = !q || title.includes(lq) || preview.includes(lq);
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('noteCount').textContent = `${visible} note${visible > 1 ? 's' : ''}`;
+}
+
+// ── MODAL
+let selectedCat = 'idee';
+function openNewNoteModal() { document.getElementById('newNoteModal').classList.add('open'); }
+function closeModal() { document.getElementById('newNoteModal').classList.remove('open'); }
+document.getElementById('newNoteModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+
+function selectCat(btn) {
+  document.querySelectorAll('.cat-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedCat = btn.dataset.cat;
+}
+
+const CAT_COLORS = { idee: 'var(--cat-idee)', question: 'var(--cat-question)', citation: 'var(--cat-citation)', liste: 'var(--cat-liste)' };
+const CAT_LABELS = { idee: 'Idée', question: '❓ Question', citation: '" Citation', liste: '☰ Liste' };
+
+function createNote() {
+  const title = document.getElementById('nn-title').value.trim(); if (!title) return;
+  const tags  = document.getElementById('nn-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const cat   = selectedCat;
+  const color = CAT_COLORS[cat];
+
+  // Add to grid
+  const grid = document.getElementById('notesGrid');
+  const addBtn = grid.querySelector('.add-card');
+  const card = document.createElement('div');
+  card.className = 'note-card';
+  card.dataset.cat = cat;
+  card.dataset.tags = tags.join(',');
+  card.style.setProperty('--nc', color);
+  card.innerHTML = `
+    <div class="note-card-header">
+      <span class="note-cat-badge" style="--nc:${color}">${CAT_LABELS[cat]}</span>
+      <div class="note-actions">
+        <button class="note-action-btn" onclick="event.stopPropagation()">✎</button>
+        <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+      </div>
+    </div>
+    <div class="note-title">${title}</div>
+    <div class="note-preview">Commencez à écrire cette note dans l'éditeur…</div>
+    <div class="note-footer">
+      <div class="note-tags">${tags.map(t=>`<span class="note-tag">${t}</span>`).join('')}</div>
+      <span class="note-date">À l'instant</span>
+    </div>`;
+  card.onclick = function() { openNote(notesData.length); };
+  grid.insertBefore(card, addBtn);
+
+  // Add to notesData
+  notesData.push({ title, cat, tags, body: '' });
+
+  // Add to editor list
+  const list = document.getElementById('editorNotesList');
+  const item = document.createElement('div');
+  item.className = 'nlist-item';
+  item.innerHTML = `<div class="nlist-item-cat" style="color:${color}">${CAT_LABELS[cat]}</div><div class="nlist-item-title">${title}</div><div class="nlist-item-date">À l'instant</div>`;
+  const newIdx = notesData.length - 1;
+  item.onclick = function() { loadEditorNote(newIdx); };
+  list.appendChild(item);
+
+  // Add new tags to filters
+  tags.forEach(t => addGlobalTag(t));
+
+  closeModal();
+  document.getElementById('nn-title').value = '';
+  document.getElementById('nn-tags').value = '';
+
+  // update count
+  const visible = document.querySelectorAll('.note-card:not([style*="display: none"])').length;
+  document.getElementById('noteCount').textContent = `${visible} notes`;
+  saveToast();
+}
+
+function deleteNote(btn) {
+  const card = btn.closest('.note-card');
+  askDelete('Supprimer cette note ?', 'Cette action est irréversible.', function() {
+    card.remove();
+    const visible = document.querySelectorAll('.note-card:not([style*="display: none"])').length;
+    document.getElementById('noteCount').textContent = visible + ' notes';
+  });
+  return;
+  const cards = document.querySelectorAll('.note-card').length;
+  document.getElementById('noteCount').textContent = `${cards} notes`;
+  saveToast();
+}
+
+// ── SAVE TOAST
+let toastTimer;
+function saveToast() {
+  const t = document.getElementById('saveToastEl');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// init count
+document.addEventListener('DOMContentLoaded', () => {
+  const c = document.querySelectorAll('.note-card').length;
+  document.getElementById('noteCount').textContent = `${c} notes`;
+});
+</script>
+
+<!-- DELETE CONFIRM OVERLAY -->
+<div id="deleteOverlay" style="display:none;position:fixed;inset:0;background:rgba(26,23,20,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fdfbf7;border:1px solid #e4ddd3;padding:32px 36px;max-width:380px;width:90%;text-align:center;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:#1a1714;margin-bottom:10px" id="deleteOverlayTitle">Supprimer cet élément ?</div>
+    <div style="font-size:13px;font-weight:300;color:#8a8278;line-height:1.7;margin-bottom:24px" id="deleteOverlayMsg">Cette action est irréversible.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="cancelDelete()" style="padding:9px 20px;background:none;border:1px solid #e4ddd3;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8a8278;transition:border-color .2s;">Annuler</button>
+      <button onclick="confirmDelete()" style="padding:9px 20px;background:#9e5a5a;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fdfbf7;transition:background .2s;">Supprimer</button>
+    </div>
+  </div>
+</div>
+<script>
+// ── GLOBAL DELETE SYSTEM
+let _deleteCallback = null;
+function askDelete(title, msg, callback) {
+  document.getElementById('deleteOverlayTitle').textContent = title || 'Supprimer ?';
+  document.getElementById('deleteOverlayMsg').textContent = msg || 'Cette action est irréversible.';
+  _deleteCallback = callback;
+  const ov = document.getElementById('deleteOverlay');
+  ov.style.display = 'flex';
+}
+function confirmDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  if (_deleteCallback) { _deleteCallback(); _deleteCallback = null; }
+}
+function cancelDelete() {
+  document.getElementById('deleteOverlay').style.display = 'none';
+  _deleteCallback = null;
+}
+</script>
+
+</body>
+</html>
