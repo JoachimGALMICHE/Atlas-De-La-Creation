@@ -757,6 +757,57 @@ function showToast(msg) {
 // ── INIT
 countWords();
 updateBreadcrumb();
+
+// Add delete buttons to all pre-existing chapter items
+document.querySelectorAll('.chap-item').forEach(function(item) {
+  if (item.querySelector('.chap-del')) return;
+  const btn = document.createElement('button');
+  btn.className = 'chap-del';
+  btn.innerHTML = '✕';
+  btn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--border-strong);font-size:12px;margin-left:auto;opacity:0;transition:opacity .2s;flex-shrink:0;';
+  btn.onmouseenter = function(){this.style.opacity=1};
+  btn.onmouseleave = function(){this.style.opacity=0};
+  btn.onclick = function(e) {
+    e.stopPropagation();
+    const group = item.closest('.proj-group');
+    askDelete('Supprimer ce chapitre ?', 'Cette action est irréversible.', function() {
+      item.remove();
+      if (group) {
+        const cnt = group.querySelector('.proj-count');
+        if (cnt) cnt.textContent = Math.max(0, parseInt(cnt.textContent) - 1);
+      }
+      showToast('Chapitre supprimé');
+    });
+  };
+  item.style.display = 'flex';
+  item.style.alignItems = 'center';
+  item.appendChild(btn);
+  item.addEventListener('mouseenter', function(){btn.style.opacity=1});
+  item.addEventListener('mouseleave', function(){btn.style.opacity=0});
+});
+// Also add delete to project groups
+document.querySelectorAll('.proj-group').forEach(function(group) {
+  const header = group.querySelector('.proj-header');
+  if (!header || header.querySelector('.proj-del')) return;
+  const btn = document.createElement('button');
+  btn.className = 'proj-del';
+  btn.innerHTML = '✕';
+  btn.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--border-strong);font-size:13px;margin-left:auto;opacity:0;transition:opacity .2s;flex-shrink:0;';
+  btn.onmouseenter = function(){this.style.opacity=1};
+  btn.onmouseleave = function(){this.style.opacity=0};
+  btn.onclick = function(e) {
+    e.stopPropagation();
+    const name = group.querySelector('.proj-name')?.textContent || 'ce projet';
+    askDelete('Supprimer ' + name + ' ?', 'Tous les chapitres seront supprimés.', function() {
+      group.remove();
+      showToast('Projet supprimé');
+    });
+  };
+  header.appendChild(btn);
+  header.addEventListener('mouseenter', function(){btn.style.opacity=1});
+  header.addEventListener('mouseleave', function(){btn.style.opacity=0});
+});
+
 </script>
 
 <!-- DELETE CONFIRM OVERLAY -->

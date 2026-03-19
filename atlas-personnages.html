@@ -985,6 +985,14 @@ function createChar() {
     </div>`;
   const idx = charData.length - 1;
   div.onclick = function() { selectChar(this, idx); };
+  const dBtn = document.createElement('button');
+  dBtn.innerHTML = '✕';
+  dBtn.style.cssText = 'position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--border-strong);font-size:12px;opacity:0;transition:opacity .2s;';
+  dBtn.onmouseenter = function(){this.style.opacity=1};
+  dBtn.onmouseleave = function(){this.style.opacity=0};
+  dBtn.onclick = function(e){e.stopPropagation();(function(d){askDelete('Supprimer ce personnage ?','Cette action est irréversible.',function(){d.remove();})})(div)};
+  div.style.position='relative';
+  div.appendChild(dBtn);
   list.appendChild(div);
   closeModal('newCharModal');
   selectChar(div, idx);
@@ -1006,6 +1014,13 @@ function saveRelation() {
       <span class="rel-type-tag ${type}">${document.getElementById('rl-type').options[document.getElementById('rl-type').selectedIndex].text}</span>
       <div class="rel-desc">${desc}</div>
     </div>`;
+  const relDel = document.createElement('button');
+  relDel.innerHTML = '✕';
+  relDel.style.cssText = 'background:none;border:none;cursor:pointer;color:var(--border-strong);font-size:13px;flex-shrink:0;align-self:flex-start;margin-top:2px;transition:color .2s;';
+  relDel.onmouseover = function(){this.style.color='#9e5a5a'};
+  relDel.onmouseout = function(){this.style.color='var(--border-strong)'};
+  relDel.onclick = function(){(function(d){askDelete('Supprimer cette relation ?','',function(){d.remove()})})(item)};
+  item.appendChild(relDel);
   list.appendChild(item);
   closeModal('relModal');
   ['rl-name','rl-desc'].forEach(id => document.getElementById(id).value='');

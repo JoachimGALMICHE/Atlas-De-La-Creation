@@ -657,19 +657,19 @@ header {
                 <td><div class="td-name">Ael'thar-Citadelle</div></td>
                 <td><div class="td-type">Capitale</div></td>
                 <td>Cœur de l'empire, siège du Trône de Cendres et de l'Académie des Liants.</td>
-                <td><button class="td-edit" onclick="editLieu(this)">✎</button></td>
+                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','Cette action est irréversible.',function(){btn.closest('tr').remove()})})(this)" style='color:#9e5a5a'>✕</button></td>
               </tr>
               <tr>
                 <td><div class="td-name">Les Forges d'Ul'mara</div></td>
                 <td><div class="td-type">Forteresse</div></td>
                 <td>Complex industriel souterrain où sont forgées les armes runiques.</td>
-                <td><button class="td-edit" onclick="editLieu(this)">✎</button></td>
+                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','Cette action est irréversible.',function(){btn.closest('tr').remove()})})(this)" style='color:#9e5a5a'>✕</button></td>
               </tr>
               <tr>
                 <td><div class="td-name">La Mer des Songes</div></td>
                 <td><div class="td-type">Lieu mystique</div></td>
                 <td>Lac magique à la surface argentée où les morts peuvent être consultés.</td>
-                <td><button class="td-edit" onclick="editLieu(this)">✎</button></td>
+                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','Cette action est irréversible.',function(){btn.closest('tr').remove()})})(this)" style='color:#9e5a5a'>✕</button></td>
               </tr>
             </tbody>
           </table>
@@ -717,7 +717,7 @@ header {
     <div class="panel" id="panel-factions">
       <div class="factions-grid" id="factionsGrid">
 
-        <div class="faction-card" style="--faction-color:#b8975a" onclick="openEditFaction(0)"><button onclick="event.stopPropagation();askDelete('Supprimer cette faction ?','Cette action est irréversible.',function(){this.closest('.faction-card').remove()}.bind(this))" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--border-strong);transition:color .2s;opacity:0;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">✕</button>
+        <div class="faction-card" style="--faction-color:#b8975a" onclick="openEditFaction(0)"><button onclick="event.stopPropagation();(function(btn){askDelete('Supprimer cette faction ?','Cette action est irréversible.',function(){btn.closest('.faction-card').remove();})})(this)" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--border-strong);transition:color .2s;opacity:0;" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">✕</button>
           <div class="faction-card-header">
             <div>
               <div class="faction-symbol">⚔</div>
@@ -1061,6 +1061,14 @@ function addNewWorld() {
   div.className = 'world-item';
   div.innerHTML = `<div class="world-name">${name}</div><div class="world-meta">Nouveau monde</div><div class="world-dot"></div>`;
   div.onclick = function() { selectWorld(this, -1); document.getElementById('worldTitle').textContent = name; };
+  const delBtn = document.createElement('button');
+  delBtn.innerHTML = '✕';
+  delBtn.style.cssText = 'position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--border-strong);font-size:12px;opacity:0;transition:opacity .2s';
+  delBtn.onmouseenter = function(){this.style.opacity=1};
+  delBtn.onmouseleave = function(){this.style.opacity=0};
+  delBtn.onclick = function(e){e.stopPropagation();(function(d){askDelete('Supprimer ce monde ?','Cette action est irréversible.',function(){d.remove();})})(div)};
+  div.style.position='relative';
+  div.appendChild(delBtn);
   list.appendChild(div);
   showSaveToast();
 }
@@ -1087,7 +1095,7 @@ function addLieu() {
   const desc = prompt('Description courte :') || '';
   const tbody = document.getElementById('lieuxBody');
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><div class="td-name">${name}</div></td><td><div class="td-type">${type}</div></td><td>${desc}</td><td><button class="td-edit" onclick="editLieu(this)">✎</button></td>`;
+  tr.innerHTML = `<td><div class="td-name">${name}</div></td><td><div class="td-type">${type}</div></td><td>${desc}</td><td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','Cette action est irréversible.',function(){btn.closest('tr').remove()})})(this)" style='color:#9e5a5a'>✕</button></td>`;
   tbody.appendChild(tr);
   showSaveToast();
 }
