@@ -708,16 +708,6 @@ function showToast(msg) {
 
 renderFrise();
 
-// Event delegation for ev-del-btn (works with dynamically created elements)
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('ev-del-btn')) {
-    e.stopPropagation();
-    const id = parseInt(e.target.dataset.evid);
-    if (!id) return;
-    deleteEventById(id);
-  }
-});
-
 </script>
 
 <!-- DELETE CONFIRM OVERLAY -->
@@ -749,6 +739,24 @@ function cancelDelete() {
   document.getElementById('deleteOverlay').style.display = 'none';
   _deleteCallback = null;
 }
+
+// Event delegation for ev-del-btn
+document.addEventListener('click', function(e) {
+  var btn = e.target;
+  if (!btn.classList.contains('ev-del-btn')) return;
+  e.stopPropagation();
+  e.preventDefault();
+  var evid = parseInt(btn.getAttribute('data-evid'));
+  if (!evid) return;
+  askDelete('Supprimer cet événement ?', '', function() {
+    var idx = EVENTS.findIndex(function(ev){ return ev.id === evid; });
+    if (idx > -1) EVENTS.splice(idx, 1);
+    renderFrise();
+    fbSaveNow();
+    showToast('Événement supprimé');
+  });
+});
+
 </script>
 
 </body>

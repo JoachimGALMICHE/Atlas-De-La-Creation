@@ -535,19 +535,22 @@ function fbOnAuth(user) {
 }
 
 function attachDeleteButtons() {
+  // Add del-btn to char items that don't have one (no onclick — delegation handles it)
   document.querySelectorAll('.char-item').forEach(function(item) {
     if (item.querySelector('.del-btn')) return;
     item.style.cssText += ';display:flex;align-items:center';
     var btn = document.createElement('button');
-    btn.className='del-btn'; btn.innerHTML='✕'; btn.style.marginLeft='auto';
-    btn.onclick=function(e){e.stopPropagation();askDelete('Supprimer ce personnage ?','',function(){item.remove();fbSaveNow();saveToast();});};
+    btn.className = 'del-btn';
+    btn.innerHTML = '✕';
+    btn.style.marginLeft = 'auto';
     item.appendChild(btn);
   });
   document.querySelectorAll('.rel-item').forEach(function(item) {
     if (item.querySelector('.del-btn')) return;
     var btn = document.createElement('button');
-    btn.className='del-btn'; btn.innerHTML='✕'; btn.style.cssText='margin-left:auto;align-self:flex-start;';
-    btn.onclick=function(e){e.stopPropagation();askDelete('Supprimer cette relation ?','',function(){item.remove();fbSaveNow();saveToast();});};
+    btn.className = 'del-btn';
+    btn.innerHTML = '✕';
+    btn.style.cssText = 'margin-left:auto;align-self:flex-start;opacity:1;';
     item.appendChild(btn);
   });
 }
@@ -1329,71 +1332,8 @@ function saveToast() {
 // ── INIT
 renderSkills();
 
-// Event delegation for dynamically loaded char items and rel items
-document.addEventListener('click', function(e) {
-  // Del btn on char item
-  if (e.target.classList.contains('del-btn') && e.target.closest('.char-item')) {
-    e.stopPropagation();
-    const item = e.target.closest('.char-item');
-    askDelete('Supprimer ce personnage ?', '', function() {
-      item.remove();
-      fbSaveNow();
-      saveToast();
-    });
-    return;
-  }
-  // Del btn on rel item
-  if (e.target.classList.contains('del-btn') && e.target.closest('.rel-item')) {
-    e.stopPropagation();
-    const item = e.target.closest('.rel-item');
-    askDelete('Supprimer cette relation ?', '', function() {
-      item.remove();
-      fbSaveNow();
-      saveToast();
-    });
-    return;
-  }
-  // Del btn on pouvoir card
-  if (e.target.classList.contains('del-btn') && e.target.closest('.pouvoir-card')) {
-    e.stopPropagation();
-    const card = e.target.closest('.pouvoir-card');
-    askDelete('Supprimer ce pouvoir ?', '', function() {
-      card.remove();
-      fbSaveNow();
-      saveToast();
-    });
-    return;
-  }
-});
 
 
-// Add delete buttons to sidebar char items
-document.querySelectorAll('.char-item').forEach(function(item) {
-  item.style.display = 'flex';
-  item.style.alignItems = 'center';
-  const btn = document.createElement('button');
-  btn.className = 'del-btn';
-  btn.innerHTML = '✕';
-  btn.style.marginLeft = 'auto';
-  btn.onclick = function(e) {
-    e.stopPropagation();
-    askDelete('Supprimer ce personnage ?', '', function(){ item.remove(); showToast('Personnage supprimé'); });
-  };
-  item.appendChild(btn);
-});
-
-// Add delete to existing rel-items
-document.querySelectorAll('.rel-item').forEach(function(item) {
-  const btn = document.createElement('button');
-  btn.className = 'del-btn';
-  btn.innerHTML = '✕';
-  btn.style.cssText = 'margin-left:auto;align-self:flex-start;margin-top:2px;';
-  btn.onclick = function(e) {
-    e.stopPropagation();
-    askDelete('Supprimer cette relation ?', '', function(){ item.remove(); });
-  };
-  item.appendChild(btn);
-});
 
 </script>
 
@@ -1426,6 +1366,33 @@ function cancelDelete() {
   document.getElementById('deleteOverlay').style.display = 'none';
   _deleteCallback = null;
 }
+
+// Event delegation — handles all del-btn clicks after DOM load and after Firestore reload
+document.addEventListener('click', function(e) {
+  var btn = e.target;
+  if (!btn.classList.contains('del-btn')) return;
+  e.stopPropagation();
+  e.preventDefault();
+
+  var charItem = btn.closest('.char-item');
+  var relItem  = btn.closest('.rel-item');
+  var pouvoir  = btn.closest('.pouvoir-card');
+
+  if (charItem) {
+    askDelete('Supprimer ce personnage ?', '', function() {
+      charItem.remove(); fbSaveNow(); saveToast();
+    });
+  } else if (relItem) {
+    askDelete('Supprimer cette relation ?', '', function() {
+      relItem.remove(); fbSaveNow(); saveToast();
+    });
+  } else if (pouvoir) {
+    askDelete('Supprimer ce pouvoir ?', '', function() {
+      pouvoir.remove(); fbSaveNow(); saveToast();
+    });
+  }
+});
+
 </script>
 
 </body>
