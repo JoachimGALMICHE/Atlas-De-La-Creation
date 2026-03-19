@@ -1009,15 +1009,15 @@ function createNote() {
 
 function deleteNote(btn) {
   const card = btn.closest('.note-card');
-  askDelete('Supprimer cette note ?', 'Cette action est irréversible.', function() {
+  if (!card) return;
+  askDelete('Supprimer cette note ?', '', function() {
     card.remove();
-    const visible = document.querySelectorAll('.note-card:not([style*="display: none"])').length;
-    document.getElementById('noteCount').textContent = visible + ' notes';
+    const visible = document.querySelectorAll('.note-card').length;
+    const el = document.getElementById('noteCount');
+    if (el) el.textContent = visible + ' note' + (visible > 1 ? 's' : '');
+    fbSaveNow();
+    saveToast();
   });
-  return;
-  const cards = document.querySelectorAll('.note-card').length;
-  document.getElementById('noteCount').textContent = `${cards} notes`;
-  saveToast();
 }
 
 // ── SAVE TOAST

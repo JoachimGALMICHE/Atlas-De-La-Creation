@@ -1588,6 +1588,44 @@ document.querySelectorAll('#lieuxBody tr').forEach(function(row) {
   lastCell.appendChild(delBtn);
 });
 
+
+// Event delegation - handles delete on dynamically loaded elements
+document.addEventListener('click', function(e) {
+  const btn = e.target;
+  if (!btn.classList.contains('del-btn') && !btn.classList.contains('faction-del') && !btn.classList.contains('td-edit')) return;
+  
+  // World item
+  const worldItem = btn.closest('.world-item');
+  if (worldItem) {
+    e.stopPropagation();
+    if (btn.innerHTML === '✕') {
+      askDelete('Supprimer ce monde ?', '', function(){ worldItem.remove(); fbSaveNow(); showSaveToast(); });
+      return;
+    }
+  }
+  // Faction card
+  const factionCard = btn.closest('.faction-card');
+  if (factionCard && btn.innerHTML === '✕') {
+    e.stopPropagation();
+    askDelete('Supprimer cette faction ?', '', function(){ factionCard.remove(); fbSaveNow(); showSaveToast(); });
+    return;
+  }
+  // Lieux row (✕ button in table)
+  const row = btn.closest('tr');
+  if (row && btn.style.color === 'rgb(158, 90, 90)') {
+    e.stopPropagation();
+    askDelete('Supprimer ce lieu ?', '', function(){ row.remove(); fbSaveNow(); showSaveToast(); });
+    return;
+  }
+  // Ressource item
+  const ressItem = btn.closest('.ressource-item');
+  if (ressItem && btn.innerHTML === '✕') {
+    e.stopPropagation();
+    askDelete('Supprimer cette ressource ?', '', function(){ ressItem.remove(); fbSaveNow(); showSaveToast(); });
+    return;
+  }
+});
+
 // ── AUTO-SAVE on all contenteditable changes
 document.addEventListener('input', function(e) {
   if (e.target.contentEditable === 'true') showSaveToast();

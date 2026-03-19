@@ -618,7 +618,7 @@ function renderFrise() {
 
     col.innerHTML = `
       <div class="ev-card" style="--ev-color:${color};animation-delay:${ev.delay}s;position:relative" onclick="openDetail(${ev.id})">
-        <button class="ev-del-btn" onclick="event.stopPropagation();deleteEventById(${ev.id})">✕</button>
+        <button class="ev-del-btn" data-evid="${ev.id}">✕</button>
         <div class="ev-type-badge" style="color:${color}">${EV_LABELS[ev.type]||ev.type}</div>
         <div class="ev-title">${ev.title}</div>
         <div class="ev-date">${ev.date}</div>
@@ -707,6 +707,17 @@ function showToast(msg) {
 }
 
 renderFrise();
+
+// Event delegation for ev-del-btn (works with dynamically created elements)
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('ev-del-btn')) {
+    e.stopPropagation();
+    const id = parseInt(e.target.dataset.evid);
+    if (!id) return;
+    deleteEventById(id);
+  }
+});
+
 </script>
 
 <!-- DELETE CONFIRM OVERLAY -->

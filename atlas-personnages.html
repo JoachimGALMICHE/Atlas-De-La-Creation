@@ -1329,6 +1329,44 @@ function saveToast() {
 // ── INIT
 renderSkills();
 
+// Event delegation for dynamically loaded char items and rel items
+document.addEventListener('click', function(e) {
+  // Del btn on char item
+  if (e.target.classList.contains('del-btn') && e.target.closest('.char-item')) {
+    e.stopPropagation();
+    const item = e.target.closest('.char-item');
+    askDelete('Supprimer ce personnage ?', '', function() {
+      item.remove();
+      fbSaveNow();
+      saveToast();
+    });
+    return;
+  }
+  // Del btn on rel item
+  if (e.target.classList.contains('del-btn') && e.target.closest('.rel-item')) {
+    e.stopPropagation();
+    const item = e.target.closest('.rel-item');
+    askDelete('Supprimer cette relation ?', '', function() {
+      item.remove();
+      fbSaveNow();
+      saveToast();
+    });
+    return;
+  }
+  // Del btn on pouvoir card
+  if (e.target.classList.contains('del-btn') && e.target.closest('.pouvoir-card')) {
+    e.stopPropagation();
+    const card = e.target.closest('.pouvoir-card');
+    askDelete('Supprimer ce pouvoir ?', '', function() {
+      card.remove();
+      fbSaveNow();
+      saveToast();
+    });
+    return;
+  }
+});
+
+
 // Add delete buttons to sidebar char items
 document.querySelectorAll('.char-item').forEach(function(item) {
   item.style.display = 'flex';

@@ -1030,6 +1030,37 @@ function showToast(msg) {
 countWords();
 updateBreadcrumb();
 
+// Event delegation for project and chapter deletion
+document.addEventListener('click', function(e) {
+  // Chapter del btn
+  if (e.target.classList.contains('del-btn') && e.target.closest('.chap-item')) {
+    e.stopPropagation();
+    const item = e.target.closest('.chap-item');
+    const group = item.closest('.proj-group');
+    askDelete('Supprimer ce chapitre ?', '', function() {
+      item.remove();
+      const cnt = group ? group.querySelector('.proj-count') : null;
+      if (cnt) cnt.textContent = Math.max(0, parseInt(cnt.textContent) - 1);
+      fbSaveNow();
+      showToast('Chapitre supprimé');
+    });
+    return;
+  }
+  // Project del btn (proj-del class)
+  if (e.target.classList.contains('del-btn') && e.target.closest('.proj-group') && e.target.closest('.proj-header')) {
+    e.stopPropagation();
+    const group = e.target.closest('.proj-group');
+    const name = group.querySelector('.proj-name') ? group.querySelector('.proj-name').textContent : 'ce projet';
+    askDelete('Supprimer ' + name + ' ?', 'Tous les chapitres seront supprimés.', function() {
+      group.remove();
+      fbSaveNow();
+      showToast('Projet supprimé');
+    });
+    return;
+  }
+});
+
+
 // Add delete buttons to all pre-existing chapter items
 document.querySelectorAll('.chap-item').forEach(function(item) {
   if (item.querySelector('.chap-del')) return;
