@@ -403,6 +403,14 @@ var _fbUid  = null;
 var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
 var _saveTimer = null;
 
+
+function fbSaveNow() {
+  if (!_fbUid || typeof fbGetData !== 'function') return;
+  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+    .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
+    .catch(function(e){ console.log('Save err:', e); });
+}
+
 function fbSave(data) {
   if (!_fbUid) return;
   clearTimeout(_saveTimer);

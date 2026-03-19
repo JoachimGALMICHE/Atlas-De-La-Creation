@@ -426,6 +426,14 @@ var _fbUid  = null;
 var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
 var _saveTimer = null;
 
+
+function fbSaveNow() {
+  if (!_fbUid || typeof fbGetData !== 'function') return;
+  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+    .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
+    .catch(function(e){ console.log('Save err:', e); });
+}
+
 function fbSave(data) {
   if (!_fbUid) return;
   clearTimeout(_saveTimer);
@@ -913,7 +921,7 @@ function addChapter(btn) {
   chapDel.className = 'del-btn';
   chapDel.innerHTML = '✕';
   chapDel.style.marginLeft = 'auto';
-  chapDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce chapitre ?','',function(){div.remove();const cnt=group.querySelector('.proj-count');if(cnt)cnt.textContent=Math.max(0,parseInt(cnt.textContent)-1);showToast('Chapitre supprimé');})};
+  chapDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce chapitre ?','',function(){div.remove();const cnt=group.querySelector('.proj-count');if(cnt)cnt.textContent=Math.max(0,parseInt(cnt.textContent)-1);fbSaveNow();showToast('Chapitre supprimé');})};
   div.style.display='flex';div.style.alignItems='center';
   div.appendChild(chapDel);
   div.onclick = function() { loadChapter(this, proj, idx); };
@@ -984,7 +992,7 @@ function createProject() {
     projDel.className = 'del-btn';
     projDel.innerHTML = '✕';
     projDel.style.marginLeft = 'auto';
-    projDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce projet ?','Tous les chapitres seront supprimés.',function(){group.remove();showToast('Projet supprimé');})};
+    projDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce projet ?','Tous les chapitres seront supprimés.',function(){group.remove();fbSaveNow();showToast('Projet supprimé');})};
     projHeader.appendChild(projDel);
   }
   list.appendChild(group);
@@ -1040,6 +1048,7 @@ document.querySelectorAll('.chap-item').forEach(function(item) {
         const cnt = group.querySelector('.proj-count');
         if (cnt) cnt.textContent = Math.max(0, parseInt(cnt.textContent) - 1);
       }
+      fbSaveNow();
       showToast('Chapitre supprimé');
     });
   };
@@ -1064,6 +1073,7 @@ document.querySelectorAll('.proj-group').forEach(function(group) {
     const name = group.querySelector('.proj-name')?.textContent || 'ce projet';
     askDelete('Supprimer ' + name + ' ?', 'Tous les chapitres seront supprimés.', function() {
       group.remove();
+      fbSaveNow();
       showToast('Projet supprimé');
     });
   };

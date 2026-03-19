@@ -461,6 +461,14 @@ var _fbUid  = null;
 var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
 var _saveTimer = null;
 
+
+function fbSaveNow() {
+  if (!_fbUid || typeof fbGetData !== 'function') return;
+  _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
+    .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
+    .catch(function(e){ console.log('Save err:', e); });
+}
+
 function fbSave(data) {
   if (!_fbUid) return;
   clearTimeout(_saveTimer);
@@ -532,14 +540,14 @@ function attachDeleteButtons() {
     item.style.cssText += ';display:flex;align-items:center';
     var btn = document.createElement('button');
     btn.className='del-btn'; btn.innerHTML='✕'; btn.style.marginLeft='auto';
-    btn.onclick=function(e){e.stopPropagation();askDelete('Supprimer ce personnage ?','',function(){item.remove();saveToast();});};
+    btn.onclick=function(e){e.stopPropagation();askDelete('Supprimer ce personnage ?','',function(){item.remove();fbSaveNow();saveToast();});};
     item.appendChild(btn);
   });
   document.querySelectorAll('.rel-item').forEach(function(item) {
     if (item.querySelector('.del-btn')) return;
     var btn = document.createElement('button');
     btn.className='del-btn'; btn.innerHTML='✕'; btn.style.cssText='margin-left:auto;align-self:flex-start;';
-    btn.onclick=function(e){e.stopPropagation();askDelete('Supprimer cette relation ?','',function(){item.remove();saveToast();});};
+    btn.onclick=function(e){e.stopPropagation();askDelete('Supprimer cette relation ?','',function(){item.remove();fbSaveNow();saveToast();});};
     item.appendChild(btn);
   });
 }
@@ -1174,7 +1182,7 @@ function addPouvoir() {
   pDel.className = 'del-btn';
   pDel.innerHTML = '✕';
   pDel.style.cssText = 'position:absolute;top:8px;right:8px;opacity:1;';
-  pDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce pouvoir ?','',function(){card.remove();saveToast();})};
+  pDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce pouvoir ?','',function(){card.remove();fbSaveNow();saveToast();})};
   card.style.position='relative';
   card.appendChild(pDel);
   grid.insertBefore(card, addBtn); saveToast();
