@@ -404,11 +404,12 @@ var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
 var _saveTimer = null;
 
 
-window.fbSaveNow = function fbSaveNow() {
-  if (!_fbUid || typeof fbGetData !== 'function') return;
+window.fbSaveNow = function fbSaveNow(cb) {
+  if (!_fbUid || typeof fbGetData !== 'function') { if(cb) cb(); return; }
   _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
     .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
-    .catch(function(e){ console.log('Save err:', e); });
+    .then(function() { if(cb) cb(); })
+    .catch(function(e){ console.log('Save err:', e); if(cb) cb(); });
 }
 
 window.fbSave = function fbSave(data) {
