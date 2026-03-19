@@ -435,7 +435,6 @@ setInterval(function() {
 </script>
 <script>
 var EVENTS = [];
-var ERES = [];
 
 function fbGetData() {
   return {
@@ -477,7 +476,7 @@ function fbOnAuth(user) {
 <!-- ÈRES -->
 <div class="ere-tabs" id="ereTabs">
   <button class="ere-tab active" onclick="filterEre(this,'toutes')">Toutes les ères</button>
-  <button class="ere-add-btn" onclick="openAddEreModal()" title="Nouvelle ère">+ Ère</button>
+
 </div>
 
 <!-- FILTERS -->
@@ -785,91 +784,6 @@ function cancelDelete() {
   _deleteCallback = null;
 }
 
-// ── ÈRE MANAGEMENT
-
-function openAddEreModal() {
-  document.getElementById('ereModal').classList.add('open');
-  setTimeout(function(){ document.getElementById('ere-name').focus(); }, 100);
-}
-function closeEreModal() {
-  document.getElementById('ereModal').classList.remove('open');
-  document.getElementById('ere-name').value = '';
-}
-document.getElementById('ereModal').addEventListener('click', function(e){
-  if (e.target === this) closeEreModal();
-});
-
-function addEre() {
-  var name = document.getElementById('ere-name').value.trim();
-  if (!name) return;
-  var slug = 'ere-' + name.toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,20) + '-' + Date.now();
-  ERES.push({ id: slug, name: name });
-  renderEreTabs();
-  closeEreModal();
-  window.fbSaveNow();
-  showToast('Ère créée !');
-}
-
-function deleteEre(slug) {
-  askDelete('Supprimer cette ère ?', 'Les événements liés resteront mais sans ère assignée.', function() {
-    ERES = ERES.filter(function(e){ return e.id !== slug; });
-    // Remove events of this era
-    EVENTS = EVENTS.filter(function(e){ return e.era !== slug; });
-    renderEreTabs();
-    renderFrise();
-    window.fbSaveNow();
-    showToast('Ère supprimée');
-  });
-}
-
-function renderEreTabs() {
-  var tabs = document.getElementById('ereTabs');
-  tabs.innerHTML = '';
-  var allBtn = document.createElement('button');
-  allBtn.className = 'ere-tab active';
-  allBtn.textContent = 'Toutes les ères';
-  allBtn.onclick = function(){ filterEre(this, 'toutes'); };
-  tabs.appendChild(allBtn);
-  ERES.forEach(function(ere) {
-    var wrap = document.createElement('div');
-    wrap.className = 'ere-tab-wrap';
-    var tab = document.createElement('button');
-    tab.className = 'ere-tab';
-    tab.textContent = ere.name;
-    tab.onclick = function(){ filterEre(this, ere.id); };
-    wrap.appendChild(tab);
-    var del = document.createElement('button');
-    del.className = 'ere-del';
-    del.innerHTML = '✕';
-    del.onclick = function(e){ e.stopPropagation(); deleteEre(ere.id); };
-    wrap.appendChild(del);
-    tabs.appendChild(wrap);
-  });
-  var addBtn = document.createElement('button');
-  addBtn.className = 'ere-add-btn';
-  addBtn.textContent = '+ Ère';
-  addBtn.onclick = openAddEreModal;
-  tabs.appendChild(addBtn);
-  updateEreSelect();
-}
-
-function updateEreSelect() {
-  var sel = document.getElementById('ev-ere');
-  if (!sel) return;
-  sel.innerHTML = '';
-  if (ERES.length === 0) {
-    var opt = document.createElement('option');
-    opt.value = ''; opt.textContent = "Aucune ere - cliquez + Ere";
-    sel.appendChild(opt);
-    return;
-  }
-  ERES.forEach(function(ere) {
-    var opt = document.createElement('option');
-    opt.value = ere.id; opt.textContent = ere.name;
-    sel.appendChild(opt);
-  });
-}
-
 
 
 
@@ -889,6 +803,133 @@ document.addEventListener('click', function(e) {
   });
 });
 
+</script>
+
+
+<script>
+// ── ÈRE MANAGEMENT (clean block)
+var ERES = window.ERES || [];
+
+function openAddEreModal() {
+  document.getElementById("ereModal").classList.add("open");
+}
+function closeEreModal() {
+  document.getElementById("ereModal").classList.remove("open");
+  document.getElementById("ere-name").value = "";
+}
+document.getElementById("ereModal").addEventListener("click", function(e) {
+  if (e.target === this) closeEreModal();
+});
+
+function addEre() {
+  var name = document.getElementById("ere-name").value.trim();
+  if (!name) return;
+  var slug = "ere" + Date.now();
+  ERES.push({ id: slug, name: name });
+  renderEreTabs();
+  closeEreModal();
+  window.fbSaveNow();
+  showToast("Ere creee !");
+}
+
+function deleteEre(slug) {
+  askDelete("Supprimer cette ere ?", "Les evenements lies resteront.", function() {
+    ERES = ERES.filter(function(e) { return e.id !== slug; });
+    for (var i = EVENTS.length - 1; i >= 0; i--) {
+      if (EVENTS[i].era === slug) EVENTS.splice(i, 1);
+    }
+    renderEreTabs();
+    renderFrise();
+    window.fbSaveNow();
+    showToast("Ere supprimee");
+  });
+}
+
+function renderEreTabs() {
+  var tabs = document.getElementById("ereTabs");
+  if (!tabs) return;
+  tabs.innerHTML = "";
+
+  var allBtn = document.createElement("button");
+  allBtn.className = "ere-tab active";
+  allBtn.textContent = "Toutes";
+  allBtn.onclick = function() { filterEre(this, "toutes"); };
+  tabs.appendChild(allBtn);
+
+  ERES.forEach(function(ere) {
+    var wrap = document.createElement("div");
+    wrap.className = "ere-tab-wrap";
+    var tab = document.createElement("button");
+    tab.className = "ere-tab";
+    tab.textContent = ere.name;
+    tab.onclick = function() { filterEre(this, ere.id); };
+    var del = document.createElement("button");
+    del.className = "ere-del";
+    del.textContent = "x";
+    del.onclick = function(e) { e.stopPropagation(); deleteEre(ere.id); };
+    wrap.appendChild(tab);
+    wrap.appendChild(del);
+    tabs.appendChild(wrap);
+  });
+
+  var addBtn = document.createElement("button");
+  addBtn.className = "ere-add-btn";
+  addBtn.textContent = "+ Ere";
+  addBtn.onclick = openAddEreModal;
+  tabs.appendChild(addBtn);
+
+  updateEreSelect();
+}
+
+function updateEreSelect() {
+  var sel = document.getElementById("ev-ere");
+  if (!sel) return;
+  sel.innerHTML = "";
+  var defaultOpt = document.createElement("option");
+  defaultOpt.value = "general";
+  defaultOpt.textContent = "Sans ere";
+  sel.appendChild(defaultOpt);
+  ERES.forEach(function(ere) {
+    var opt = document.createElement("option");
+    opt.value = ere.id;
+    opt.textContent = ere.name;
+    sel.appendChild(opt);
+  });
+}
+
+// Override fbGetData to include ERES
+window.addEventListener("load", function() {
+  var origFbGetData = window.fbGetData;
+  if (origFbGetData) {
+    window.fbGetData = function() {
+      var data = origFbGetData();
+      data.eres = JSON.stringify(ERES);
+      return data;
+    };
+  }
+
+  var origFbOnAuth = window.fbOnAuth;
+  if (origFbOnAuth) {
+    window.fbOnAuth = function(user) {
+      window.fbLoad(function(data) {
+        if (data && data.eres) {
+          try { ERES = JSON.parse(data.eres); } catch(e) {}
+        }
+        if (data && data.events) {
+          try {
+            var evs = JSON.parse(data.events);
+            EVENTS.splice(0, EVENTS.length);
+            evs.forEach(function(ev) { EVENTS.push(ev); });
+          } catch(e) {}
+        }
+        renderEreTabs();
+        renderFrise();
+      });
+    };
+  } else {
+    renderEreTabs();
+  }
+});
 </script>
 
 </body>
