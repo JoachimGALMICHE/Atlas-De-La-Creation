@@ -462,14 +462,14 @@ var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
 var _saveTimer = null;
 
 
-function fbSaveNow() {
+window.fbSaveNow = function fbSaveNow() {
   if (!_fbUid || typeof fbGetData !== 'function') return;
   _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
     .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
     .catch(function(e){ console.log('Save err:', e); });
 }
 
-function fbSave(data) {
+window.fbSave = function fbSave(data) {
   if (!_fbUid) return;
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(function() {
@@ -492,13 +492,14 @@ _fbAuth.onAuthStateChanged(function(user) {
   if (typeof fbOnAuth === 'function') fbOnAuth(user);
 });
 
-window.addEventListener('beforeunload', function() {
+// Auto-save every 60 seconds as backup
+setInterval(function() {
   if (typeof fbGetData === 'function' && _fbUid) {
-    var data = fbGetData();
     _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
-      .set(Object.assign(data, { updatedAt: new Date().toISOString() }));
+      .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
+      .catch(function(e){ console.log('Auto-save err:', e); });
   }
-});
+}, 60000);
 </script>
 <script>
 function fbGetData() {
@@ -1185,7 +1186,7 @@ function addPouvoir() {
   pDel.className = 'del-btn';
   pDel.innerHTML = '✕';
   pDel.style.cssText = 'position:absolute;top:8px;right:8px;opacity:1;';
-  pDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce pouvoir ?','',function(){card.remove();fbSaveNow();saveToast();})};
+  pDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce pouvoir ?','',function(){card.remove();window.fbSaveNow();saveToast();})};
   card.style.position='relative';
   card.appendChild(pDel);
   grid.insertBefore(card, addBtn); saveToast();
@@ -1380,15 +1381,15 @@ document.addEventListener('click', function(e) {
 
   if (charItem) {
     askDelete('Supprimer ce personnage ?', '', function() {
-      charItem.remove(); fbSaveNow(); saveToast();
+      charItem.remove(); window.fbSaveNow(); saveToast();
     });
   } else if (relItem) {
     askDelete('Supprimer cette relation ?', '', function() {
-      relItem.remove(); fbSaveNow(); saveToast();
+      relItem.remove(); window.fbSaveNow(); saveToast();
     });
   } else if (pouvoir) {
     askDelete('Supprimer ce pouvoir ?', '', function() {
-      pouvoir.remove(); fbSaveNow(); saveToast();
+      pouvoir.remove(); window.fbSaveNow(); saveToast();
     });
   }
 });

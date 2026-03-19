@@ -360,14 +360,14 @@ var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
 var _saveTimer = null;
 
 
-function fbSaveNow() {
+window.fbSaveNow = function fbSaveNow() {
   if (!_fbUid || typeof fbGetData !== 'function') return;
   _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
     .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
     .catch(function(e){ console.log('Save err:', e); });
 }
 
-function fbSave(data) {
+window.fbSave = function fbSave(data) {
   if (!_fbUid) return;
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(function() {
@@ -390,13 +390,14 @@ _fbAuth.onAuthStateChanged(function(user) {
   if (typeof fbOnAuth === 'function') fbOnAuth(user);
 });
 
-window.addEventListener('beforeunload', function() {
+// Auto-save every 60 seconds as backup
+setInterval(function() {
   if (typeof fbGetData === 'function' && _fbUid) {
-    var data = fbGetData();
     _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
-      .set(Object.assign(data, { updatedAt: new Date().toISOString() }));
+      .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
+      .catch(function(e){ console.log('Auto-save err:', e); });
   }
-});
+}, 60000);
 </script>
 <script>
 function fbGetData() {
@@ -571,7 +572,7 @@ function deleteEventById(id) {
     const idx = EVENTS.findIndex(e => e.id === id);
     if (idx > -1) EVENTS.splice(idx, 1);
     renderFrise();
-    fbSaveNow();
+    window.fbSaveNow();
     showToast('Événement supprimé');
   });
 }
@@ -752,7 +753,7 @@ document.addEventListener('click', function(e) {
     var idx = EVENTS.findIndex(function(ev){ return ev.id === evid; });
     if (idx > -1) EVENTS.splice(idx, 1);
     renderFrise();
-    fbSaveNow();
+    window.fbSaveNow();
     showToast('Événement supprimé');
   });
 });

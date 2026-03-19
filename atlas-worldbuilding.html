@@ -656,14 +656,14 @@ var _fbPage = window.location.pathname.split('/').pop().replace('.html','');
 var _saveTimer = null;
 
 
-function fbSaveNow() {
+window.fbSaveNow = function fbSaveNow() {
   if (!_fbUid || typeof fbGetData !== 'function') return;
   _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
     .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
     .catch(function(e){ console.log('Save err:', e); });
 }
 
-function fbSave(data) {
+window.fbSave = function fbSave(data) {
   if (!_fbUid) return;
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(function() {
@@ -686,13 +686,14 @@ _fbAuth.onAuthStateChanged(function(user) {
   if (typeof fbOnAuth === 'function') fbOnAuth(user);
 });
 
-window.addEventListener('beforeunload', function() {
+// Auto-save every 60 seconds as backup
+setInterval(function() {
   if (typeof fbGetData === 'function' && _fbUid) {
-    var data = fbGetData();
     _fbDb.collection('users').doc(_fbUid).collection('pages').doc(_fbPage)
-      .set(Object.assign(data, { updatedAt: new Date().toISOString() }));
+      .set(Object.assign(fbGetData(), { updatedAt: new Date().toISOString() }))
+      .catch(function(e){ console.log('Auto-save err:', e); });
   }
-});
+}, 60000);
 </script>
 <script>
 function fbGetData() {
@@ -741,14 +742,14 @@ function attachDeleteButtons() {
     item.style.cssText += ';display:flex;align-items:center';
     var btn = document.createElement('button');
     btn.className = 'del-btn'; btn.innerHTML = '✕'; btn.style.marginLeft = 'auto';
-    btn.onclick = function(e){ e.stopPropagation(); askDelete('Supprimer ce monde ?','',function(){item.remove();fbSaveNow();showSaveToast();}); };
+    btn.onclick = function(e){ e.stopPropagation(); askDelete('Supprimer ce monde ?','',function(){item.remove();window.fbSaveNow();showSaveToast();}); };
     item.appendChild(btn);
   });
   document.querySelectorAll('.faction-card').forEach(function(card) {
     if (card.querySelector('.faction-del')) return;
     var btn = document.createElement('button');
     btn.className = 'del-btn faction-del'; btn.innerHTML = '✕';
-    btn.onclick = function(e){ e.stopPropagation(); askDelete('Supprimer cette faction ?','',function(){card.remove();fbSaveNow();showSaveToast();}); };
+    btn.onclick = function(e){ e.stopPropagation(); askDelete('Supprimer cette faction ?','',function(){card.remove();window.fbSaveNow();showSaveToast();}); };
     card.appendChild(btn);
   });
   document.querySelectorAll('#lieuxBody tr').forEach(function(row) {
@@ -757,7 +758,7 @@ function attachDeleteButtons() {
     if (!lastCell) return;
     var btn = document.createElement('button');
     btn.className = 'td-edit'; btn.innerHTML = '✕'; btn.style.color = '#9e5a5a';
-    btn.onclick = function(){ askDelete('Supprimer ce lieu ?','',function(){row.remove();fbSaveNow();showSaveToast();}); };
+    btn.onclick = function(){ askDelete('Supprimer ce lieu ?','',function(){row.remove();window.fbSaveNow();showSaveToast();}); };
     lastCell.appendChild(btn);
   });
 }
@@ -795,19 +796,19 @@ function attachDeleteButtons() {
       <div class="world-name">Le Royaume d'Ael'thar</div>
       <div class="world-meta">3 factions · Magie du sang</div>
       <div class="world-dot"></div>
-      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove();fbSaveNow();showSaveToast();})})(this.closest('.world-item'))">✕</button>
+      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove();window.fbSaveNow();showSaveToast();})})(this.closest('.world-item'))">✕</button>
     </div>
     <div class="world-item" onclick="selectWorld(this, 1)">
       <div class="world-name">Les Terres de Kervash</div>
       <div class="world-meta">5 factions · Technologie arcane</div>
       <div class="world-dot"></div>
-      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove();fbSaveNow();showSaveToast();})})(this.closest('.world-item'))">✕</button>
+      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove();window.fbSaveNow();showSaveToast();})})(this.closest('.world-item'))">✕</button>
     </div>
     <div class="world-item" onclick="selectWorld(this, 2)">
       <div class="world-name">L'Archipel du Vide</div>
       <div class="world-meta">2 factions · Sans magie</div>
       <div class="world-dot"></div>
-      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove();fbSaveNow();showSaveToast();})})(this.closest('.world-item'))">✕</button>
+      <button class="del-btn" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce monde ?','',function(){el.remove();window.fbSaveNow();showSaveToast();})})(this.closest('.world-item'))">✕</button>
     </div>
   </div>
 
@@ -971,19 +972,19 @@ function attachDeleteButtons() {
                 <td><div class="td-name">Ael'thar-Citadelle</div></td>
                 <td><div class="td-type">Capitale</div></td>
                 <td>Cœur de l'empire, siège du Trône de Cendres et de l'Académie des Liants.</td>
-                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','',function(){this.closest('tr').remove();fbSaveNow();showSaveToast();})})(this)" style='color:#9e5a5a'>✕</button></td>
+                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','',function(){this.closest('tr').remove();window.fbSaveNow();showSaveToast();})})(this)" style='color:#9e5a5a'>✕</button></td>
               </tr>
               <tr>
                 <td><div class="td-name">Les Forges d'Ul'mara</div></td>
                 <td><div class="td-type">Forteresse</div></td>
                 <td>Complex industriel souterrain où sont forgées les armes runiques.</td>
-                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','',function(){this.closest('tr').remove();fbSaveNow();showSaveToast();})})(this)" style='color:#9e5a5a'>✕</button></td>
+                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','',function(){this.closest('tr').remove();window.fbSaveNow();showSaveToast();})})(this)" style='color:#9e5a5a'>✕</button></td>
               </tr>
               <tr>
                 <td><div class="td-name">La Mer des Songes</div></td>
                 <td><div class="td-type">Lieu mystique</div></td>
                 <td>Lac magique à la surface argentée où les morts peuvent être consultés.</td>
-                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','',function(){this.closest('tr').remove();fbSaveNow();showSaveToast();})})(this)" style='color:#9e5a5a'>✕</button></td>
+                <td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','',function(){this.closest('tr').remove();window.fbSaveNow();showSaveToast();})})(this)" style='color:#9e5a5a'>✕</button></td>
               </tr>
             </tbody>
           </table>
@@ -1031,7 +1032,7 @@ function attachDeleteButtons() {
     <div class="panel" id="panel-factions">
       <div class="factions-grid" id="factionsGrid">
 
-        <div class="faction-card" style="--faction-color:#b8975a" onclick="openEditFaction(0)"><button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove();fbSaveNow();showSaveToast();})})(this.closest('.faction-card'))">✕</button>
+        <div class="faction-card" style="--faction-color:#b8975a" onclick="openEditFaction(0)"><button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove();window.fbSaveNow();showSaveToast();})})(this.closest('.faction-card'))">✕</button>
           <div class="faction-card-header">
             <div>
               <div class="faction-symbol">⚔</div>
@@ -1063,7 +1064,7 @@ function attachDeleteButtons() {
         </div>
 
         <div class="faction-card" style="--faction-color:#7a5a9e" onclick="openEditFaction(1)">
-          <button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove();fbSaveNow();showSaveToast();})})(this.closest('.faction-card'))">✕</button>
+          <button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove();window.fbSaveNow();showSaveToast();})})(this.closest('.faction-card'))">✕</button>
           <div class="faction-card-header">
             <div><div class="faction-symbol">🌑</div></div>
             <div class="faction-color-dot"></div>
@@ -1093,7 +1094,7 @@ function attachDeleteButtons() {
         </div>
 
         <div class="faction-card" style="--faction-color:#5a8e6a" onclick="openEditFaction(2)">
-          <button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove();fbSaveNow();showSaveToast();})})(this.closest('.faction-card'))">✕</button>
+          <button class="del-btn faction-del" onclick="event.stopPropagation();(function(el){askDelete('Supprimer cette faction ?','',function(){el.remove();window.fbSaveNow();showSaveToast();})})(this.closest('.faction-card'))">✕</button>
           <div class="faction-card-header">
             <div><div class="faction-symbol">🌿</div></div>
             <div class="faction-color-dot"></div>
@@ -1410,7 +1411,7 @@ function addLieu() {
   const desc = prompt('Description courte :') || '';
   const tbody = document.getElementById('lieuxBody');
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><div class="td-name">${name}</div></td><td><div class="td-type">${type}</div></td><td>${desc}</td><td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','',function(){this.closest('tr').remove();fbSaveNow();showSaveToast();})})(this)" style='color:#9e5a5a'>✕</button></td>`;
+  tr.innerHTML = `<td><div class="td-name">${name}</div></td><td><div class="td-type">${type}</div></td><td>${desc}</td><td style='display:flex;gap:6px;align-items:center'><button class="td-edit" onclick="editLieu(this)">✎</button><button class="td-edit" onclick="(function(btn){askDelete('Supprimer ce lieu ?','',function(){this.closest('tr').remove();window.fbSaveNow();showSaveToast();})})(this)" style='color:#9e5a5a'>✕</button></td>`;
   tbody.appendChild(tr);
   showSaveToast();
 }
@@ -1441,7 +1442,7 @@ function addRessource() {
   rDel.className = 'del-btn';
   rDel.innerHTML = '✕';
   rDel.style.cssText = 'position:absolute;top:6px;right:6px;';
-  rDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer cette ressource ?','',function(){div.remove();fbSaveNow();showSaveToast();})};
+  rDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer cette ressource ?','',function(){div.remove();window.fbSaveNow();showSaveToast();})};
   div.appendChild(rDel);
   grid.insertBefore(div, addBtn);
   showSaveToast();
@@ -1584,7 +1585,7 @@ document.querySelectorAll('#lieuxBody tr').forEach(function(row) {
   delBtn.className = 'td-edit';
   delBtn.innerHTML = '✕';
   delBtn.style.color = '#9e5a5a';
-  delBtn.onclick = function(){ askDelete('Supprimer ce lieu ?','',function(){row.remove();fbSaveNow();showSaveToast();}); };
+  delBtn.onclick = function(){ askDelete('Supprimer ce lieu ?','',function(){row.remove();window.fbSaveNow();showSaveToast();}); };
   lastCell.appendChild(delBtn);
 });
 
@@ -1599,7 +1600,7 @@ document.addEventListener('click', function(e) {
   if (worldItem) {
     e.stopPropagation();
     if (btn.innerHTML === '✕') {
-      askDelete('Supprimer ce monde ?', '', function(){ worldItem.remove(); fbSaveNow(); showSaveToast(); });
+      askDelete('Supprimer ce monde ?', '', function(){ worldItem.remove(); window.fbSaveNow(); showSaveToast(); });
       return;
     }
   }
@@ -1607,21 +1608,21 @@ document.addEventListener('click', function(e) {
   const factionCard = btn.closest('.faction-card');
   if (factionCard && btn.innerHTML === '✕') {
     e.stopPropagation();
-    askDelete('Supprimer cette faction ?', '', function(){ factionCard.remove(); fbSaveNow(); showSaveToast(); });
+    askDelete('Supprimer cette faction ?', '', function(){ factionCard.remove(); window.fbSaveNow(); showSaveToast(); });
     return;
   }
   // Lieux row (✕ button in table)
   const row = btn.closest('tr');
   if (row && btn.style.color === 'rgb(158, 90, 90)') {
     e.stopPropagation();
-    askDelete('Supprimer ce lieu ?', '', function(){ row.remove(); fbSaveNow(); showSaveToast(); });
+    askDelete('Supprimer ce lieu ?', '', function(){ row.remove(); window.fbSaveNow(); showSaveToast(); });
     return;
   }
   // Ressource item
   const ressItem = btn.closest('.ressource-item');
   if (ressItem && btn.innerHTML === '✕') {
     e.stopPropagation();
-    askDelete('Supprimer cette ressource ?', '', function(){ ressItem.remove(); fbSaveNow(); showSaveToast(); });
+    askDelete('Supprimer cette ressource ?', '', function(){ ressItem.remove(); window.fbSaveNow(); showSaveToast(); });
     return;
   }
 });
