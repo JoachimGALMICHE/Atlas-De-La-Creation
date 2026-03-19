@@ -435,6 +435,7 @@ setInterval(function() {
 </script>
 <script>
 var EVENTS = [];
+var ERES = [];
 
 function fbGetData() {
   return {
@@ -785,7 +786,6 @@ function cancelDelete() {
 }
 
 // ── ÈRE MANAGEMENT
-var ERES = []; // { id, name, slug }
 
 function openAddEreModal() {
   document.getElementById('ereModal').classList.add('open');
@@ -825,7 +825,7 @@ function deleteEre(slug) {
 function renderEreTabs() {
   var tabs = document.getElementById('ereTabs');
   // Keep first tab (Toutes) and add btn
-  tabs.innerHTML = '<button class="ere-tab active" onclick="filterEre(this,'toutes')">Toutes les ères</button>';
+  tabs.innerHTML = '<button class="ere-tab active" onclick="filterEre(this,\'toutes\')">Toutes les ères</button>';
   ERES.forEach(function(ere) {
     var wrap = document.createElement('div');
     wrap.className = 'ere-tab-wrap';
