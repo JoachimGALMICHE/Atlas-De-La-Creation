@@ -953,6 +953,13 @@ function addPouvoir() {
   const card = document.createElement('div');
   card.className = 'pouvoir-card';
   card.innerHTML = `<div class="pouvoir-name">${name}</div><div class="pouvoir-desc">${desc}</div>`;
+  const pDel = document.createElement('button');
+  pDel.className = 'del-btn';
+  pDel.innerHTML = '✕';
+  pDel.style.cssText = 'position:absolute;top:8px;right:8px;opacity:1;';
+  pDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce pouvoir ?','',function(){card.remove();saveToast();})};
+  card.style.position='relative';
+  card.appendChild(pDel);
   grid.insertBefore(card, addBtn); saveToast();
 }
 

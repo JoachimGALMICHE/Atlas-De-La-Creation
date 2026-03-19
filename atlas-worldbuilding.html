@@ -1179,13 +1179,12 @@ function addNewWorld() {
   div.className = 'world-item';
   div.innerHTML = `<div class="world-name">${name}</div><div class="world-meta">Nouveau monde</div><div class="world-dot"></div>`;
   div.onclick = function() { selectWorld(this, -1); document.getElementById('worldTitle').textContent = name; };
-  const delBtn = document.createElement('button');
-  delBtn.innerHTML = '✕';
-  delBtn.style.cssText = 'position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--border-strong);font-size:12px;opacity:0;transition:opacity .2s';
-  delBtn.onmouseenter = function(){this.style.opacity=1};
-  delBtn.onmouseleave = function(){this.style.opacity=0};
-  delBtn.onclick = function(e){e.stopPropagation();(function(d){askDelete('Supprimer ce monde ?','Cette action est irréversible.',function(){d.remove();})})(div)};
   div.style.position='relative';
+  const delBtn = document.createElement('button');
+  delBtn.className = 'del-btn';
+  delBtn.innerHTML = '✕';
+  delBtn.style.marginLeft = 'auto';
+  delBtn.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce monde ?','',function(){div.remove();})};
   div.appendChild(delBtn);
   list.appendChild(div);
   showSaveToast();
@@ -1239,6 +1238,13 @@ function addRessource() {
   const div = document.createElement('div');
   div.className = 'ressource-item';
   div.innerHTML = `<span class="ressource-emoji">${emoji}</span><div class="ressource-name">${name}</div><div class="ressource-note">${note}</div>`;
+  div.style.position = 'relative';
+  const rDel = document.createElement('button');
+  rDel.className = 'del-btn';
+  rDel.innerHTML = '✕';
+  rDel.style.cssText = 'position:absolute;top:6px;right:6px;';
+  rDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer cette ressource ?','',function(){div.remove();})};
+  div.appendChild(rDel);
   grid.insertBefore(div, addBtn);
   showSaveToast();
 }
@@ -1313,6 +1319,11 @@ function saveFaction() {
     <div class="faction-field"><div class="faction-field-label">Territoire</div><div class="faction-field-val">${territory}</div></div>
     <div class="faction-field"><div class="faction-field-label">Idéologie</div><div class="faction-field-val">${ideology}</div></div>
     <div class="faction-field"><div class="faction-field-label">Relations</div><div class="faction-field-val">${relations}</div></div>`;
+  const fDelBtn = document.createElement('button');
+  fDelBtn.className = 'del-btn faction-del';
+  fDelBtn.innerHTML = '✕';
+  fDelBtn.onclick = function(e){e.stopPropagation();askDelete('Supprimer cette faction ?','',function(){card.remove();})};
+  card.appendChild(fDelBtn);
   grid.insertBefore(card, addBtn);
   closeFactionModal();
   // clear fields

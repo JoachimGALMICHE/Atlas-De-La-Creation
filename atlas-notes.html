@@ -359,7 +359,7 @@ window.addEventListener('beforeunload', saveData);
           <span class="note-cat-badge" style="--nc:var(--cat-question)">❓ Question</span>
           <div class="note-actions">
             <button class="note-action-btn" onclick="event.stopPropagation();editNote(1)">✎</button>
-            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)" style="opacity:1;color:var(--border-strong)">✕</button>
           </div>
         </div>
         <div class="note-title">Qui est vraiment la Mère-Sans-Nom ?</div>
@@ -377,7 +377,7 @@ window.addEventListener('beforeunload', saveData);
           <span class="note-cat-badge" style="--nc:var(--cat-citation)">" Citation</span>
           <div class="note-actions">
             <button class="note-action-btn" onclick="event.stopPropagation();editNote(2)">✎</button>
-            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)" style="opacity:1;color:var(--border-strong)">✕</button>
           </div>
         </div>
         <div class="note-title">Phrase d'ouverture — Chapitre I</div>
@@ -394,7 +394,7 @@ window.addEventListener('beforeunload', saveData);
           <span class="note-cat-badge" style="--nc:var(--cat-liste)">☰ Liste</span>
           <div class="note-actions">
             <button class="note-action-btn" onclick="event.stopPropagation();editNote(3)">✎</button>
-            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)" style="opacity:1;color:var(--border-strong)">✕</button>
           </div>
         </div>
         <div class="note-title">Noms à donner aux sorts de Liaison</div>
@@ -416,7 +416,7 @@ window.addEventListener('beforeunload', saveData);
           <span class="note-cat-badge" style="--nc:var(--cat-idee)">Idée</span>
           <div class="note-actions">
             <button class="note-action-btn" onclick="event.stopPropagation();editNote(4)">✎</button>
-            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)" style="opacity:1;color:var(--border-strong)">✕</button>
           </div>
         </div>
         <div class="note-title">Scène : Seraphel et le miroir du Flux</div>
@@ -433,7 +433,7 @@ window.addEventListener('beforeunload', saveData);
           <span class="note-cat-badge" style="--nc:var(--cat-question)">❓ Question</span>
           <div class="note-actions">
             <button class="note-action-btn" onclick="event.stopPropagation();editNote(5)">✎</button>
-            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+            <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)" style="opacity:1;color:var(--border-strong)">✕</button>
           </div>
         </div>
         <div class="note-title">Économie du Royaume — comment fonctionne-t-elle ?</div>
@@ -783,7 +783,7 @@ function createNote() {
       <span class="note-cat-badge" style="--nc:${color}">${CAT_LABELS[cat]}</span>
       <div class="note-actions">
         <button class="note-action-btn" onclick="event.stopPropagation()">✎</button>
-        <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)">✕</button>
+        <button class="note-action-btn" onclick="event.stopPropagation();deleteNote(this)" style="opacity:1;color:var(--border-strong)">✕</button>
       </div>
     </div>
     <div class="note-title">${title}</div>

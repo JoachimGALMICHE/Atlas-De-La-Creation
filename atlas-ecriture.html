@@ -728,7 +728,14 @@ function addChapter(btn) {
 
   const div = document.createElement('div');
   div.className = 'chap-item';
-  div.innerHTML = `<span class="chap-num">${num}</span><span class="chap-name">${name}</span><span class="chap-wc">0</span><button onclick="event.stopPropagation();askDelete('Supprimer ce chapitre ?','Cette action est irréversible.',function(){div.remove();const c=group.querySelector('.proj-count');c.textContent=parseInt(c.textContent)-1;})" style="background:none;border:none;cursor:pointer;color:var(--border-strong);font-size:12px;margin-left:4px;opacity:0;transition:opacity .2s" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">✕</button>`;
+  div.innerHTML = `<span class="chap-num">${num}</span><span class="chap-name">${name}</span><span class="chap-wc">0</span>`;
+  const chapDel = document.createElement('button');
+  chapDel.className = 'del-btn';
+  chapDel.innerHTML = '✕';
+  chapDel.style.marginLeft = 'auto';
+  chapDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce chapitre ?','',function(){div.remove();const cnt=group.querySelector('.proj-count');if(cnt)cnt.textContent=Math.max(0,parseInt(cnt.textContent)-1);showToast('Chapitre supprimé');})};
+  div.style.display='flex';div.style.alignItems='center';
+  div.appendChild(chapDel);
   div.onclick = function() { loadChapter(this, proj, idx); };
   chapters.insertBefore(div, btn);
 
@@ -790,6 +797,16 @@ function createProject() {
       </div>
       <button class="add-chap-btn" onclick="addChapter(this)">+ Ajouter</button>
     </div>`;
+  // Add del btn to new project header
+  const projHeader = group.querySelector('.proj-header');
+  if (projHeader) {
+    const projDel = document.createElement('button');
+    projDel.className = 'del-btn';
+    projDel.innerHTML = '✕';
+    projDel.style.marginLeft = 'auto';
+    projDel.onclick = function(e){e.stopPropagation();askDelete('Supprimer ce projet ?','Tous les chapitres seront supprimés.',function(){group.remove();showToast('Projet supprimé');})};
+    projHeader.appendChild(projDel);
+  }
   list.appendChild(group);
   closeModal('newProjModal');
   document.getElementById('np-title').value = '';
