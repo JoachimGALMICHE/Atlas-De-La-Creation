@@ -634,6 +634,16 @@ tr:hover .del-btn,
   .stat-divider { width: 20px; height: 1px; }
 }
 
+
+.pill-wrap { display: inline-flex; align-items: center; gap: 2px; }
+.pill-x { background: none; border: none; cursor: pointer; font-size: 10px; color: var(--border-strong); padding: 0 2px; opacity: 0; transition: opacity .15s, color .15s; line-height: 1; }
+.pill-wrap:hover .pill-x { opacity: 1; }
+.pill-x:hover { color: #9e5a5a; }
+.ressource-item { position: relative; }
+.ressource-item .res-del { position: absolute; top: 4px; right: 4px; background: #9e5a5a; border: none; cursor: pointer; width: 16px; height: 16px; border-radius: 50%; color: white; font-size: 9px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .15s; }
+.ressource-item:hover .res-del { opacity: 1; }
+@media(max-width:768px){ .pill-x { opacity:1; } .res-del { opacity:1 !important; } }
+
 </style>
 
 <!-- Firebase compat (global scope) -->
@@ -905,14 +915,14 @@ function attachDeleteButtons() {
         <div class="section-card-body">
           <div class="field-label">Biomes présents</div>
           <div class="pills-wrap" id="biomesPills">
-            <span class="pill active" onclick="togglePill(this)">Forêt ancienne</span>
-            <span class="pill active" onclick="togglePill(this)">Montagnes glacées</span>
-            <span class="pill" onclick="togglePill(this)">Désert de cendres</span>
-            <span class="pill" onclick="togglePill(this)">Plaines dorées</span>
-            <span class="pill" onclick="togglePill(this)">Marécages obscurs</span>
-            <span class="pill" onclick="togglePill(this)">Côtes tempérées</span>
-            <span class="pill" onclick="togglePill(this)">Toundra</span>
-            <span class="pill" onclick="togglePill(this)">Volcans</span>
+            <span class="pill-wrap"><span class="pill active" onclick="togglePill(this)">Forêt ancienne</span><button class="pill-x" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce biome ?','',function(){el.remove();showSaveToast();})})(this.closest('.pill-wrap'))">✕</button></span>
+            <span class="pill-wrap"><span class="pill active" onclick="togglePill(this)">Montagnes glacées</span><button class="pill-x" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce biome ?','',function(){el.remove();showSaveToast();})})(this.closest('.pill-wrap'))">✕</button></span>
+            <span class="pill-wrap"><span class="pill" onclick="togglePill(this)">Désert de cendres</span><button class="pill-x" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce biome ?','',function(){el.remove();showSaveToast();})})(this.closest('.pill-wrap'))">✕</button></span>
+            <span class="pill-wrap"><span class="pill" onclick="togglePill(this)">Plaines dorées</span><button class="pill-x" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce biome ?','',function(){el.remove();showSaveToast();})})(this.closest('.pill-wrap'))">✕</button></span>
+            <span class="pill-wrap"><span class="pill" onclick="togglePill(this)">Marécages obscurs</span><button class="pill-x" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce biome ?','',function(){el.remove();showSaveToast();})})(this.closest('.pill-wrap'))">✕</button></span>
+            <span class="pill-wrap"><span class="pill" onclick="togglePill(this)">Côtes tempérées</span><button class="pill-x" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce biome ?','',function(){el.remove();showSaveToast();})})(this.closest('.pill-wrap'))">✕</button></span>
+            <span class="pill-wrap"><span class="pill" onclick="togglePill(this)">Toundra</span><button class="pill-x" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce biome ?','',function(){el.remove();showSaveToast();})})(this.closest('.pill-wrap'))">✕</button></span>
+            <span class="pill-wrap"><span class="pill" onclick="togglePill(this)">Volcans</span><button class="pill-x" onclick="event.stopPropagation();(function(el){askDelete('Supprimer ce biome ?','',function(){el.remove();showSaveToast();})})(this.closest('.pill-wrap'))">✕</button></span>
             <button class="pill-add" onclick="addBiome()">+ Autre</button>
           </div>
           <div style="margin-top:20px" class="fields-grid">
@@ -1009,16 +1019,19 @@ function attachDeleteButtons() {
         <div class="section-card-body">
           <div class="ressources-grid" id="ressourcesGrid">
             <div class="ressource-item">
+              <button class="res-del" onclick="askDelete('Supprimer ?','',function(){this.closest('.ressource-item').remove();showSaveToast();}.bind(this))">✕</button>
               <span class="ressource-emoji">🌑</span>
               <div class="ressource-name">Obsidienne de mana</div>
               <div class="ressource-note">Très rare — Nord</div>
             </div>
             <div class="ressource-item">
+              <button class="res-del" onclick="askDelete('Supprimer ?','',function(){this.closest('.ressource-item').remove();showSaveToast();}.bind(this))">✕</button>
               <span class="ressource-emoji">🌲</span>
               <div class="ressource-name">Bois de Cèdre-âme</div>
               <div class="ressource-note">Commun — Forêts</div>
             </div>
             <div class="ressource-item">
+              <button class="res-del" onclick="askDelete('Supprimer ?','',function(){this.closest('.ressource-item').remove();showSaveToast();}.bind(this))">✕</button>
               <span class="ressource-emoji">⚗️</span>
               <div class="ressource-name">Sel d'éther</div>
               <div class="ressource-note">Rare — Côtes</div>
@@ -1629,6 +1642,21 @@ document.addEventListener('click', function(e) {
     e.stopPropagation();
     askDelete('Supprimer cette ressource ?', '', function(){ ressItem.remove(); window.fbSaveNow(); showSaveToast(); });
     return;
+  }
+});
+
+
+// Extra delegation for res-del and pill-x
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('res-del')) {
+    e.stopPropagation();
+    var item = e.target.closest('.ressource-item');
+    if (item) askDelete('Supprimer cette ressource ?', '', function(){ item.remove(); window.fbSaveNow(); showSaveToast(); });
+  }
+  if (e.target.classList.contains('pill-x')) {
+    e.stopPropagation();
+    var wrap = e.target.closest('.pill-wrap');
+    if (wrap) askDelete('Supprimer ce biome ?', '', function(){ wrap.remove(); window.fbSaveNow(); showSaveToast(); });
   }
 });
 
