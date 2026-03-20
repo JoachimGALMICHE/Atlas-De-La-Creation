@@ -759,14 +759,14 @@ function attachDeleteButtons() {
     if (item.querySelector('.del-btn')) return;
     item.style.cssText += ';display:flex;align-items:center';
     var btn = document.createElement('button');
-    btn.className = 'del-btn'; btn.innerHTML = '✕'; btn.style.marginLeft = 'auto';
+    btn.className = 'del-btn'; btn.innerHTML = '\u2715'; btn.style.marginLeft = 'auto';
     btn.onclick = function(e){ e.stopPropagation(); askDelete('Supprimer ce monde ?','',function(){item.remove();window.fbSaveNow();showSaveToast();}); };
     item.appendChild(btn);
   });
   document.querySelectorAll('.faction-card').forEach(function(card) {
     if (card.querySelector('.faction-del')) return;
     var btn = document.createElement('button');
-    btn.className = 'del-btn faction-del'; btn.innerHTML = '✕';
+    btn.className = 'del-btn faction-del'; btn.innerHTML = '\u2715';
     btn.onclick = function(e){ e.stopPropagation(); askDelete('Supprimer cette faction ?','',function(){card.remove();window.fbSaveNow();showSaveToast();}); };
     card.appendChild(btn);
   });
@@ -775,9 +775,47 @@ function attachDeleteButtons() {
     var lastCell = row.cells[row.cells.length-1];
     if (!lastCell) return;
     var btn = document.createElement('button');
-    btn.className = 'td-edit'; btn.innerHTML = '✕'; btn.style.color = '#9e5a5a';
+    btn.className = 'td-edit'; btn.innerHTML = '\u2715'; btn.style.color = '#9e5a5a';
     btn.onclick = function(){ askDelete('Supprimer ce lieu ?','',function(){row.remove();window.fbSaveNow();showSaveToast();}); };
     lastCell.appendChild(btn);
+  });
+  // Restore res-del buttons on ressource items loaded from Firebase
+  document.querySelectorAll('#ressourcesGrid .ressource-item').forEach(function(item) {
+    if (item.style.borderStyle === 'dashed') return;
+    if (item.querySelector('.res-del')) return;
+    var btn = document.createElement('button');
+    btn.className = 'res-del';
+    btn.innerHTML = '\u2715';
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      askDelete('Supprimer cette ressource ?', '', function() {
+        item.remove(); window.fbSaveNow(); showSaveToast();
+      });
+    };
+    item.appendChild(btn);
+  });
+  // Restore pill-x buttons on biome pills loaded from Firebase
+  document.querySelectorAll('#biomesPills .pill').forEach(function(pill) {
+    var wrap = pill.closest('.pill-wrap');
+    if (wrap && wrap.querySelector('.pill-x')) return;
+    if (!wrap) {
+      var newWrap = document.createElement('span');
+      newWrap.className = 'pill-wrap';
+      pill.parentNode.insertBefore(newWrap, pill);
+      newWrap.appendChild(pill);
+      wrap = newWrap;
+    }
+    var xBtn = document.createElement('button');
+    xBtn.className = 'pill-x';
+    xBtn.innerHTML = '\u2715';
+    xBtn.title = 'Supprimer ce biome';
+    (function(w){ xBtn.onclick = function(e) {
+      e.stopPropagation();
+      askDelete('Supprimer ce biome ?', '', function() {
+        w.remove(); window.fbSaveNow(); showSaveToast();
+      });
+    }; })(wrap);
+    wrap.appendChild(xBtn);
   });
 }
 </script>
@@ -1022,19 +1060,19 @@ function attachDeleteButtons() {
         <div class="section-card-body">
           <div class="ressources-grid" id="ressourcesGrid">
             <div class="ressource-item">
-              <button class="res-del" onclick="askDelete('Supprimer ?','',function(){this.closest('.ressource-item').remove();showSaveToast();}.bind(this))">✕</button>
+              <button class="res-del" onclick="(function(btn){askDelete('Supprimer ?','',function(){btn.closest('.ressource-item').remove();window.fbSaveNow();showSaveToast();})})(this)">✕</button>
               <span class="ressource-emoji">🌑</span>
               <div class="ressource-name">Obsidienne de mana</div>
               <div class="ressource-note">Très rare — Nord</div>
             </div>
             <div class="ressource-item">
-              <button class="res-del" onclick="askDelete('Supprimer ?','',function(){this.closest('.ressource-item').remove();showSaveToast();}.bind(this))">✕</button>
+              <button class="res-del" onclick="(function(btn){askDelete('Supprimer ?','',function(){btn.closest('.ressource-item').remove();window.fbSaveNow();showSaveToast();})})(this)">✕</button>
               <span class="ressource-emoji">🌲</span>
               <div class="ressource-name">Bois de Cèdre-âme</div>
               <div class="ressource-note">Commun — Forêts</div>
             </div>
             <div class="ressource-item">
-              <button class="res-del" onclick="askDelete('Supprimer ?','',function(){this.closest('.ressource-item').remove();showSaveToast();}.bind(this))">✕</button>
+              <button class="res-del" onclick="(function(btn){askDelete('Supprimer ?','',function(){btn.closest('.ressource-item').remove();window.fbSaveNow();showSaveToast();})})(this)">✕</button>
               <span class="ressource-emoji">⚗️</span>
               <div class="ressource-name">Sel d'éther</div>
               <div class="ressource-note">Rare — Côtes</div>
@@ -1417,12 +1455,29 @@ function addBiome() {
   const name = prompt('Nouveau biome :');
   if (!name) return;
   const wrap = document.getElementById('biomesPills');
-  const btn = wrap.querySelector('.pill-add');
+  const addBtn = wrap.querySelector('.pill-add');
+  const pillWrap = document.createElement('span');
+  pillWrap.className = 'pill-wrap';
   const pill = document.createElement('span');
   pill.className = 'pill active';
   pill.textContent = name;
   pill.onclick = function() { togglePill(this); };
-  wrap.insertBefore(pill, btn);
+  const xBtn = document.createElement('button');
+  xBtn.className = 'pill-x';
+  xBtn.innerHTML = '✕';
+  xBtn.title = 'Supprimer ce biome';
+  xBtn.onclick = function(e) {
+    e.stopPropagation();
+    askDelete('Supprimer ce biome ?', '', function() {
+      pillWrap.remove();
+      window.fbSaveNow();
+      showSaveToast();
+    });
+  };
+  pillWrap.appendChild(pill);
+  pillWrap.appendChild(xBtn);
+  wrap.insertBefore(pillWrap, addBtn);
+  showSaveToast();
 }
 
 // ── LIEUX
