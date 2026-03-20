@@ -319,12 +319,7 @@ _auth.onAuthStateChanged(function(user) {
     setTile('tile-chronologie', [evs + ' événement' + (evs>1?'s':'')]);
   });
 
-  pagesRef.doc('carte').get().then(function(s) {
-    if (!s.exists) return;
-    var mk = 0;
-    try { mk = JSON.parse(s.data().markers||'[]').length; } catch(e){}
-    setTile('tile-carte', [mk + ' marqueur' + (mk>1?'s':'')]);
-  });
+  
 });
 
 function doSignOut() {
@@ -371,7 +366,7 @@ function doSignOut() {
     <a class="tile" id="tile-notes" href="atlas-notes.html"><div class="tile-arrow">→</div><span class="tile-icon">✦</span><div class="tile-category">Idées & Brainstorming</div><div class="tile-title">Notes de création</div><div class="tile-desc">Capturez vos idées, références et réflexions sans perdre l'élan. Un espace libre et sans contrainte.</div><div class="tile-meta"><span class="tile-count"><strong>47</strong> notes</span><span class="tile-badge new">Récent</span></div></a>
     <a class="tile" id="tile-ecriture" href="atlas-ecriture.html"><div class="tile-arrow">→</div><span class="tile-icon">✒</span><div class="tile-category">Manuscrits</div><div class="tile-title">Écriture</div><div class="tile-desc">Rédigez chapitres, nouvelles et fragments directement dans l'Atlas, organisés par projet.</div><div class="tile-meta"><span class="tile-count"><strong>5</strong> projets</span><span class="tile-badge">Actif</span></div></a>
     <a class="tile" id="tile-chronologie" href="atlas-chronologie.html"><div class="tile-arrow">→</div><span class="tile-icon">⏳</span><div class="tile-category">Temporel</div><div class="tile-title">Chronologies</div><div class="tile-desc">Visualisez l'histoire de vos univers sur une frise interactive. Ères, événements, points de bascule.</div><div class="tile-meta"><span class="tile-count"><strong>12</strong> événements</span><span class="tile-badge new">Nouveau</span></div></a>
-    <a class="tile" id="tile-carte" href="atlas-carte.html"><div class="tile-arrow">→</div><span class="tile-icon">🧭</span><div class="tile-category">Cartographie</div><div class="tile-title">Cartes interactives</div><div class="tile-desc">Uploadez ou générez des cartes, placez des marqueurs et reliez vos lieux entre eux.</div><div class="tile-meta"><span class="tile-count"><strong>2</strong> cartes</span><span class="tile-badge new">Nouveau</span></div></a>
+    
   </div>
 </main>
 <footer>
