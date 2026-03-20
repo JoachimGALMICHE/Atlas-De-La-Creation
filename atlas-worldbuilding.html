@@ -718,6 +718,7 @@ function fbGetData() {
   var rg = document.getElementById('ressourcesGrid');
   var wt = document.getElementById('worldTitle');
   var ws = document.getElementById('worldSubtitle');
+  var bp = document.getElementById('biomesPills');
   // collect all editable texts
   var editables = {};
   document.querySelectorAll('[contenteditable]').forEach(function(el,i){ editables['ed_'+i] = el.innerHTML; });
@@ -726,6 +727,7 @@ function fbGetData() {
     factionsGrid: fg ? fg.innerHTML : '',
     lieuxBody: lb ? lb.innerHTML : '',
     ressourcesGrid: rg ? rg.innerHTML : '',
+    biomesPills: bp ? bp.innerHTML : '',
     worldTitle: wt ? wt.textContent : '',
     worldSubtitle: ws ? ws.textContent : '',
     editables: JSON.stringify(editables)
@@ -738,6 +740,7 @@ function fbOnAuth(user) {
     if (data.factionsGrid) document.getElementById('factionsGrid').innerHTML = data.factionsGrid;
     if (data.lieuxBody) document.getElementById('lieuxBody').innerHTML = data.lieuxBody;
     if (data.ressourcesGrid) document.getElementById('ressourcesGrid').innerHTML = data.ressourcesGrid;
+    if (data.biomesPills) document.getElementById('biomesPills').innerHTML = data.biomesPills;
     if (data.worldTitle) document.getElementById('worldTitle').textContent = data.worldTitle;
     if (data.worldSubtitle) document.getElementById('worldSubtitle').textContent = data.worldSubtitle;
     if (data.editables) {
@@ -1646,17 +1649,34 @@ document.addEventListener('click', function(e) {
 });
 
 
-// Extra delegation for res-del and pill-x
+// Delegation for res-del and pill-x
 document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('res-del')) {
+  var btn = e.target;
+  
+  // Ressource delete
+  if (btn.classList.contains('res-del')) {
     e.stopPropagation();
-    var item = e.target.closest('.ressource-item');
-    if (item) askDelete('Supprimer cette ressource ?', '', function(){ item.remove(); window.fbSaveNow(); showSaveToast(); });
+    var item = btn.closest('.ressource-item');
+    if (!item) return;
+    askDelete('Supprimer cette ressource ?', '', function() {
+      item.remove();
+      window.fbSaveNow();
+      showSaveToast();
+    });
+    return;
   }
-  if (e.target.classList.contains('pill-x')) {
+  
+  // Biome delete
+  if (btn.classList.contains('pill-x')) {
     e.stopPropagation();
-    var wrap = e.target.closest('.pill-wrap');
-    if (wrap) askDelete('Supprimer ce biome ?', '', function(){ wrap.remove(); window.fbSaveNow(); showSaveToast(); });
+    var wrap = btn.closest('.pill-wrap');
+    if (!wrap) return;
+    askDelete('Supprimer ce biome ?', '', function() {
+      wrap.remove();
+      window.fbSaveNow();
+      showSaveToast();
+    });
+    return;
   }
 });
 
