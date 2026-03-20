@@ -884,13 +884,13 @@ function attachDeleteButtons() {
     </div>
     <div class="world-header-top">
       <div class="world-title-wrap">
-        <div class="world-title-display" id="worldTitle" contenteditable="false"
-             onclick="makeEditable(this)" onblur="saveEditable(this, 'title')"
+        <div class="world-title-display" id="worldTitle" contenteditable="true"
+             onblur="saveEditable(this, 'title')"
              onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
           Le Royaume d'Ael'thar
         </div><br>
-        <div class="world-subtitle-display" id="worldSubtitle" contenteditable="false"
-             onclick="makeEditable(this)" onblur="saveEditable(this, 'subtitle')"
+        <div class="world-subtitle-display" id="worldSubtitle" contenteditable="true"
+             onblur="saveEditable(this, 'subtitle')"
              onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">
           Un empire millénaire bâti sur les cendres des dieux anciens
         </div>
@@ -1405,7 +1405,7 @@ function makeEditable(el) {
   sel.addRange(range);
 }
 function saveEditable(el, key) {
-  el.contentEditable = 'false';
+  // Keep contenteditable="true" so the field stays clickable
   showSaveToast();
 }
 
@@ -1413,12 +1413,9 @@ function saveEditable(el, key) {
 function selectWorld(el, idx) {
   document.querySelectorAll('.world-item').forEach(w => w.classList.remove('active'));
   el.classList.add('active');
-  const names = ["Le Royaume d'Ael'thar", "Les Terres de Kervash", "L'Archipel du Vide"];
-  const subs  = ["Un empire millénaire bâti sur les cendres des dieux anciens",
-                 "Là où la magie et l'acier se forgent ensemble",
-                 "Des îles flottantes suspendues au-dessus du néant"];
-  document.getElementById('worldTitle').textContent = names[idx];
-  document.getElementById('worldSubtitle').textContent = subs[idx];
+  // Only update title/subtitle from the clicked world-item's stored data if available
+  var nameEl = el.querySelector('.world-name');
+  if (nameEl) document.getElementById('worldTitle').textContent = nameEl.textContent;
   showSaveToast();
 }
 
